@@ -1,0 +1,41 @@
+# ========== React (Create React App) ==========
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ========== Django ==========
+*.pyc
+__pycache__/
+db.sqlite3
+.env
+media/
+staticfiles/
+ofis-backend/migrations/   # (optionnel, certains versionnent les migrations)
+
+# ========== Fichiers de backup / temporaires ==========
+*.sql
+*.bak
+*.py.bak
+*.log
+
+# ========== Dossiers système ==========
+Thumbs.db
+.DS_Store
