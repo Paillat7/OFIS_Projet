@@ -1,29 +1,20 @@
 """
 Django settings for config project.
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-import os
+# ===== SÉCURITÉ =====
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-18yuu-g9*3o^&5w1n&0cn^6en^lpa!$l03(jnq!l-w99e!r8*l')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '.onrender.com,localhost,127.0.0.1').split(',')
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-
-# Quick-start development settings - unsuitable for production
-SECRET_KEY = "django-insecure-18yuu-g9*3o^&5w1n&0cn^6en^lpa!$l03(jnq!l-w99e!r8*l"
-
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
-# Application definition
-
+# ===== APPLICATIONS =====
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -35,8 +26,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     "corsheaders",
     "api",
-    'channels',  # ← AJOUTÉ
-    'notifications',   # <-- nouvelle ligne
+    'channels',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -69,50 +60,32 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-
-# Database
+# ===== BASE DE DONNÉES =====
+# Utilise PostgreSQL si DATABASE_URL est définie, sinon SQLite (pour le développement local)
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR.parent / "db.sqlite3",
-    }
+    'default': dj_database_url.config(default='sqlite:///' + str(BASE_DIR.parent / "db.sqlite3"))
 }
 
-
-# Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
-
-
-# Internationalization
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
-USE_I18N = True
-USE_TZ = True
-
-
-# Static files
+# ===== FICHIERS STATIQUES ET MÉDIAS =====
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-# CORS settings
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
+
+# ===== CORS =====
+# Autorise les origines locales et l'URL du frontend (à définir dans FRONTEND_URL)
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:3001",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+    FRONTEND_URL,
 ]
+CORS_ALLOW_ALL_ORIGINS = False
 
-# REST Framework configuration
+# ===== REST FRAMEWORK =====
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -123,7 +96,7 @@ REST_FRAMEWORK = {
     ]
 }
 
-# JWT Configuration
+# ===== JWT =====
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -151,9 +124,8 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
-# ===== AJOUT POUR CHANNELS =====
+# ===== CHANNELS =====
 ASGI_APPLICATION = 'config.asgi.application'
-
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer'
