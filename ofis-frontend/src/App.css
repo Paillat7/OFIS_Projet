@@ -1,0 +1,21 @@
+/* Variables couleurs OFIS */
+:root {
+  --ofis-dark: #0A1F3A;
+  --ofis-blue: #1E6FD9;
+  --ofis-light: #4A90E2;
+  --ofis-navy: #1A3A5F;
+}
+
+/* Styles existants - gardez tout sauf les directives Tailwind */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f5f5;
+}
+
+/* Continuez avec le reste de votre CSS sans @tailwind */

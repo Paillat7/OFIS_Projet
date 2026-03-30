@@ -39,3 +39,18 @@ ofis-backend/migrations/   # (optionnel, certains versionnent les migrations)
 # ========== Dossiers système ==========
 Thumbs.db
 .DS_Store
+ofis-backend/venv/
+ofis-frontend/node_modules/
+ofis-frontend/build/
+*.sql
+*.bak
+
+# Django
+ofis-backend/venv/
+*.sql
+*.bak
+ofis-backend/__pycache__/
+
+# React
+ofis-frontend/node_modules/
+ofis-frontend/build/

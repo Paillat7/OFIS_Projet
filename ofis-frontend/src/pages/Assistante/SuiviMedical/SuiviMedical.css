@@ -1,0 +1,32 @@
+.alerte-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+.alerte-badge.alerte-expire {
+  background-color: #fee2e2;
+  color: #991b1b;
+  font-weight: bold;
+}
+
+.alerte-badge.alerte-renouveler {
+  background-color: #fef3c7;
+  color: #92400e;
+  font-weight: bold;
+}
+
+/* couleur ligne tableau */
+
+.row-expire{
+  background-color:#ffe5e5;
+}
+
+.row-renouveler{
+  background-color:#fff7e6;
+}
+
+.row-valide{
+  background-color:#e8f8ee;
+}

@@ -1,0 +1,470 @@
+/* Login Page */
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0A1F3A 0%, #1A3A5F 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 450px;
+}
+
+.login-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== NOUVEAU : Styles pour le logo OFIS ===== */
+.login-logo-wrapper {
+  padding: 1rem 1rem 0;
+  text-align: center;
+}
+
+.login-logo {
+  max-width: 100%;
+  height: auto;
+  max-height: 45px;
+  width: auto;
+  object-fit: contain;
+  display: inline-block;
+}
+
+.login-logo-tagline {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+  font-size: 0.7rem;
+  font-style: italic;
+  line-height: 1.2;
+}
+/* ===== FIN NOUVEAU STYLES ===== */
+
+.login-header {
+  background: linear-gradient(90deg, #1E6FD9, #4A90E2);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo-container {
+  margin-bottom: 1rem;
+}
+
+.logo {
+  font-size: 3rem;
+  font-weight: bold;
+  margin: 0 0 0.5rem 0;
+  background: white;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tagline {
+  opacity: 0.9;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.welcome-box {
+  margin-top: 1rem;
+}
+
+.welcome-box h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+}
+
+.welcome-box p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.welcome-message {
+  background: #f0f9ff;
+  padding: 1rem;
+  text-align: center;
+  color: #1E6FD9;
+  font-size: 0.9rem;
+}
+
+.login-form {
+  padding: 2rem;
+}
+
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.password-toggle {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+}
+
+.login-button {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.login-links {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.forgot-link {
+  color: #1E6FD9;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.login-footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  color: #6b7280;
+}
+
+.version {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+}
+
+.security-note {
+  margin: 0;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.lock-icon {
+  font-size: 0.8rem;
+}
+
+/* Dashboard Page */
+.dashboard-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+}
+
+.date-display {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.active-timer-card {
+  margin-bottom: 2rem;
+  background: linear-gradient(90deg, #f0f9ff, #e0f2fe);
+  border: 2px solid #dbeafe;
+}
+
+.timer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.timer-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #1E40AF;
+  font-size: 1.1rem;
+}
+
+.timer-mission {
+  margin: 0 0 0.25rem 0;
+  font-weight: 600;
+  color: #111827;
+  font-size: 1.1rem;
+}
+
+.timer-started {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.timer-display {
+  text-align: center;
+}
+
+.timer-value {
+  font-family: 'Courier New', monospace;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.timer-label {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.timer-stop-btn {
+  min-width: 120px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.stat-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.stat-label {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #111827;
+  margin: 0 0 0.25rem 0;
+  line-height: 1;
+}
+
+.stat-change {
+  color: #059669;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.stat-icon.blue {
+  background: #dbeafe;
+  color: #1E6FD9;
+}
+
+.stat-icon.green {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.stat-icon.purple {
+  background: #e9d5ff;
+  color: #8b5cf6;
+}
+
+.stat-icon.orange {
+  background: #fed7aa;
+  color: #f97316;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.missions-card .missions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mission-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+
+.mission-item:hover {
+  background: #f3f4f6;
+}
+
+.mission-client {
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #1E6FD9;
+}
+
+.client-badge {
+  width: 32px;
+  height: 32px;
+  background: #dbeafe;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.8rem;
+  color: #1E6FD9;
+}
+
+.mission-details {
+  flex: 1;
+}
+
+.mission-title {
+  margin: 0 0 0.25rem 0;
+  font-weight: 500;
+  color: #111827;
+}
+
+.mission-date {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.mission-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 90px;
+  text-align: center;
+}
+
+.status-in_progress {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-planned {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-completed {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.start-timer-btn {
+  min-width: 100px;
+}
+
+.chart-card .weekly-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 200px;
+  padding: 1rem 0;
+}
+
+.chart-bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  margin: 0 4px;
+}
+
+.bar-label {
+  margin-bottom: 0.5rem;
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.bar-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.bar-fill {
+  width: 100%;
+  max-width: 40px;
+  background: linear-gradient(to top, #1E6FD9, #4A90E2);
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  transition: height 0.3s;
+}
+
+.bar-value {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1E6FD9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+.quick-actions .actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}

@@ -1,0 +1,141 @@
+.technician-timer {
+  padding: 1.5rem;
+}
+
+.timer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.timer-header h3 {
+  margin: 0;
+  color: #1E6FD9;
+}
+
+.connection-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.connection-status.connected {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.connection-status.disconnected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.timer-display {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.timer {
+  font-size: 4rem;
+  font-weight: bold;
+  font-family: monospace;
+  color: #1E6FD9;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.status-badge {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.location-info {
+  padding: 1rem;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  font-family: monospace;
+  margin-bottom: 1rem;
+}
+
+.notifications-panel {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+.notifications-panel h4 {
+  margin: 0 0 1rem 0;
+  color: #666;
+}
+
+.notification {
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.notification.info {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.notification.success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.notification.warning {
+  background-color: #ffedd5;
+  color: #9a3412;
+}
+
+.notification.danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.notification small {
+  display: block;
+  margin-top: 0.25rem;
+  opacity: 0.7;
+}
+
+/* components/TechnicianTimer.css - Ajoute à la fin */
+.connection-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+  border: 1px solid #ffeeba;
+}
+
+.location-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  border: 1px solid #f5c6cb;
+}
+
+.location-info {
+  background-color: #e7f3ff;
+  color: #004085;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  border: 1px solid #b8daff;
+  line-height: 1.6;
+}
