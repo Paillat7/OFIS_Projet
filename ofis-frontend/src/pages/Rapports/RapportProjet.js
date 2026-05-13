@@ -17,7 +17,7 @@ const RapportProjet = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:8000/api/rapports-projet/', {
+      const response = await fetch('https://tresorndinga06.pythonanywhere.com/api/rapports-projet/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

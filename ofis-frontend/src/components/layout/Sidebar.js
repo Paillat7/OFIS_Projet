@@ -6,22 +6,28 @@ import {
   FaArchive, 
   FaFileAlt, 
   FaCalendarWeek, 
-  FaUserCog,
   FaCheckCircle,
   FaProjectDiagram,
-  FaTachometerAlt   // ← ajouté pour le tableau de bord
+  FaTachometerAlt,
+  FaUser,
+  FaBell,
+  FaTicketAlt
 } from 'react-icons/fa';
 import './Layout.css';
 
 const Sidebar = ({ userRole = 'technicien' }) => {
   const menuItems = [
     { path: '/dashboard', icon: <FaTachometerAlt />, label: 'DASHBOARD', roles: ['manager', 'admin'] },
-    { path: '/ot-en-cours', icon: <FaTasks />, label: 'EN COURS', roles: ['technicien', 'manager', 'admin'] },
-    { path: '/ot-clotures', icon: <FaArchive />, label: 'CLOTURES', roles: ['manager', 'admin'] },
-    { path: '/validation-ot', icon: <FaCheckCircle />, label: 'A VALIDER', roles: ['manager', 'admin'] },
-    { path: '/rapports/journalier', icon: <FaFileAlt />, label: 'RAPPORTS JOURNALIERS', roles: ['technicien', 'manager', 'admin'] },
+    { path: '/ot-en-cours', icon: <FaTasks />, label: 'OT EN COURS', roles: ['technicien', 'manager', 'admin'] },
+    { path: '/ot-clotures', icon: <FaArchive />, label: 'OT CLOTURES', roles: ['manager', 'admin'] },
+    { path: '/validation-ot', icon: <FaCheckCircle />, label: 'OT A VALIDER', roles: ['manager', 'admin'] },
+    { path: '/rapports/journalier', icon: <FaFileAlt />, label: 'RAPPORTS JOURNALIERS', roles: ['technicien', 'manager', 'admin', 'cadre'] },
     { path: '/rapports-hebdo-cadre', icon: <FaCalendarWeek />, label: 'RAPPORTS HEBDOMADAIRES', roles: ['cadre', 'manager', 'admin'] },
+    { path: '/projets', icon: <FaProjectDiagram />, label: 'PROJETS', roles: ['cadre', 'manager', 'admin'] },
     { path: '/clients', icon: <FaBuilding />, label: 'CLIENTS', roles: ['manager', 'admin'] },
+    { path: '/techniciens', icon: <FaUser />, label: 'TECHNICIENS', roles: ['manager', 'admin'] },
+    { path: '/tickets', icon: <FaTicketAlt />, label: 'TICKETS', roles: ['technicien', 'manager', 'admin', 'assistant'] },
+    { path: '/notifications', icon: <FaBell />, label: 'NOTIFICATIONS', roles: ['manager', 'admin', 'cadre'] },
   ];
 
   const filteredItems = menuItems.filter(item => item.roles.includes(userRole));

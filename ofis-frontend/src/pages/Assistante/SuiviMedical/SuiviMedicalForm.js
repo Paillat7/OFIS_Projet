@@ -28,7 +28,7 @@ const SuiviMedicalForm = () => {
   const charger = async () => {
 
     const res = await fetch(
-      `http://localhost:8000/api/suivi-medical/${id}/`,
+      `https://tresorndinga06.pythonanywhere.com/api/suivi-medical/${id}/`,
       {
         headers:{
           Authorization:`Bearer ${localStorage.getItem('ofis_token')}`
@@ -49,8 +49,8 @@ const SuiviMedicalForm = () => {
     const method = id ? "PUT" : "POST";
 
     const url = id
-      ? `http://localhost:8000/api/suivi-medical/${id}/`
-      : `http://localhost:8000/api/suivi-medical/`;
+      ? `https://tresorndinga06.pythonanywhere.com/api/suivi-medical/${id}/`
+      : `https://tresorndinga06.pythonanywhere.com/api/suivi-medical/`;
 
     const res = await fetch(url,{
       method,

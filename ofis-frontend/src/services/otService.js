@@ -2,8 +2,8 @@ import api from './api';
 
 export const otService = {
   async getAll(params = {}) {
-    // Appel correct : passer params directement
-    return api.get('/ordres-travail/', params);
+    const response = await api.get('/ordres-travail/', { params });
+    return response;
   },
   async getById(id) {
     return api.get(`/ordres-travail/${id}/`);
@@ -20,7 +20,7 @@ export const otService = {
   async demarrer(id) {
     return api.post(`/ordres-travail/${id}/demarrer/`);
   },
-  async terminer(id, rapportData) {
+  async terminer(id, rapportData = {}) {
     return api.post(`/ordres-travail/${id}/terminer/`, rapportData);
   },
   async uploadDocument(id, formData) {
@@ -34,5 +34,21 @@ export const otService = {
   },
   async delete(id) {
     return api.delete(`/ordres-travail/${id}/`);
+  },
+  async ajouterTechnicien(id, technicienId) {
+    return api.post(`/ordres-travail/${id}/ajouter_technicien/`, { technicien_id: technicienId });
+  },
+  async retirerTechnicien(id, technicienId) {
+    return api.post(`/ordres-travail/${id}/retirer_technicien/`, { technicien_id: technicienId });
+  },
+  async getSousOts(id) {
+    return api.get(`/ordres-travail/${id}/sous_ots/`);
+  },
+  async ajouterSousOt(parentId, data) {
+    return api.post(`/ordres-travail/${parentId}/ajouter_sous_ot/`, data);
+  },
+  async getHistorique(otId) {
+  return api.get(`/ordres-travail/${otId}/historique/`);
   }
 };
+

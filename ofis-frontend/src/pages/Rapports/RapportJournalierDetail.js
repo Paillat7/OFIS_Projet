@@ -2,48 +2,75 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
-import { rapportService } from '../../services/rapportService';
 import { FaArrowLeft } from 'react-icons/fa';
+import api from '../../services/api';
 
 const RapportJournalierDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [rapport, setRapport] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRapport = async () => {
-      try {
-        const data = await rapportService.getJournalier(id);
-        setRapport(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchRapport();
+    chargerRapport();
   }, [id]);
 
-  if (!rapport) return <div>Chargement...</div>;
+  const chargerRapport = async () => {
+    setLoading(true);
+    try {
+      const data = await api.get(`/rapports-journaliers/${id}/`);
+      setRapport(data);
+    } catch (error) {
+      console.error('Erreur chargement rapport', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <div className="loading">Chargement...</div>;
+  if (!rapport) return <div>Rapport non trouvé</div>;
 
   return (
     <div className="dashboard-page">
-      <Button variant="outline" onClick={() => navigate(-1)}>
-        <FaArrowLeft /> Retour
-      </Button>
+      <div className="page-header">
+        <Button variant="outline" onClick={() => navigate(-1)}>
+          <FaArrowLeft /> Retour
+        </Button>
+        <h1>Rapport journalier du {new Date(rapport.date).toLocaleDateString()}</h1>
+      </div>
+
       <Card>
-        <h2>Rapport journalier</h2>
-        <p><strong>Date :</strong> {new Date(rapport.date).toLocaleDateString()}</p>
         <p><strong>Technicien :</strong> {rapport.technicien_name}</p>
-        <p><strong>Service :</strong> {rapport.service || 'Non défini'}</p>   {/* Nouvelle ligne */}
-        <p><strong>Client :</strong> {rapport.client_name}</p>
-        <p><strong>Heure départ :</strong> {rapport.heure_depart}</p>
-        <p><strong>Heure arrivée :</strong> {rapport.heure_arrivee}</p>
-        <p><strong>Heure RDV :</strong> {rapport.heure_rdv}</p>
-        <p><strong>Type intervention :</strong> {rapport.type_intervention}</p>
-        <p><strong>RDV planifié :</strong> {rapport.rdv_planifie ? 'Oui' : 'Non'}</p>
-        <p><strong>Description :</strong> {rapport.description}</p>
-        <p><strong>RIT signé :</strong> {rapport.rit_signe ? 'Oui' : 'Non'}</p>
-        <p><strong>PV signé :</strong> {rapport.pv_signe ? 'Oui' : 'Non'}</p>
-        <p><strong>Conclusions :</strong> {rapport.conclusions}</p>
+        {rapport.sous_service_name && (
+          <p><strong>Sous-service :</strong> {rapport.sous_service_parent} - {rapport.sous_service_name}</p>
+        )}
+        <p><strong>Date :</strong> {new Date(rapport.date).toLocaleDateString()}</p>
+
+        <h3>Détail des interventions</h3>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Nature</th>
+              <th>Description</th>
+              <th>Durée</th>
+              <th>RIT</th>
+              <th>PV</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rapport.lignes?.map((ligne, idx) => (
+              <tr key={idx}>
+                <td>{ligne.client_name}</td>
+                <td>{ligne.nature_intervention}</td>
+                <td>{ligne.description}</td>
+                <td>{ligne.duree} h</td>
+                <td>{ligne.rit_signe ? '✓' : '✗'}</td>
+                <td>{ligne.pv_signe ? '✓' : '✗'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </Card>
     </div>
   );

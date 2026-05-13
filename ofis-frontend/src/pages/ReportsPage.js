@@ -54,7 +54,7 @@ const ReportsPage = () => {
       const token = localStorage.getItem('ofis_token');
       console.log("🔑 Token utilisé:", token ? "Présent" : "MANQUANT");
       
-      const response = await fetch('http://localhost:8000/api/generated-reports/', {
+      const response = await fetch('https://tresorndinga06.pythonanywhere.com/api/generated-reports/', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -81,7 +81,7 @@ const ReportsPage = () => {
     console.log("📊 Chargement des statistiques...");
     try {
       const token = localStorage.getItem('ofis_token');
-      const response = await fetch('http://localhost:8000/api/generated-reports/stats/', {
+      const response = await fetch('https://tresorndinga06.pythonanywhere.com/api/generated-reports/stats/', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -122,7 +122,7 @@ const ReportsPage = () => {
       }
       
       console.log("📡 Envoi au backend...");
-      const response = await fetch('http://localhost:8000/api/generated-reports/', {
+      const response = await fetch('https://tresorndinga06.pythonanywhere.com/api/generated-reports/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -165,7 +165,7 @@ const ReportsPage = () => {
       }
     } catch (error) {
       console.error("❌ Exception réseau:", error);
-      alert('Erreur de connexion au backend. Vérifie que Django est lancé sur http://localhost:8000');
+      alert('Erreur de connexion au backend. Vérifie que Django est lancé sur https://TresorNDINGA06.pythonanywhere.com');
     }
   };
 
@@ -174,7 +174,7 @@ const ReportsPage = () => {
     console.log(`🔄 Génération du rapport ${reportId}...`);
     try {
       const token = localStorage.getItem('ofis_token');
-      const response = await fetch(`http://localhost:8000/api/generated-reports/${reportId}/generate/`, {
+      const response = await fetch(`https://tresorndinga06.pythonanywhere.com/api/generated-reports/${reportId}/generate/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -202,7 +202,7 @@ const ReportsPage = () => {
       const report = reports.find(r => r.id === reportId);
       
       const token = localStorage.getItem('ofis_token');
-      const response = await fetch(`http://localhost:8000/api/generated-reports/${reportId}/download/`, {
+      const response = await fetch(`https://tresorndinga06.pythonanywhere.com/api/generated-reports/${reportId}/download/`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -255,7 +255,7 @@ const ReportsPage = () => {
     
     try {
       const token = localStorage.getItem('ofis_token');
-      const response = await fetch(`http://localhost:8000/api/generated-reports/${reportId}/`, {
+      const response = await fetch(`https://tresorndinga06.pythonanywhere.com/api/generated-reports/${reportId}/`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -310,7 +310,7 @@ const ReportsPage = () => {
       console.log("📡 Envoi du fichier au backend...");
       
       // Envoyer au backend
-      const response = await fetch('http://localhost:8000/api/generated-reports/upload/', {
+      const response = await fetch('https://tresorndinga06.pythonanywhere.com/api/generated-reports/upload/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

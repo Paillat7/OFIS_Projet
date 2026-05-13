@@ -1,5 +1,5 @@
 // src/services/teamService.js
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://tresorndinga06.pythonanywhere.com/api';
 
 const getHeaders = () => {
   const headers = { 'Content-Type': 'application/json' };

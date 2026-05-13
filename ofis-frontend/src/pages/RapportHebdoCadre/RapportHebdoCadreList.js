@@ -21,9 +21,10 @@ const RapportHebdoCadreList = () => {
         setLoading(true);
         try {
             const data = await rapportService.getHebdoCadre();
-            setRapports(data);
+            setRapports(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Erreur chargement rapports', error);
+            setRapports([]);
         } finally {
             setLoading(false);
         }
@@ -40,7 +41,7 @@ const RapportHebdoCadreList = () => {
         }
     };
 
-    if (loading) return <div>Chargement...</div>;
+    if (loading) return <div className="loading">Chargement...</div>;
 
     return (
         <div className="dashboard-page">
@@ -62,7 +63,8 @@ const RapportHebdoCadreList = () => {
                                 <div>
                                     <h3>{rapport.cadre_name} – {rapport.date_debut} au {rapport.date_fin}</h3>
                                     <p><strong>Type :</strong> {rapport.type_display}</p>
-                                    <p><strong>Total interventions :</strong> {rapport.lignes?.length || 0}</p>
+                                    <p><strong>Résumé :</strong> {rapport.resume?.substring(0, 100)}...</p>
+                                    <p><strong>Interventions :</strong> {rapport.nb_interventions} | <strong>Heures :</strong> {rapport.heures_total} h</p>
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                     <Link to={`/rapports-hebdo-cadre/${rapport.id}`}>

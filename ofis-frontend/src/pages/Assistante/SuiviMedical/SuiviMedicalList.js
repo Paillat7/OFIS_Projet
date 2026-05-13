@@ -20,7 +20,7 @@ const SuiviMedicalList = () => {
 
     try {
 
-      const res = await fetch('http://localhost:8000/api/suivi-medical/', {
+      const res = await fetch('https://tresorndinga06.pythonanywhere.com/api/suivi-medical/', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('ofis_token')}`
         }
@@ -48,7 +48,7 @@ const SuiviMedicalList = () => {
 
     try {
 
-      await fetch(`http://localhost:8000/api/suivi-medical/${id}/`, {
+      await fetch(`https://tresorndinga06.pythonanywhere.com/api/suivi-medical/${id}/`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('ofis_token')}`

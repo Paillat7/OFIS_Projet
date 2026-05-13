@@ -5,7 +5,6 @@ import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { rapportService } from '../../services/rapportService';
 import { authService } from '../../services/authService';
-import api from '../../services/api';
 import { FaArrowLeft, FaPlus, FaTrash } from 'react-icons/fa';
 
 const RapportHebdoCadreForm = () => {
@@ -13,41 +12,48 @@ const RapportHebdoCadreForm = () => {
     const navigate = useNavigate();
     const user = authService.getCurrentUser();
     const [loading, setLoading] = useState(false);
-    const [techniciens, setTechniciens] = useState([]);
-    const [clients, setClients] = useState([]);
+    
+    // État pour les tickets
+    const [tickets, setTickets] = useState([
+        { client: '', numero: '', nature: '', intervenant: '' }
+    ]);
+    
     const [form, setForm] = useState({
         date_debut: '',
         date_fin: '',
         type: 'maintenances',
-        lignes: []
+        resume: '',
+        actions_notables: '',
+        difficultes: '',
+        perspectives: '',
+        nb_interventions: 0,
+        heures_total: 0
     });
 
     useEffect(() => {
-        chargerDonnees();
         if (id) chargerRapport();
     }, [id]);
-
-    const chargerDonnees = async () => {
-        try {
-            const users = await api.getUsers();
-            setTechniciens(users.filter(u => !u.is_staff && !u.is_superuser));
-            const clientsData = await api.getClients();
-            setClients(clientsData);
-        } catch (error) {
-            console.error('Erreur chargement données', error);
-        }
-    };
 
     const chargerRapport = async () => {
         setLoading(true);
         try {
             const data = await rapportService.getHebdoCadre(id);
             setForm({
-                date_debut: data.date_debut,
-                date_fin: data.date_fin,
-                type: data.type,
-                lignes: data.lignes || []
+                date_debut: data.date_debut || '',
+                date_fin: data.date_fin || '',
+                type: data.type || 'maintenances',
+                resume: data.resume || '',
+                actions_notables: data.actions_notables || '',
+                difficultes: data.difficultes || '',
+                perspectives: data.perspectives || '',
+                nb_interventions: data.nb_interventions || 0,
+                heures_total: data.heures_total || 0
             });
+            
+            // Charger les tickets existants
+            if (data.tickets && data.tickets.length > 0) {
+                setTickets(data.tickets);
+            }
         } catch (error) {
             console.error('Erreur chargement rapport', error);
         } finally {
@@ -60,44 +66,45 @@ const RapportHebdoCadreForm = () => {
         setForm(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleLigneChange = (idx, field, value) => {
-        const newLignes = [...form.lignes];
-        newLignes[idx][field] = value;
-        setForm(prev => ({ ...prev, lignes: newLignes }));
+    // Gestion des tickets
+    const handleTicketChange = (index, field, value) => {
+        const newTickets = [...tickets];
+        newTickets[index][field] = value;
+        setTickets(newTickets);
     };
 
-    const ajouterLigne = () => {
-        setForm(prev => ({
-            ...prev,
-            lignes: [
-                ...prev.lignes,
-                {
-                    client: '',
-                    nature_intervention: '',
-                    avancement_resultat: '',
-                    date_debut: '',
-                    date_fin: '',
-                    numero_ticket: '',
-                    intervenant: ''
-                }
-            ]
-        }));
+    const ajouterTicket = () => {
+        setTickets([...tickets, { client: '', numero: '', nature: '', intervenant: '' }]);
     };
 
-    const supprimerLigne = (idx) => {
-        const newLignes = [...form.lignes];
-        newLignes.splice(idx, 1);
-        setForm(prev => ({ ...prev, lignes: newLignes }));
+    const supprimerTicket = (index) => {
+        if (tickets.length > 1) {
+            const newTickets = tickets.filter((_, i) => i !== index);
+            setTickets(newTickets);
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
+            const dataToSend = {
+                date_debut: form.date_debut,
+                date_fin: form.date_fin,
+                type: form.type,
+                resume: form.resume,
+                actions_notables: form.actions_notables,
+                difficultes: form.difficultes,
+                perspectives: form.perspectives,
+                nb_interventions: parseInt(form.nb_interventions) || 0,
+                heures_total: parseFloat(form.heures_total) || 0,
+                tickets: tickets.filter(t => t.numero && t.client) // Garder seulement les tickets remplis
+            };
+            
             if (id) {
-                await rapportService.updateHebdoCadre(id, form);
+                await rapportService.updateHebdoCadre(id, dataToSend);
             } else {
-                await rapportService.createHebdoCadre(form);
+                await rapportService.createHebdoCadre(dataToSend);
             }
             navigate('/rapports-hebdo-cadre');
         } catch (error) {
@@ -149,80 +156,115 @@ const RapportHebdoCadreForm = () => {
                         </select>
                     </div>
 
-                    <h3>Détail des interventions</h3>
-                    {form.lignes.map((ligne, idx) => (
-                        <div key={idx} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem', borderRadius: '4px' }}>
-                            <div className="form-group">
-                                <label>Client</label>
-                                <select
-                                    value={ligne.client}
-                                    onChange={(e) => handleLigneChange(idx, 'client', e.target.value)}
-                                    required
-                                >
-                                    <option value="">Sélectionner un client</option>
-                                    {clients.map(c => (
-                                        <option key={c.id} value={c.id}>
-                                            {c.firstName} {c.lastName} - {c.company}
-                                        </option>
-                                    ))}
-                                </select>
+                    <Input
+                        label="Résumé de la semaine"
+                        name="resume"
+                        textarea
+                        value={form.resume}
+                        onChange={handleChange}
+                        rows="3"
+                        placeholder="Résumé des activités de la semaine..."
+                    />
+
+                    <Input
+                        label="Actions notables"
+                        name="actions_notables"
+                        textarea
+                        value={form.actions_notables}
+                        onChange={handleChange}
+                        rows="2"
+                        placeholder="Actions notables réalisées..."
+                    />
+
+                    <Input
+                        label="Difficultés rencontrées"
+                        name="difficultes"
+                        textarea
+                        value={form.difficultes}
+                        onChange={handleChange}
+                        rows="2"
+                        placeholder="Difficultés rencontrées..."
+                    />
+
+                    <Input
+                        label="Perspectives"
+                        name="perspectives"
+                        textarea
+                        value={form.perspectives}
+                        onChange={handleChange}
+                        rows="2"
+                        placeholder="Perspectives pour la semaine suivante..."
+                    />
+
+                    {/* Section Tickets GLPI */}
+                    <h3 style={{ marginTop: '1rem' }}>Tickets GLPI</h3>
+                    {tickets.map((ticket, idx) => (
+                        <div key={idx} style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <strong>Ticket #{idx + 1}</strong>
+                                {tickets.length > 1 && (
+                                    <Button type="button" variant="danger" size="small" onClick={() => supprimerTicket(idx)}>
+                                        <FaTrash /> Supprimer
+                                    </Button>
+                                )}
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <Input
+                                    label="Client"
+                                    value={ticket.client}
+                                    onChange={(e) => handleTicketChange(idx, 'client', e.target.value)}
+                                    placeholder="Ex: SAIPEM"
+                                />
+                                <Input
+                                    label="N° Ticket"
+                                    value={ticket.numero}
+                                    onChange={(e) => handleTicketChange(idx, 'numero', e.target.value)}
+                                    placeholder="Ex: 2321"
+                                />
                             </div>
                             <Input
                                 label="Nature de l'intervention"
-                                value={ligne.nature_intervention}
-                                onChange={(e) => handleLigneChange(idx, 'nature_intervention', e.target.value)}
-                                required
+                                value={ticket.nature}
+                                onChange={(e) => handleTicketChange(idx, 'nature', e.target.value)}
+                                placeholder="Ex: Problème de communication"
                             />
                             <Input
-                                label="Avancement / Résultat"
-                                textarea
-                                value={ligne.avancement_resultat}
-                                onChange={(e) => handleLigneChange(idx, 'avancement_resultat', e.target.value)}
-                                rows="2"
-                                required
+                                label="Intervenant"
+                                value={ticket.intervenant}
+                                onChange={(e) => handleTicketChange(idx, 'intervenant', e.target.value)}
+                                placeholder="Ex: Justie BAKITOUL"
                             />
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <Input
-                                    label="Début"
-                                    type="date"
-                                    value={ligne.date_debut}
-                                    onChange={(e) => handleLigneChange(idx, 'date_debut', e.target.value)}
-                                    required
-                                />
-                                <Input
-                                    label="Fin"
-                                    type="date"
-                                    value={ligne.date_fin}
-                                    onChange={(e) => handleLigneChange(idx, 'date_fin', e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <Input
-                                label="N° Ticket"
-                                value={ligne.numero_ticket}
-                                onChange={(e) => handleLigneChange(idx, 'numero_ticket', e.target.value)}
-                            />
-                            <div className="form-group">
-                                <label>Intervenant</label>
-                                <select
-                                    value={ligne.intervenant}
-                                    onChange={(e) => handleLigneChange(idx, 'intervenant', e.target.value)}
-                                    required
-                                >
-                                    <option value="">Sélectionner un technicien</option>
-                                    {techniciens.map(t => (
-                                        <option key={t.id} value={t.id}>{t.username}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <Button variant="outline" size="small" onClick={() => supprimerLigne(idx)}>
-                                <FaTrash /> Supprimer
-                            </Button>
                         </div>
                     ))}
-                    <Button variant="outline" onClick={ajouterLigne}>
-                        <FaPlus /> Ajouter une intervention
+
+                    <Button type="button" variant="outline" onClick={ajouterTicket}>
+                        <FaPlus /> Ajouter un ticket
                     </Button>
+
+                    {/* Indicateurs calculés automatiquement */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                        <div className="form-group">
+                            <label>Nombre d'interventions (auto)</label>
+                            <input 
+                                type="number" 
+                                name="nb_interventions"
+                                value={form.nb_interventions || 0} 
+                                disabled 
+                                style={{ width: '100%', padding: '0.5rem', backgroundColor: '#f0f0f0' }}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Heures totales (auto)</label>
+                            <input 
+                                type="number" 
+                                step="0.5" 
+                                name="heures_total"
+                                value={form.heures_total || 0} 
+                                disabled 
+                                style={{ width: '100%', padding: '0.5rem', backgroundColor: '#f0f0f0' }}
+                            />
+                        </div>
+                    </div>
 
                     <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
                         <Button type="submit" variant="primary" disabled={loading}>

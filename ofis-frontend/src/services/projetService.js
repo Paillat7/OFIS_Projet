@@ -1,29 +1,46 @@
 import api from './api';
 
-const projetService = {
-    // Récupérer tous les rapports projet (avec filtres possibles)
-    getAll: (params) => api.get('/rapports-projet/', { params }),
-
-    // Récupérer un rapport par ID
-    getById: (id) => api.get(`/rapports-projet/${id}/`),
-
-    // Créer un nouveau rapport
-    create: (data) => api.post('/rapports-projet/', data),
-
-    // Mettre à jour un rapport
-    update: (id, data) => api.put(`/rapports-projet/${id}/`, data),
-
-    // Supprimer un rapport
-    delete: (id) => api.delete(`/rapports-projet/${id}/`),
-
-    // Ajouter une ligne à un rapport existant
-    ajouterLigne: (rapportId, data) => api.post(`/rapports-projet/${rapportId}/ajouter_ligne/`, data),
-
-    // Modifier une ligne
-    modifierLigne: (rapportId, ligneId, data) => api.put(`/rapports-projet/${rapportId}/lignes/${ligneId}/`, data),
-
-    // Supprimer une ligne
-    supprimerLigne: (rapportId, ligneId) => api.delete(`/rapports-projet/${rapportId}/lignes/${ligneId}/`),
+export const projetService = {
+  async getAll(params = {}) {
+    return api.get('/projets/', params);
+  },
+  async getById(id) {
+    return api.get(`/projets/${id}/`);
+  },
+  async create(data) {
+    const dataToSend = {
+      ...data,
+      intervenants_ids: data.intervenants_ids || []
+    };
+    return api.post('/projets/', dataToSend);
+  },
+  async update(id, data) {
+    const dataToSend = {
+      ...data,
+      intervenants_ids: data.intervenants_ids || []
+    };
+    return api.put(`/projets/${id}/`, dataToSend);
+  },
+  async delete(id) {
+    return api.delete(`/projets/${id}/`);
+  },
+  async ajouterHeures(projetId, data) {
+    return api.post(`/projets/${projetId}/ajouter_heures/`, data);
+  },
+  async getHeures(projetId) {
+    return api.get(`/projets/${projetId}/heures/`);
+  },
+  async ajouterIntervenant(projetId, intervenantId) {
+    return api.post(`/projets/${projetId}/ajouter_intervenant/`, { intervenant_id: intervenantId });
+  },
+  async ajouterIntervenants(projetId, intervenantsIds) {
+    return api.post(`/projets/${projetId}/ajouter_intervenants/`, { intervenants_ids: intervenantsIds });
+  },
+  async retirerIntervenant(projetId, intervenantId) {
+    return api.post(`/projets/${projetId}/retirer_intervenant/`, { intervenant_id: intervenantId });
+  },
+  async getHistorique(projetId) {
+  return api.get(`/projets/${projetId}/historique/`);
+    }
 };
 
-export default projetService;

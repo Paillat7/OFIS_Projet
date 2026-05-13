@@ -2,91 +2,85 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
-import { FaPlus, FaPlay, FaStop, FaEye, FaEdit } from 'react-icons/fa';
+import { FaPlus, FaEye, FaPlay, FaSearch, FaFilter } from 'react-icons/fa';
 import { otService } from '../../services/otService';
 import { authService } from '../../services/authService';
 import './OT.css';
 
 const OrdresTravailList = () => {
-  const [ordres, setOrdres] = useState([]);
+  const [ots, setOts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState({ statut: '', validation: '' });
+  const [showFilters, setShowFilters] = useState(false);
   const user = authService.getCurrentUser();
   const isManager = user?.role === 'manager' || user?.role === 'admin';
 
   useEffect(() => {
-    chargerOrdres();
-  }, [filter]);
+    chargerOts();
+  }, [filters, search]);
 
-  const chargerOrdres = async () => {
+  const chargerOts = async () => {
     setLoading(true);
     try {
-      const params = filter !== 'all' ? { statut: filter } : {};
+      const params = {};
+      if (search) params.search = search;
+      if (filters.statut) params.statut = filters.statut;
+      if (filters.validation) params.validation = filters.validation;
+      
       const data = await otService.getAll(params);
-      setOrdres(data);
+      setOts(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Erreur chargement OT', error);
+      setOts([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDemarrer = async (id) => {
-    if (window.confirm('Démarrer cet ordre de travail ?')) {
+    if (window.confirm('Démarrer cet OT ?')) {
       try {
         await otService.demarrer(id);
-        chargerOrdres();
+        chargerOts();
       } catch (error) {
         alert('Erreur au démarrage');
       }
     }
   };
 
-  const handleTerminer = (id) => {
-    window.location.href = `/ordres-travail/${id}/rapport`;
-  };
-
   const getStatutBadge = (statut) => {
     const config = {
-      'planifie': { color: '#f59e0b', text: 'Planifié' },
-      'en_cours': { color: '#10b981', text: 'En cours' },
-      'termine': { color: '#6b7280', text: 'Terminé' },
-      'annule': { color: '#ef4444', text: 'Annulé' }
+      planifie: { label: 'Planifié', color: '#f59e0b', bg: '#FEF3C7' },
+      en_cours: { label: 'En cours', color: '#3b82f6', bg: '#DBEAFE' },
+      termine: { label: 'Terminé', color: '#10b981', bg: '#D1FAE5' }
     };
-    const s = config[statut] || config.planifie;
-    return (
-      <span style={{
-        backgroundColor: s.color + '20',
-        color: s.color,
-        padding: '4px 8px',
-        borderRadius: '20px',
-        fontSize: '0.8rem',
-        fontWeight: 'bold'
-      }}>
-        {s.text}
-      </span>
-    );
+    const c = config[statut] || { label: statut, color: '#666', bg: '#f0f0f0' };
+    return <span style={{ background: c.bg, color: c.color, padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 500 }}>{c.label}</span>;
   };
 
-  const getValidationBadge = (statut) => {
+  const getValidationBadge = (validation) => {
     const config = {
-      'en_attente': { color: '#f59e0b', text: 'À valider' },
-      'valide': { color: '#10b981', text: 'Validé' },
-      'rejete': { color: '#ef4444', text: 'Rejeté' }
+      en_attente: { label: 'En attente', color: '#f59e0b', bg: '#FEF3C7' },
+      valide: { label: 'Validé', color: '#10b981', bg: '#D1FAE5' },
+      rejete: { label: 'Rejeté', color: '#ef4444', bg: '#FEE2E2' }
     };
-    const s = config[statut] || config.en_attente;
+    const c = config[validation] || { label: validation, color: '#666', bg: '#f0f0f0' };
+    return <span style={{ background: c.bg, color: c.color, padding: '0.2rem 0.5rem', borderRadius: '12px', fontSize: '0.7rem', marginLeft: '0.5rem' }}>{c.label}</span>;
+  };
+
+  const getAvancementBar = (heuresConsommees, estimationHeures) => {
+    if (!estimationHeures || estimationHeures === 0) {
+      return <span style={{ fontSize: '0.75rem' }}>-</span>;
+    }
+    const pourcentage = Math.min(100, (heuresConsommees / estimationHeures) * 100);
     return (
-      <span style={{
-        backgroundColor: s.color + '20',
-        color: s.color,
-        padding: '2px 6px',
-        borderRadius: '4px',
-        fontSize: '0.7rem',
-        fontWeight: 'bold',
-        marginLeft: '0.5rem'
-      }}>
-        {s.text}
-      </span>
+      <div style={{ minWidth: '100px' }}>
+        <div style={{ background: '#e0e0e0', borderRadius: '4px', height: '6px', overflow: 'hidden' }}>
+          <div style={{ background: pourcentage >= 100 ? '#10b981' : '#3b82f6', width: `${pourcentage}%`, height: '6px' }} />
+        </div>
+        <span style={{ fontSize: '0.7rem' }}>{Math.round(pourcentage)}% ({heuresConsommees}h/{estimationHeures}h)</span>
+      </div>
     );
   };
 
@@ -103,90 +97,102 @@ const OrdresTravailList = () => {
         )}
       </div>
 
-      <Card style={{ marginBottom: '2rem', padding: '1rem' }}>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <Button 
-            variant={filter === 'all' ? 'primary' : 'outline'}
-            size="small"
-            onClick={() => setFilter('all')}
-          >
-            Tous
-          </Button>
-          <Button 
-            variant={filter === 'planifie' ? 'primary' : 'outline'}
-            size="small"
-            onClick={() => setFilter('planifie')}
-          >
-            Planifiés
-          </Button>
-          <Button 
-            variant={filter === 'en_cours' ? 'primary' : 'outline'}
-            size="small"
-            onClick={() => setFilter('en_cours')}
-          >
-            En cours
-          </Button>
-          <Button 
-            variant={filter === 'termine' ? 'primary' : 'outline'}
-            size="small"
-            onClick={() => setFilter('termine')}
-          >
-            Terminés
-          </Button>
+      {/* Barre de recherche et filtres */}
+      <Card style={{ marginBottom: '1rem', padding: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ flex: 2, position: 'relative' }}>
+            <FaSearch style={{ position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
+            <input
+              type="text"
+              placeholder="Rechercher par référence, objet, client..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ width: '100%', padding: '0.5rem 0.5rem 0.5rem 2rem', borderRadius: '4px', border: '1px solid #ccc' }}
+            />
+          </div>
+          <button onClick={() => setShowFilters(!showFilters)} style={{ padding: '0.5rem 1rem', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FaFilter /> Filtres
+          </button>
+          {(filters.statut || filters.validation) && (
+            <button onClick={() => setFilters({ statut: '', validation: '' })} style={{ padding: '0.5rem 1rem', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '4px', cursor: 'pointer', color: '#dc2626' }}>
+              Effacer
+            </button>
+          )}
         </div>
+
+        {showFilters && (
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap', paddingTop: '1rem', borderTop: '1px solid #e0e0e0' }}>
+            <select value={filters.statut} onChange={(e) => setFilters({ ...filters, statut: e.target.value })} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
+              <option value="">Tous statuts</option>
+              <option value="planifie">Planifié</option>
+              <option value="en_cours">En cours</option>
+              <option value="termine">Terminé</option>
+            </select>
+            <select value={filters.validation} onChange={(e) => setFilters({ ...filters, validation: e.target.value })} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
+              <option value="">Toutes validations</option>
+              <option value="en_attente">En attente</option>
+              <option value="valide">Validé</option>
+              <option value="rejete">Rejeté</option>
+            </select>
+          </div>
+        )}
       </Card>
 
-      <div style={{ display: 'grid', gap: '1rem' }}>
-        {ordres.length === 0 ? (
-          <Card style={{ padding: '2rem', textAlign: 'center' }}>
-            <p>Aucun ordre de travail trouvé.</p>
-          </Card>
-        ) : (
-          ordres.map(ot => (
-            <Card key={ot.id} className="ordre-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                    <h3 style={{ margin: 0 }}>{ot.reference} - {ot.mission_title}</h3>
-                    {getStatutBadge(ot.statut)}
-                    {ot.statut === 'termine' && getValidationBadge(ot.statut_validation)}
-                  </div>
-                  <p><strong>Technicien :</strong> {ot.technicien_username}</p>
-                  {ot.bon_commande_numero && <p><strong>Bon :</strong> {ot.bon_commande_numero}</p>}
-                  {ot.reference_externe && <p><strong>Réf. SAGE :</strong> {ot.reference_externe}</p>}
-                  {ot.date_debut && <p><strong>Début :</strong> {new Date(ot.date_debut).toLocaleString()}</p>}
-                  {ot.date_fin && <p><strong>Fin :</strong> {new Date(ot.date_fin).toLocaleString()}</p>}
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <Link to={`/ordres-travail/${ot.id}`}>
-                    <Button size="small" variant="outline" title="Voir détails">
-                      <FaEye />
-                    </Button>
-                  </Link>
-                  {isManager && ot.statut !== 'annule' && (
-                    <Link to={`/ordres-travail/modifier/${ot.id}`}>
-                      <Button size="small" variant="outline" title="Modifier">
-                        <FaEdit />
-                      </Button>
-                    </Link>
-                  )}
-                  {!isManager && ot.statut === 'planifie' && (
-                    <Button size="small" variant="primary" onClick={() => handleDemarrer(ot.id)}>
-                      <FaPlay /> Démarrer
-                    </Button>
-                  )}
-                  {!isManager && ot.statut === 'en_cours' && (
-                    <Link to={`/ordres-travail/${ot.id}/rapport`}>
-                      <Button size="small" variant="primary">
-                        <FaStop /> Rapport
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </Card>
-          ))
-        )}
+      {/* TABLEAU des OT */}
+      {ots.length === 0 ? (
+        <Card style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>Aucun ordre de travail trouvé.</p>
+        </Card>
+      ) : (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            <thead>
+              <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #e0e0e0' }}>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Référence</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Objet</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Client</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Techniciens</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Heures</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Avancement</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Statut</th>
+                <th style={{ padding: '0.75rem', textAlign: 'center' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ots.map(ot => (
+                <tr key={ot.id} style={{ borderBottom: '1px solid #e0e0e0' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'} onMouseLeave={(e) => e.currentTarget.style.background = 'white'}>
+                  <td style={{ padding: '0.75rem', fontWeight: 500 }}>{ot.reference} {getValidationBadge(ot.statut_validation)}</td>
+                  <td style={{ padding: '0.75rem' }}>{ot.objet?.substring(0, 40)}{ot.objet?.length > 40 ? '...' : ''}</td>
+                  <td style={{ padding: '0.75rem' }}>{ot.client_rapport_name || '-'}</td>
+                  <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{ot.techniciens_names?.join(', ') || '-'}</td>
+                  <td style={{ padding: '0.75rem' }}>{ot.heures_consommees?.toFixed(1)}/{ot.estimation_heures?.toFixed(0) || '-'}h</td>
+                  <td style={{ padding: '0.75rem', minWidth: '120px' }}>{getAvancementBar(ot.heures_consommees || 0, ot.estimation_heures)}</td>
+                  <td style={{ padding: '0.75rem' }}>{getStatutBadge(ot.statut)}</td>
+                  <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
+                      <Link to={`/ordres-travail/${ot.id}`}>
+                        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1976D2' }} title="Voir">
+                          <FaEye />
+                        </button>
+                      </Link>
+                      {ot.statut === 'planifie' && (
+                        <button onClick={() => handleDemarrer(ot.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#10b981' }} title="Démarrer">
+                          <FaPlay />
+                        </button>
+                      )}
+                    </div>
+                   </td>
+                 </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Légende */}
+      <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', fontSize: '0.7rem', color: '#666' }}>
+        <span>📋 Statuts: <span style={{ background: '#FEF3C7', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>Planifié</span> <span style={{ background: '#DBEAFE', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>En cours</span> <span style={{ background: '#D1FAE5', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>Terminé</span></span>
+        <span>✅ Validation: <span style={{ background: '#FEF3C7', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>En attente</span> <span style={{ background: '#D1FAE5', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>Validé</span> <span style={{ background: '#FEE2E2', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>Rejeté</span></span>
       </div>
     </div>
   );
