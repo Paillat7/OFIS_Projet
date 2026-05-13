@@ -1,166 +1,141 @@
 from django.contrib import admin
 from .models import (
-    Technician, Manager, Client, Mission, Report,
-    GeneratedReport, GeneratedReportDownload,
-    Team, Position, Service, Equipment,
-    MissionV2, MissionReport,
-    BonDeCommande, LigneBonDeCommande,
-    RapportJournalier, RapportHebdomadaire,
-    SuiviMedical,
-    OrdreTravail, DocumentOT,
-    RapportProjetCadre,
-    RapportHebdoCadre, LigneRapportHebdoCadre,
-    SuiviOT
+    Client, OrdreTravail, DocumentOT, SuiviOT,
+    RapportJournalier, LigneRapportJournalier,
+    RapportHebdoCadre,
+    SousService, Technician, Projet, HeureProjet,
+    Ticket, TicketHistorique
 )
-# ===== MODÈLES SIMPLES =====
-admin.site.register(Technician)
-admin.site.register(Manager)
-admin.site.register(Client)
-admin.site.register(Mission)
-admin.site.register(Report)
-
-# ===== BON DE COMMANDE =====
-@admin.register(BonDeCommande)
-class BonDeCommandeAdmin(admin.ModelAdmin):
-    list_display = ['numero', 'client', 'montant_ttc', 'statut', 'date_creation']
-    list_filter = ['statut', 'date_creation']
-    search_fields = ['numero', 'client__firstName', 'client__lastName']
-
-@admin.register(LigneBonDeCommande)
-class LigneBonDeCommandeAdmin(admin.ModelAdmin):
-    list_display = ['bon', 'description', 'quantite', 'prix_unitaire_ht', 'montant_ht']
-
-# ===== RAPPORTS GÉNÉRÉS =====
-@admin.register(GeneratedReport)
-class GeneratedReportAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'report_type', 'format', 'status', 'created_by', 'created_at', 'download_count']
-    list_filter = ['report_type', 'format', 'status', 'created_at']
-    search_fields = ['title', 'description', 'created_by__username']
-    readonly_fields = ['created_at', 'updated_at', 'download_count', 'file_size', 'filename']
-    fieldsets = (
-        ('Informations générales', {
-            'fields': ('title', 'description', 'report_type', 'format', 'status')
-        }),
-        ('Fichier', {
-            'fields': ('file', 'original_filename', 'file_size', 'download_count')
-        }),
-        ('Métadonnées', {
-            'fields': ('created_by', 'created_at', 'updated_at', 'generated_at', 'parameters')
-        }),
-    )
-    def filename(self, obj):
-        return obj.filename
-    filename.short_description = 'Nom du fichier'
-
-@admin.register(GeneratedReportDownload)
-class GeneratedReportDownloadAdmin(admin.ModelAdmin):
-    list_display = ['id', 'report', 'downloaded_by', 'downloaded_at', 'ip_address']
-    list_filter = ['downloaded_at']
-    search_fields = ['report__title', 'downloaded_by__username']
-    readonly_fields = ['downloaded_at']
-
-# ===== ÉQUIPES ET POSITIONS =====
-@admin.register(Team)
-class TeamAdmin(admin.ModelAdmin):
-    list_display = ['name', 'service', 'location', 'leaderId']
-    search_fields = ['name', 'service']
-
-@admin.register(Position)
-class PositionAdmin(admin.ModelAdmin):
-    list_display = ['team', 'user', 'latitude', 'longitude', 'timestamp']
-    list_filter = ['team', 'timestamp']
-    readonly_fields = ['timestamp']
-
-# ===== SERVICES ET MATÉRIEL =====
-@admin.register(Service)
-class ServiceAdmin(admin.ModelAdmin):
-    list_display = ['name', 'color', 'created_at']
-    search_fields = ['name']
-    list_filter = ['color']
-
-@admin.register(Equipment)
-class EquipmentAdmin(admin.ModelAdmin):
-    list_display = ['name', 'type', 'reference', 'service', 'team', 'quantity']
-    list_filter = ['type', 'service', 'team']
-    search_fields = ['name', 'reference', 'model']
-    readonly_fields = ['created_at', 'updated_at']
-
-# ===== MISSIONS V2 =====
-@admin.register(MissionV2)
-class MissionV2Admin(admin.ModelAdmin):
-    list_display = ['title', 'service', 'team', 'status', 'priority', 'start_date', 'end_date']
-    list_filter = ['status', 'priority', 'service', 'team']
-    search_fields = ['title', 'description', 'location']
-    readonly_fields = ['created_at', 'updated_at']
-    filter_horizontal = ['assigned_to']
-
-@admin.register(MissionReport)
-class MissionReportAdmin(admin.ModelAdmin):
-    list_display = ['mission', 'technician', 'hours_worked', 'created_at']
-    list_filter = ['created_at']
-    search_fields = ['mission__title', 'technician__username']
-    readonly_fields = ['created_at']
-
-# ===== RAPPORTS (JOURNALIER, HEBDOMADAIRE, PROJET) =====
-@admin.register(RapportJournalier)
-class RapportJournalierAdmin(admin.ModelAdmin):
-    list_display = ['mission', 'technicien', 'date']
-    list_filter = ['date']
-    search_fields = ['mission__title', 'technicien__username']
-
-@admin.register(RapportHebdomadaire)
-class RapportHebdomadaireAdmin(admin.ModelAdmin):
-    list_display = ['cadre', 'date_debut', 'date_fin']
-    list_filter = ['date_debut', 'date_fin']
-    search_fields = ['cadre__username']
-
-# Inline pour RapportProjet
 
 
-# ===== SUIVI MÉDICAL =====
-@admin.register(SuiviMedical)
-class SuiviMedicalAdmin(admin.ModelAdmin):
-    list_display = ['nom', 'prenom', 'service', 'date_delivrance', 'date_expiration']
-    list_filter = ['service', 'date_expiration']
-    search_fields = ['nom', 'prenom', 'service']
+@admin.register(SousService)
+class SousServiceAdmin(admin.ModelAdmin):
+    list_display = ['nom', 'service_parent']
+    list_filter = ['service_parent']
+    search_fields = ['nom']
 
-# ===== ORDRE DE TRAVAIL =====
+
+@admin.register(Technician)
+class TechnicianAdmin(admin.ModelAdmin):
+    list_display = ['user', 'get_sous_services', 'phone']
+    list_filter = ['sous_services']
+    search_fields = ['user__username', 'user__first_name', 'user__last_name', 'phone']
+    filter_horizontal = ['sous_services']
+
+    def get_sous_services(self, obj):
+        return ", ".join([str(ss) for ss in obj.sous_services.all()])
+    get_sous_services.short_description = 'Sous-services'
+
+
+@admin.register(Client)
+class ClientAdmin(admin.ModelAdmin):
+    list_display = ['firstName', 'lastName', 'company', 'email', 'phone', 'createdAt']
+    list_filter = ['company', 'createdAt']
+    search_fields = ['firstName', 'lastName', 'company', 'email']
+
+
 @admin.register(OrdreTravail)
 class OrdreTravailAdmin(admin.ModelAdmin):
-    list_display = ['reference', 'reference_externe', 'code_client', 'mission', 'technicien', 'statut', 'statut_validation', 'date_creation']
-    list_filter = ['statut', 'statut_validation']
-    search_fields = ['reference', 'reference_externe', 'code_client', 'mission__title', 'technicien__username']
-    readonly_fields = ['reference', 'date_creation', 'date_validation', 'valide_par']
+    list_display = ['reference', 'objet', 'get_techniciens', 'statut', 'statut_validation', 'estimation_heures', 'date_creation']
+    list_filter = ['statut', 'statut_validation', 'date_creation']
+    search_fields = ['reference', 'objet', 'techniciens__username']
+    readonly_fields = ['reference', 'date_creation', 'date_debut', 'date_fin', 'date_validation', 'date_archivage']
+    filter_horizontal = ['techniciens']
+
+    def get_techniciens(self, obj):
+        return ", ".join([t.username for t in obj.techniciens.all()])
+    get_techniciens.short_description = 'Techniciens'
+
 
 @admin.register(DocumentOT)
 class DocumentOTAdmin(admin.ModelAdmin):
     list_display = ['ot', 'type', 'nom', 'uploaded_at']
-    list_filter = ['type']
+    list_filter = ['type', 'uploaded_at']
     search_fields = ['ot__reference', 'nom']
 
-# ===== RAPPORT PROJET CADRE (simplifié) =====
-@admin.register(RapportProjetCadre)
-class RapportProjetCadreAdmin(admin.ModelAdmin):
-    list_display = ['nom_projet', 'cadre', 'avancement', 'date_creation']
-    list_filter = ['avancement', 'date_creation']
-    search_fields = ['nom_projet', 'cadre__username']
 
-# ===== RAPPORT HEBDOMADAIRE CADRE (avec ses lignes) =====
-# Inline pour les lignes du rapport hebdomadaire (plus de champ 'duree')
-class LigneRapportHebdoCadreInline(admin.TabularInline):
-    model = LigneRapportHebdoCadre
+@admin.register(SuiviOT)
+class SuiviOTAdmin(admin.ModelAdmin):
+    list_display = ['ot', 'technicien', 'date', 'heures', 'description']
+    list_filter = ['date', 'ot__statut']
+    search_fields = ['ot__reference', 'technicien__username', 'description']
+    readonly_fields = ['created_at', 'updated_at']
+
+
+class LigneRapportJournalierInline(admin.TabularInline):
+    model = LigneRapportJournalier
     extra = 1
-    # readonly_fields = ()   # aucun champ en lecture seule spécifique
+    fields = ['client', 'ot', 'nature_intervention', 'description', 'duree']
+
+
+@admin.register(RapportJournalier)
+class RapportJournalierAdmin(admin.ModelAdmin):
+    list_display = ['technicien', 'date', 'created_at']
+    list_filter = ['date']
+    search_fields = ['technicien__username']
+    inlines = [LigneRapportJournalierInline]
+    readonly_fields = ['created_at', 'updated_at']
+
 
 @admin.register(RapportHebdoCadre)
 class RapportHebdoCadreAdmin(admin.ModelAdmin):
-    list_display = ('cadre', 'date_debut', 'date_fin', 'type', 'created_at')
-    inlines = [LigneRapportHebdoCadreInline]
-
-# ===== SUIVI QUOTIDIEN DES OT =====
-@admin.register(SuiviOT)
-class SuiviOTAdmin(admin.ModelAdmin):
-    list_display = ['ot', 'date', 'heures', 'description']
-    list_filter = ['date', 'ot__technicien']
-    search_fields = ['ot__reference', 'description']
+    list_display = ['cadre', 'date_debut', 'date_fin', 'type', 'created_at']
+    list_filter = ['type', 'date_debut', 'date_fin']
+    search_fields = ['cadre__username']
     readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(Projet)
+class ProjetAdmin(admin.ModelAdmin):
+    list_display = ['nom', 'chef_projet', 'estimation_heures', 'heures_consommees', 'avancement', 'statut', 'date_debut']
+    list_filter = ['statut', 'date_debut']
+    search_fields = ['nom', 'chef_projet__username']
+    readonly_fields = ['created_at', 'updated_at']
+    filter_horizontal = ['intervenants']
+
+    def heures_consommees(self, obj):
+        return f"{obj.heures_consommees} h"
+    heures_consommees.short_description = 'Heures consommées'
+
+    def avancement(self, obj):
+        return f"{obj.avancement}%"
+    avancement.short_description = 'Avancement'
+
+
+@admin.register(HeureProjet)
+class HeureProjetAdmin(admin.ModelAdmin):
+    list_display = ['projet', 'intervenant', 'date', 'heures', 'description']
+    list_filter = ['date', 'projet']
+    search_fields = ['projet__nom', 'intervenant__username']
+    readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(Ticket)
+class TicketAdmin(admin.ModelAdmin):
+    list_display = ['numero', 'titre', 'client', 'technicien_assigne', 'statut', 'priorite', 'date_creation']
+    list_filter = ['statut', 'priorite', 'date_creation']
+    search_fields = ['numero', 'titre', 'client__company', 'description']
+    readonly_fields = ['numero', 'date_creation', 'date_modification', 'date_resolution', 'date_fermeture']
+    raw_id_fields = ['client', 'technicien_assigne', 'cree_par']
+    fieldsets = (
+        ('Informations générales', {
+            'fields': ('numero', 'titre', 'description', 'client', 'statut', 'priorite')
+        }),
+        ('Assignation', {
+            'fields': ('technicien_assigne', 'cree_par')
+        }),
+        ('Traitement', {
+            'fields': ('temps_passe', 'solution', 'commentaires')
+        }),
+        ('Dates', {
+            'fields': ('date_creation', 'date_modification', 'date_resolution', 'date_fermeture')
+        }),
+    )
+
+
+@admin.register(TicketHistorique)
+class TicketHistoriqueAdmin(admin.ModelAdmin):
+    list_display = ['ticket', 'utilisateur', 'action', 'date_action']
+    list_filter = ['date_action']
+    search_fields = ['ticket__numero', 'ticket__titre', 'utilisateur__username', 'action']
+    readonly_fields = ['date_action']

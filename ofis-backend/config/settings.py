@@ -11,7 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ===== SÉCURITÉ =====
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-18yuu-g9*3o^&5w1n&0cn^6en^lpa!$l03(jnq!l-w99e!r8*l')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True  # À passer à False en production
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '.onrender.com,localhost,127.0.0.1').split(',')
 
 # ===== APPLICATIONS =====
@@ -61,10 +62,21 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # ===== BASE DE DONNÉES =====
-# Utilise PostgreSQL si DATABASE_URL est définie, sinon SQLite (pour le développement local)
-DATABASES = {
-    'default': dj_database_url.config(default='sqlite:///' + str(BASE_DIR.parent / "db.sqlite3"))
-}
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ['DATABASE_URL'],
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # ===== FICHIERS STATIQUES ET MÉDIAS =====
 STATIC_URL = "static/"
@@ -74,7 +86,6 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
 
 # ===== CORS =====
-# Autorise les origines locales et l'URL du frontend (à définir dans FRONTEND_URL)
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",

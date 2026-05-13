@@ -1,0 +1,1385 @@
+[
+  {
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+      "name": "cadre",
+      "permissions": []
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 2,
+    "fields": {
+      "name": "manager",
+      "permissions": []
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 3,
+    "fields": {
+      "name": "assistant",
+      "permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$8frHykhYPN7n1dSAia0axL$rtEscSlhwLqeqvm5Yei6NscrDM/T/y8FzIEJw2InBFg=",
+      "last_login": "2026-04-20T07:15:33.731Z",
+      "is_superuser": true,
+      "username": "tresor",
+      "first_name": "",
+      "last_name": "",
+      "email": "tresor@ofis.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-04-04T15:10:43.575Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$QqzuLGTVhYP1pehP9zuQWq$bdrtPEmiknkCUTizLqw471mU11FpvCbkBdEwb6pF3qE=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Angel",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-05T12:19:27Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$awXPvEkDhT1LdEUm9nOQrG$WC8jeTJndccKMW9ZKw337sRzIuZM/JUzDVN/rpFuLDc=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "SVEN",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-05T15:30:51.881Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$D01c5VQTiafBxBA0Utz12m$/ocdIhoQ0oB+tY6XOsJ0g//U+pgqh5KNhbwZSBGIzOw=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Vianney",
+      "first_name": "",
+      "last_name": "",
+      "email": "vianney.missolo@ofis-technologies.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:47.941Z",
+      "groups": [
+        2
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 6,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$bSdZGYDWK9plZzxZkdrEDK$VW629fsB8+IQAc2eF8dXbftJ1uedtWfEvFIefqWCwd8=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Achille",
+      "first_name": "",
+      "last_name": "",
+      "email": "achille.donguia@ofis-technologies.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:48.892Z",
+      "groups": [
+        2
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 7,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$XrePz5JPTipIqjbQaYQJZJ$sK/L3DYzEM/gBLtPyVgzLbLU3Zo6LGkikkeEN8ROk9w=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Patrick",
+      "first_name": "",
+      "last_name": "",
+      "email": "patrick@ofis.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:49.986Z",
+      "groups": [
+        1
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 8,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$t0XUslw6kcKqg2JcziWxZL$aP42Yafp+NXDBEa1c6w8wuqNAIR7JENcbP6ZeBz47K4=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Gédeon",
+      "first_name": "",
+      "last_name": "",
+      "email": "gedeon@ofis.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:51.030Z",
+      "groups": [
+        1
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 9,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$hTAUNo6dXFZFFfB69AYOQL$c4g+GxHpkXwUxBj3lmxaFxnDopnZ5nwovczMHpPNkJ4=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Sidney",
+      "first_name": "",
+      "last_name": "",
+      "email": "sidney@ofis.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:51.968Z",
+      "groups": [
+        1
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 10,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$UI66HxKIkl7sCYFqS1aDvR$U92L+/lqaETQDOZwg+B62dTeBDpYwAGyp/luAPfFvXY=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Zita",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:20:03.844Z",
+      "groups": [
+        3
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 11,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$dYPVZglgQJUhTzu25nUeeC$GdOXOKPB2BDRgGBN0wcanWvpCOvMBuhS24/EZ89KuW8=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Arnaud",
+      "first_name": "Arnaud",
+      "last_name": "GANONGO",
+      "email": "arnaud.ganongo@ofis-technologies.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-07T13:36:56.515Z",
+      "groups": [
+        1
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 12,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$3XzwYdu9MWVjeLQa2V602l$sacOy77qgdGUWUTlfb7VNlnhH2Hdz1X9hI3rEWvnb28=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Dile",
+      "first_name": "Dile",
+      "last_name": "SAMBA SAMBA",
+      "email": "dile@ofis-technologies.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-20T09:17:09.707Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 13,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$z0fzCQ9JRsFGhNbmRd3uTW$xhJPzaYAD4R1GB1+mKRKR418Ryqhupt6ROWcfH9OAgs=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Prince",
+      "first_name": "Prince",
+      "last_name": "MAZOUNGA",
+      "email": "prince@ofis-technologies.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-20T09:17:10.532Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "api.sousservice",
+    "pk": 1,
+    "fields": {
+      "nom": "Réseaux",
+      "service_parent": "OSN"
+    }
+  },
+  {
+    "model": "api.sousservice",
+    "pk": 2,
+    "fields": {
+      "nom": "Systèmes informatiques",
+      "service_parent": "OSN"
+    }
+  },
+  {
+    "model": "api.sousservice",
+    "pk": 3,
+    "fields": {
+      "nom": "Radio",
+      "service_parent": "OBT"
+    }
+  },
+  {
+    "model": "api.sousservice",
+    "pk": 4,
+    "fields": {
+      "nom": "Géo",
+      "service_parent": "OBT"
+    }
+  },
+  {
+    "model": "api.sousservice",
+    "pk": 5,
+    "fields": {
+      "nom": "Support technique",
+      "service_parent": "OSN"
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 1,
+    "fields": {
+      "user": 3,
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "6500",
+      "sous_services": [
+        2,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 2,
+    "fields": {
+      "user": 4,
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "6000",
+      "sous_services": [
+        1,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 3,
+    "fields": {
+      "user": 11,
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "20000",
+      "sous_services": [
+        1,
+        2,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 4,
+    "fields": {
+      "user": 12,
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "5500",
+      "sous_services": [
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 5,
+    "fields": {
+      "user": 13,
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "5000",
+      "sous_services": [
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 6,
+    "fields": {
+      "user": 7,
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "20000",
+      "sous_services": [
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 7,
+    "fields": {
+      "user": 8,
+      "phone": "gedeon@ofis.com",
+      "hire_date": null,
+      "taux_horaire": "18000",
+      "sous_services": [
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 8,
+    "fields": {
+      "user": 9,
+      "phone": "sidney@ofis.com",
+      "hire_date": null,
+      "taux_horaire": "18000",
+      "sous_services": [
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 9,
+    "fields": {
+      "user": 10,
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "6000",
+      "sous_services": [
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.client",
+    "pk": 1,
+    "fields": {
+      "firstName": "Bralico",
+      "lastName": "PNR",
+      "company": "Bralico",
+      "email": "bral.recrutement@castel-afrique.com",
+      "phone": "+242 05 395 0666",
+      "address": "POINTE-NOIRE Direction Générale Située vers la foire de Songolo, derrière la résidence du Préfet, BP 1201",
+      "createdAt": "2026-04-05T12:34:42.719Z",
+      "is_active": true
+    }
+  },
+  {
+    "model": "api.client",
+    "pk": 2,
+    "fields": {
+      "firstName": "Maintaining Energy",
+      "lastName": "Dietsmann",
+      "company": "Dietsmann",
+      "email": "info@dietsmann.com",
+      "phone": "+242 05 708 88 08",
+      "address": "Avenue de Loango, BP 1775, Pointe-Noire.",
+      "createdAt": "2026-04-05T13:58:19.182Z",
+      "is_active": true
+    }
+  },
+  {
+    "model": "api.ordretravail",
+    "pk": 1,
+    "fields": {
+      "reference": "OT-CC21-4047",
+      "reference_externe": "CDA-25-101502",
+      "objet": "REFONTE DES BAIES IT",
+      "lieu": "Usine Bralico",
+      "client_rapport": 1,
+      "estimation_heures": "20.00",
+      "date_creation": "2026-04-05T16:18:27.076Z",
+      "date_debut": "2026-04-05T16:21:36.363Z",
+      "date_fin": "2026-04-05T16:44:49.513Z",
+      "date_validation": "2026-04-05T16:53:32.915Z",
+      "date_archivage": "2026-04-05T16:53:32.915Z",
+      "statut": "termine",
+      "statut_validation": "valide",
+      "valide_par": 1,
+      "technicien": null,
+      "parent_ot": null,
+      "techniciens": [
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "model": "api.ordretravail",
+    "pk": 2,
+    "fields": {
+      "reference": "OT-CC23-4048",
+      "reference_externe": "CDA-26-101504",
+      "objet": "Supervision Des Serveurs",
+      "lieu": "Dietsmann Direction",
+      "client_rapport": 2,
+      "estimation_heures": "10.00",
+      "date_creation": "2026-04-05T17:21:07.476Z",
+      "date_debut": "2026-04-05T17:28:31.964Z",
+      "date_fin": "2026-04-05T18:07:03.151Z",
+      "date_validation": "2026-04-05T18:09:36.307Z",
+      "date_archivage": "2026-04-05T18:09:36.307Z",
+      "statut": "termine",
+      "statut_validation": "valide",
+      "valide_par": 1,
+      "technicien": null,
+      "parent_ot": null,
+      "techniciens": [
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "model": "api.ordretravail",
+    "pk": 9,
+    "fields": {
+      "reference": "OT-CC26-4240",
+      "reference_externe": "CDA-26-101708",
+      "objet": "DIAGNOSTIC DE SERVEURS salle 2",
+      "lieu": "Dietsmann Direction",
+      "client_rapport": 2,
+      "estimation_heures": "3.00",
+      "date_creation": "2026-04-08T09:42:31.132Z",
+      "date_debut": "2026-04-08T09:42:59.122Z",
+      "date_fin": null,
+      "date_validation": null,
+      "date_archivage": null,
+      "statut": "en_cours",
+      "statut_validation": "en_attente",
+      "valide_par": null,
+      "technicien": null,
+      "parent_ot": null,
+      "techniciens": [
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "model": "api.ordretravail",
+    "pk": 10,
+    "fields": {
+      "reference": "OT-CC26-4975",
+      "reference_externe": "CDA-26-101212",
+      "objet": "Diagnostic Des Serveurs",
+      "lieu": "Dietsmann Direction",
+      "client_rapport": 2,
+      "estimation_heures": "10.00",
+      "date_creation": "2026-04-17T07:38:25.816Z",
+      "date_debut": "2026-04-17T07:39:16.112Z",
+      "date_fin": null,
+      "date_validation": null,
+      "date_archivage": null,
+      "statut": "en_cours",
+      "statut_validation": "en_attente",
+      "valide_par": null,
+      "technicien": null,
+      "parent_ot": null,
+      "techniciens": [
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "model": "api.rapportjournalier",
+    "pk": 2,
+    "fields": {
+      "technicien": 3,
+      "date": "2026-04-05",
+      "sous_service": null,
+      "created_at": "2026-04-05T14:11:04.670Z",
+      "updated_at": "2026-04-07T12:46:17.476Z"
+    }
+  },
+  {
+    "model": "api.rapportjournalier",
+    "pk": 3,
+    "fields": {
+      "technicien": 4,
+      "date": "2026-04-07",
+      "sous_service": null,
+      "created_at": "2026-04-07T14:32:22.285Z",
+      "updated_at": "2026-04-07T14:32:22.285Z"
+    }
+  },
+  {
+    "model": "api.rapportjournalier",
+    "pk": 6,
+    "fields": {
+      "technicien": 3,
+      "date": "2026-04-20",
+      "sous_service": null,
+      "created_at": "2026-04-20T07:26:27.585Z",
+      "updated_at": "2026-04-20T07:26:27.585Z"
+    }
+  },
+  {
+    "model": "api.lignerapportjournalier",
+    "pk": 2,
+    "fields": {
+      "rapport": 2,
+      "client": 1,
+      "ot": null,
+      "nature_intervention": "Refonte de Baies",
+      "description": "On a refait les diffférentes baies avec succès",
+      "avancement_resultat": "",
+      "date_debut": null,
+      "date_fin": null,
+      "duree": "3.00",
+      "numero_ticket": "",
+      "rit_signe": true,
+      "pv_signe": false,
+      "created_at": "2026-04-05T14:11:04.688Z",
+      "updated_at": "2026-04-05T14:11:04.688Z"
+    }
+  },
+  {
+    "model": "api.lignerapportjournalier",
+    "pk": 3,
+    "fields": {
+      "rapport": 2,
+      "client": 2,
+      "ot": null,
+      "nature_intervention": "Changement de Serveurs",
+      "description": "Les Serveurs ont été changé et on ajusté avec  succès",
+      "avancement_resultat": "",
+      "date_debut": null,
+      "date_fin": null,
+      "duree": "2.00",
+      "numero_ticket": "",
+      "rit_signe": true,
+      "pv_signe": false,
+      "created_at": "2026-04-05T14:11:04.699Z",
+      "updated_at": "2026-04-05T14:11:04.700Z"
+    }
+  },
+  {
+    "model": "api.lignerapportjournalier",
+    "pk": 4,
+    "fields": {
+      "rapport": 3,
+      "client": 2,
+      "ot": null,
+      "nature_intervention": "Analyse des Serveurs",
+      "description": "J'ai fait un nettoyage au niveau du serveur et là il est en parfait état",
+      "avancement_resultat": "",
+      "date_debut": null,
+      "date_fin": null,
+      "duree": "2.00",
+      "numero_ticket": "",
+      "rit_signe": true,
+      "pv_signe": false,
+      "created_at": "2026-04-07T14:32:22.303Z",
+      "updated_at": "2026-04-07T14:32:22.303Z"
+    }
+  },
+  {
+    "model": "api.lignerapportjournalier",
+    "pk": 5,
+    "fields": {
+      "rapport": 6,
+      "client": 1,
+      "ot": null,
+      "nature_intervention": "Contrôle technique",
+      "description": "Le équipements ont été installés st synchronisés",
+      "avancement_resultat": "Effectué avec succès et dans les temps",
+      "date_debut": "08:00:00",
+      "date_fin": "08:30:00",
+      "duree": "3.00",
+      "numero_ticket": "",
+      "rit_signe": false,
+      "pv_signe": false,
+      "created_at": "2026-04-20T07:26:27.589Z",
+      "updated_at": "2026-04-20T07:26:27.589Z"
+    }
+  },
+  {
+    "model": "api.rapporthebdocadre",
+    "pk": 3,
+    "fields": {
+      "cadre": 11,
+      "sous_service": null,
+      "date_debut": "2026-04-05",
+      "date_fin": "2026-04-07",
+      "type": "maintenances",
+      "resume": "Intervention chez Bralico pour refonte des baies et chez Dietsmann pour changement et analyse des serveurs.",
+      "actions_notables": "Refonte des baies terminée, analyse des serveurs effectuée avec succès.",
+      "difficultes": "Aucune difficulté majeure.",
+      "perspectives": "Poursuite des maintenances préventives.",
+      "nb_interventions": 2,
+      "heures_total": "7.00",
+      "tickets": [
+        {
+          "client": "Bralico",
+          "numero": "2321",
+          "nature": "Réfonte de Baies",
+          "intervenant": "Angel"
+        },
+        {
+          "client": "Dietsmann",
+          "numero": "2324",
+          "nature": "Changement de Serveurs",
+          "intervenant": "Angel"
+        },
+        {
+          "client": "Dietsmann",
+          "numero": "2326",
+          "nature": "Analyse de Serveurs",
+          "intervenant": "SVEN"
+        }
+      ],
+      "created_at": "2026-04-20T12:29:19.762Z",
+      "updated_at": "2026-04-20T12:29:19.762Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 1,
+    "fields": {
+      "ot": 1,
+      "technicien": 3,
+      "date": "2026-04-05",
+      "heures": "2.00",
+      "description": "Maintenance et refonte des baies",
+      "created_at": "2026-04-05T16:35:46.501Z",
+      "updated_at": "2026-04-05T16:35:46.501Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 2,
+    "fields": {
+      "ot": 1,
+      "technicien": 4,
+      "date": "2026-04-05",
+      "heures": "2.00",
+      "description": "Maintenance et refonte des baies",
+      "created_at": "2026-04-05T16:38:56.687Z",
+      "updated_at": "2026-04-05T16:38:56.687Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 3,
+    "fields": {
+      "ot": 2,
+      "technicien": 3,
+      "date": "2026-04-05",
+      "heures": "2.00",
+      "description": "J'ai travaillé sur la plateforme comme difficultés rencontrés y avait des serveurs qui n'étaient plus fonctionnels faut y remedier",
+      "created_at": "2026-04-05T17:31:01.956Z",
+      "updated_at": "2026-04-05T17:31:01.956Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 4,
+    "fields": {
+      "ot": 2,
+      "technicien": 4,
+      "date": "2026-04-06",
+      "heures": "3.00",
+      "description": "Le équipements ont été installés st synchronisés",
+      "created_at": "2026-04-05T18:05:28.298Z",
+      "updated_at": "2026-04-05T18:05:28.298Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 6,
+    "fields": {
+      "ot": 9,
+      "technicien": 3,
+      "date": "2026-04-08",
+      "heures": "1.00",
+      "description": "Maintenance et Depannage de serveurs",
+      "created_at": "2026-04-08T09:50:43.111Z",
+      "updated_at": "2026-04-08T09:50:43.111Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 7,
+    "fields": {
+      "ot": 9,
+      "technicien": 3,
+      "date": "2026-04-09",
+      "heures": "1.50",
+      "description": "Installation et configuration du VLAN interne",
+      "created_at": "2026-04-08T14:53:35.306Z",
+      "updated_at": "2026-04-08T14:53:35.306Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 8,
+    "fields": {
+      "ot": 9,
+      "technicien": 4,
+      "date": "2026-04-08",
+      "heures": "0.50",
+      "description": "Le équipements ont été installés st synchronisés",
+      "created_at": "2026-04-08T14:55:51.247Z",
+      "updated_at": "2026-04-08T14:55:51.247Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 9,
+    "fields": {
+      "ot": 10,
+      "technicien": 3,
+      "date": "2026-04-17",
+      "heures": "2.00",
+      "description": "J'ai fait un diagnostic pour identifier le problème, après un aperçu approfondi, j'ai constaté que la mémoire est pleine ,ce qui affecte la base de données j'ai alors partitionné pour la rendre plus fluide",
+      "created_at": "2026-04-17T07:43:39.004Z",
+      "updated_at": "2026-04-17T07:46:11.622Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 10,
+    "fields": {
+      "ot": 10,
+      "technicien": 4,
+      "date": "2026-04-17",
+      "heures": "3.00",
+      "description": "Après la partition que Angel a eu à faire il fallait s'assurer que la base de donnée n'a pas été touché du coup ,le diagnostic rencontre des conflits d'accès où une transaction bloque d'autres utilisateurs, entraînant des lenteurs ou des deadlocks ,j'ai Optimisé les transactions pour les rendre le plus court possible et utiliser des niveaux d'isolation appropriés",
+      "created_at": "2026-04-17T07:53:10.714Z",
+      "updated_at": "2026-04-17T07:53:10.714Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 1,
+    "fields": {
+      "ot": 2,
+      "type": "photo",
+      "fichier": "ot_documents/union.jpg",
+      "nom": "union.jpg",
+      "uploaded_at": "2026-04-05T17:42:41.719Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 2,
+    "fields": {
+      "ot": 2,
+      "type": "cr",
+      "fichier": "ot_documents/Together.jpg",
+      "nom": "Together.jpg",
+      "uploaded_at": "2026-04-05T17:59:18.865Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 3,
+    "fields": {
+      "ot": 2,
+      "type": "qualite",
+      "fichier": "ot_documents/Chapitre1_Entreprenariat_P0ryi2S.pdf",
+      "nom": "Chapitre1 Entreprenariat.pdf",
+      "uploaded_at": "2026-04-05T18:09:21.023Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 4,
+    "fields": {
+      "ot": 1,
+      "type": "photo",
+      "fichier": "ot_documents/OFIS_Software_Factory_LDeuL3S.pdf",
+      "nom": "OFIS Software Factory.pdf",
+      "uploaded_at": "2026-04-07T07:55:32.864Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 5,
+    "fields": {
+      "ot": 9,
+      "type": "screenshot",
+      "fichier": "ot_documents/annie-spratt-QckxruozjRg-unsplash.jpg",
+      "nom": "annie-spratt-QckxruozjRg-unsplash.jpg",
+      "uploaded_at": "2026-04-08T09:51:36.733Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 6,
+    "fields": {
+      "ot": 10,
+      "type": "photo",
+      "fichier": "ot_documents/Admin_2k8jtZA.jpg",
+      "nom": "Admin.jpg",
+      "uploaded_at": "2026-04-17T07:46:52.786Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 7,
+    "fields": {
+      "ot": 10,
+      "type": "photo",
+      "fichier": "ot_documents/Sun.jpg",
+      "nom": "Sun.jpg",
+      "uploaded_at": "2026-04-17T07:53:49.254Z"
+    }
+  },
+  {
+    "model": "api.projet",
+    "pk": 5,
+    "fields": {
+      "nom": "Installation des balises TELTONIKA  véhicules  DIETSMANN",
+      "description": "installé  des balises teltonika pour différents véhicules DIETSMANN",
+      "chef_projet": 7,
+      "estimation_heures": "10.00",
+      "date_debut": "2026-04-18",
+      "date_fin": "2026-04-20",
+      "statut": "en_cours",
+      "cout_projet": "29999000",
+      "devise_cout": "XAF",
+      "benefice_attendu": "6000000",
+      "devise_benefice": "XAF",
+      "created_at": "2026-04-20T10:41:36.654Z",
+      "updated_at": "2026-04-20T10:41:36.654Z",
+      "intervenants": [
+        12,
+        13
+      ]
+    }
+  },
+  {
+    "model": "api.projet",
+    "pk": 6,
+    "fields": {
+      "nom": "Projet Wifi Bralico",
+      "description": "Installation et configuration du réseau wifi pour Bralico Congo",
+      "chef_projet": 11,
+      "estimation_heures": "20.00",
+      "date_debut": "2026-04-06",
+      "date_fin": "2026-04-20",
+      "statut": "en_cours",
+      "cout_projet": "50000000",
+      "devise_cout": "XAF",
+      "benefice_attendu": "9999000",
+      "devise_benefice": "XAF",
+      "created_at": "2026-04-20T11:50:15.767Z",
+      "updated_at": "2026-04-20T11:50:15.767Z",
+      "intervenants": [
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "model": "api.projet",
+    "pk": 8,
+    "fields": {
+      "nom": "Projet Wifi Bralico Vindoulou",
+      "description": "Traçage de véhicules",
+      "chef_projet": 7,
+      "estimation_heures": "8.00",
+      "date_debut": "2026-04-20",
+      "date_fin": "2026-04-22",
+      "statut": "en_cours",
+      "cout_projet": "800000",
+      "devise_cout": "XAF",
+      "benefice_attendu": "160000",
+      "devise_benefice": "XAF",
+      "created_at": "2026-04-22T14:50:24.757Z",
+      "updated_at": "2026-04-22T14:50:24.757Z",
+      "intervenants": [
+        12,
+        13
+      ]
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 12,
+    "fields": {
+      "projet": 5,
+      "intervenant": 12,
+      "date": "2026-04-18",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.00",
+      "description": "Le 18 Dile a installé la balise teltonika, Véhicule DiIETSMANN  avec l'immatriculation 204 MG 6 ",
+      "created_at": "2026-04-20T10:46:00.692Z",
+      "updated_at": "2026-04-20T10:46:00.692Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 13,
+    "fields": {
+      "projet": 5,
+      "intervenant": 13,
+      "date": "2026-04-19",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "3.00",
+      "description": "Le 19 Prince a installé la balise teltonika, Véhicule DIETSMANN avec l'immatriculation 449 LB 6",
+      "created_at": "2026-04-20T10:48:21.482Z",
+      "updated_at": "2026-04-20T10:48:21.482Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 14,
+    "fields": {
+      "projet": 5,
+      "intervenant": 12,
+      "date": "2026-04-19",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.50",
+      "description": "Le 19 Dile a installé la balise teltonika, Véhicule DiIETSMANN avec l'immatriculation 366 MU 6",
+      "created_at": "2026-04-20T10:50:03.062Z",
+      "updated_at": "2026-04-20T10:50:03.062Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 15,
+    "fields": {
+      "projet": 5,
+      "intervenant": 13,
+      "date": "2026-04-20",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.50",
+      "description": "Le 20 Prince a installé la balise teltonika, Véhicule DIETSMANN avec l'immatriculation 970 AK 6",
+      "created_at": "2026-04-20T10:51:52.025Z",
+      "updated_at": "2026-04-20T10:51:52.025Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 16,
+    "fields": {
+      "projet": 6,
+      "intervenant": 4,
+      "date": "2026-04-06",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.00",
+      "description": "Configuration des Switches",
+      "created_at": "2026-04-20T12:07:24.548Z",
+      "updated_at": "2026-04-20T12:07:24.548Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 17,
+    "fields": {
+      "projet": 6,
+      "intervenant": 3,
+      "date": "2026-04-08",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "3.00",
+      "description": "Configuration Vlan de Salle Transformation",
+      "created_at": "2026-04-20T12:08:53.041Z",
+      "updated_at": "2026-04-20T12:08:53.041Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 18,
+    "fields": {
+      "projet": 6,
+      "intervenant": 4,
+      "date": "2026-04-09",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "3.00",
+      "description": "Mise en place du protocle TCP/IP",
+      "created_at": "2026-04-20T12:10:44.825Z",
+      "updated_at": "2026-04-20T12:10:44.825Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 19,
+    "fields": {
+      "projet": 6,
+      "intervenant": 4,
+      "date": "2026-04-10",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.00",
+      "description": "Mise en place SSH",
+      "created_at": "2026-04-20T12:11:56.595Z",
+      "updated_at": "2026-04-20T12:11:56.595Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 20,
+    "fields": {
+      "projet": 6,
+      "intervenant": 3,
+      "date": "2026-04-12",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.00",
+      "description": "OSTP effectué",
+      "created_at": "2026-04-20T12:13:29.320Z",
+      "updated_at": "2026-04-20T12:13:29.320Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 21,
+    "fields": {
+      "projet": 6,
+      "intervenant": 3,
+      "date": "2026-04-17",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "3.00",
+      "description": "LAN configuré",
+      "created_at": "2026-04-20T12:14:27.786Z",
+      "updated_at": "2026-04-20T12:14:27.786Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 22,
+    "fields": {
+      "projet": 6,
+      "intervenant": 4,
+      "date": "2026-04-18",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "3.00",
+      "description": "Affectation Adresse ip,pour les différents sous réseaux ",
+      "created_at": "2026-04-20T12:15:40.858Z",
+      "updated_at": "2026-04-20T12:15:40.858Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 23,
+    "fields": {
+      "projet": 6,
+      "intervenant": 4,
+      "date": "2026-04-19",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "1.50",
+      "description": "Connectivité entre différents terminaux",
+      "created_at": "2026-04-20T12:16:59.385Z",
+      "updated_at": "2026-04-20T12:16:59.385Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 24,
+    "fields": {
+      "projet": 6,
+      "intervenant": 3,
+      "date": "2026-04-20",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.00",
+      "description": "Mis en place des parfeux",
+      "created_at": "2026-04-20T12:18:13.143Z",
+      "updated_at": "2026-04-20T12:18:13.143Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 25,
+    "fields": {
+      "projet": 8,
+      "intervenant": 12,
+      "date": "2026-04-20",
+      "heure_debut": "08:30:00",
+      "heure_fin": "11:00:00",
+      "heures": "2.50",
+      "description": "Installation des balises Gallooli",
+      "created_at": "2026-04-22T14:58:20.309Z",
+      "updated_at": "2026-04-22T14:58:20.309Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 26,
+    "fields": {
+      "projet": 8,
+      "intervenant": 13,
+      "date": "2026-04-21",
+      "heure_debut": "12:00:00",
+      "heure_fin": "15:00:00",
+      "heures": "3.00",
+      "description": "Installation MIX sur le Véhicule 449 LB 6",
+      "created_at": "2026-04-22T15:00:43.795Z",
+      "updated_at": "2026-04-22T15:00:43.795Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 27,
+    "fields": {
+      "projet": 8,
+      "intervenant": 13,
+      "date": "2026-04-22",
+      "heure_debut": "06:00:00",
+      "heure_fin": "08:00:00",
+      "heures": "2.00",
+      "description": "Installation MIX sur le Véhicule 970 AK 6",
+      "created_at": "2026-04-22T15:03:06.617Z",
+      "updated_at": "2026-04-22T15:03:06.617Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 28,
+    "fields": {
+      "projet": 8,
+      "intervenant": 12,
+      "date": "2026-04-22",
+      "heure_debut": "15:00:00",
+      "heure_fin": "18:30:00",
+      "heures": "3.50",
+      "description": "Installation MIX sur le Véhicule 366 MU 6",
+      "created_at": "2026-04-22T15:04:12.243Z",
+      "updated_at": "2026-04-22T15:04:12.243Z"
+    }
+  },
+  {
+    "model": "api.ticket",
+    "pk": 2,
+    "fields": {
+      "numero": 2321,
+      "titre": "Panne réseau siège Bralico",
+      "description": "Le client signale une interruption totale du réseau depuis 8h ce matin. Plusieurs utilisateurs concernés. Pas d'accès aux serveurs.",
+      "client": 1,
+      "technicien_assigne": 3,
+      "cree_par": 1,
+      "statut": "ferme",
+      "priorite": "haute",
+      "date_creation": "2026-04-24T09:32:18.859Z",
+      "date_modification": "2026-04-24T09:36:18.646Z",
+      "date_resolution": "2026-04-24T09:35:28.207Z",
+      "date_fermeture": "2026-04-24T09:36:18.646Z",
+      "temps_passe": "2.50",
+      "solution": "Diagnostic : switch défectueux. Remplacement effectué. Le réseau est revenu. Temps passé : 2h30",
+      "commentaires": ""
+    }
+  },
+  {
+    "model": "api.ticket",
+    "pk": 3,
+    "fields": {
+      "numero": 2322,
+      "titre": "Panne au niveau des Serveurs Bralico",
+      "description": "Besoin d'une maintenance au sein des salles serveurs, causant un disfonctionnement des activités",
+      "client": 2,
+      "technicien_assigne": 4,
+      "cree_par": 1,
+      "statut": "en_cours",
+      "priorite": "haute",
+      "date_creation": "2026-05-12T10:08:12.793Z",
+      "date_modification": "2026-05-12T10:09:36.472Z",
+      "date_resolution": null,
+      "date_fermeture": null,
+      "temps_passe": "0.00",
+      "solution": "",
+      "commentaires": ""
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 3,
+    "fields": {
+      "ticket": 2,
+      "utilisateur": 1,
+      "action": "Création du ticket",
+      "details": "Ticket créé avec priorité Haute",
+      "date_action": "2026-04-24T09:32:18.863Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 4,
+    "fields": {
+      "ticket": 2,
+      "utilisateur": 1,
+      "action": "Assignation",
+      "details": "Assigné à Angel (était non assigné)",
+      "date_action": "2026-04-24T09:32:30.637Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 5,
+    "fields": {
+      "ticket": 2,
+      "utilisateur": 3,
+      "action": "Changement de statut",
+      "details": "Statut changé de nouveau à en_cours",
+      "date_action": "2026-04-24T09:32:53.479Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 6,
+    "fields": {
+      "ticket": 2,
+      "utilisateur": 3,
+      "action": "Ajout de temps",
+      "details": "2.0 heures ajoutées (total: 2.0h)",
+      "date_action": "2026-04-24T09:34:31.870Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 7,
+    "fields": {
+      "ticket": 2,
+      "utilisateur": 3,
+      "action": "Solution ajoutée",
+      "details": "Diagnostic : switch défectueux. Remplacement effectué. Le réseau est revenu. Temps passé : 2h30",
+      "date_action": "2026-04-24T09:34:41.246Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 8,
+    "fields": {
+      "ticket": 2,
+      "utilisateur": 3,
+      "action": "Ajout de temps",
+      "details": "0.5 heures ajoutées (total: 2.5h)",
+      "date_action": "2026-04-24T09:35:14.155Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 9,
+    "fields": {
+      "ticket": 2,
+      "utilisateur": 3,
+      "action": "Changement de statut",
+      "details": "Statut changé de en_cours à resolu",
+      "date_action": "2026-04-24T09:35:28.211Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 10,
+    "fields": {
+      "ticket": 2,
+      "utilisateur": 1,
+      "action": "Changement de statut",
+      "details": "Statut changé de resolu à ferme",
+      "date_action": "2026-04-24T09:36:18.659Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 11,
+    "fields": {
+      "ticket": 3,
+      "utilisateur": 1,
+      "action": "Création du ticket",
+      "details": "Ticket créé avec priorité Haute",
+      "date_action": "2026-05-12T10:08:12.804Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 12,
+    "fields": {
+      "ticket": 3,
+      "utilisateur": 1,
+      "action": "Assignation",
+      "details": "Assigné à SVEN (était non assigné)",
+      "date_action": "2026-05-12T10:08:56.854Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 13,
+    "fields": {
+      "ticket": 3,
+      "utilisateur": 4,
+      "action": "Changement de statut",
+      "details": "Statut changé de nouveau à en_cours",
+      "date_action": "2026-05-12T10:09:36.476Z"
+    }
+  }
+]

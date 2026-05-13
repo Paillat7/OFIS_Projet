@@ -1,529 +1,69 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from rest_framework import generics, status, viewsets,permissions
+from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import filters
 from django.contrib.auth.models import User
-from django.db.models import Sum, Count
 from django.utils import timezone
-from datetime import timedelta
-import os
-from django.http import FileResponse
-from django.conf import settings
-from django.core.files.base import ContentFile
-import tempfile
-from io import BytesIO
-import csv
-import qrcode
-import base64
-from django.db.models.deletion import ProtectedError
-from django.db import IntegrityError
-from notifications.models import Notification  # si vous utilisez le système de notifications
-
-
-
-
-
-# Bibliothèques pour génération de fichiers (avec fallback si non installées)
-try:
-    from reportlab.pdfgen import canvas
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.units import cm
-    REPORTLAB_AVAILABLE = True
-except ImportError:
-    REPORTLAB_AVAILABLE = False
-    print("⚠️ ReportLab non installé. La génération PDF utilisera le fallback texte.")
-
-try:
-    import openpyxl
-    OPENPYXL_AVAILABLE = True
-except ImportError:
-    OPENPYXL_AVAILABLE = False
-    print("⚠️ OpenPyXL non installé. La génération Excel utilisera le fallback CSV.")
+from django.db import models
+from django.db.models import Sum
+from datetime import datetime, timedelta, date as date_today
 from .models import (
-    Client, Technician, Manager, Mission, Report, Position, Team,
-    GeneratedReport, GeneratedReportDownload,
-    Service, Equipment, MissionV2, MissionReport,
-    BonDeCommande, LigneBonDeCommande,
-    RapportJournalier, RapportHebdomadaire,
-    SuiviMedical,
-    OrdreTravail,
-    RapportProjetCadre,
-    RapportHebdoCadre, LigneRapportHebdoCadre
+    Client, OrdreTravail, DocumentOT, SuiviOT,
+    RapportJournalier, LigneRapportJournalier,
+    RapportHebdoCadre,
+    Projet, HeureProjet, SousService, Technician, Notification,
+    Ticket, TicketHistorique
 )
-
 from .serializers import (
-    ClientSerializer, TechnicianSerializer, ManagerSerializer,
-    MissionSerializer, ReportSerializer, UserSerializer,
-    PositionSerializer, TeamSerializer,
-    GeneratedReportSerializer,
-    GeneratedReportCreateSerializer, GeneratedReportUploadSerializer,
-    GeneratedReportDownloadSerializer,
-    ServiceSerializer, EquipmentSerializer, MissionV2Serializer, MissionReportSerializer,
-    BonDeCommandeSerializer, LigneBonDeCommandeSerializer,
-    RapportJournalierSerializer, RapportHebdomadaireSerializer,
-    SuiviMedicalSerializer,
-    OrdreTravailSerializer,
-    RapportProjetCadreSerializer,
+    ClientSerializer, OrdreTravailSerializer, DocumentOTSerializer,
+    SuiviOTSerializer, RapportJournalierSerializer,
     RapportHebdoCadreSerializer,
-    LigneRapportHebdoCadreSerializer
+    UserSerializer, CustomTokenObtainPairSerializer,
+    ProjetSerializer, HeureProjetSerializer, TechnicianSerializer, NotificationSerializer,
+     TicketSerializer, TicketHistoriqueSerializer
 )
-
-# ===== VIEWSETS EXISTANTS =====
-
-class GeneratedReportViewSet(viewsets.ModelViewSet):
-    """ViewSet pour les nouveaux rapports génériques"""
-    permission_classes = [IsAuthenticated]
-    serializer_class = GeneratedReportSerializer
-
-    def get_queryset(self):
-        """Les utilisateurs ne voient que leurs propres rapports"""
-        user = self.request.user
-        if user.is_superuser:
-            return GeneratedReport.objects.all()
-        return GeneratedReport.objects.filter(created_by=user)
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return GeneratedReportCreateSerializer
-        elif self.action == 'upload':
-            return GeneratedReportUploadSerializer
-        return GeneratedReportSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['request'] = self.request
-        return context
-
-    @action(detail=True, methods=['post'])
-    def generate(self, request, pk=None):
-        """Génère un vrai rapport avec fichier"""
-        report = self.get_object()
-        try:
-            report.status = 'en_cours'
-            report.save()
-            file_content, filename, content_type = self._generate_report_file(report)
-            report.file.save(filename, ContentFile(file_content))
-            report.status = 'genere'
-            report.generated_at = timezone.now()
-            report.file_size = report.file.size
-            report.original_filename = filename
-            report.save()
-            return Response({
-                'message': 'Rapport généré avec succès',
-                'file_url': report.file.url if report.file else None,
-                'filename': filename,
-                'id': report.id
-            })
-        except Exception as e:
-            report.status = 'erreur'
-            report.save()
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def _generate_report_file(self, report):
-        """Génère le contenu du fichier avec fallback en cas d'erreur"""
-        timestamp = timezone.now().strftime('%Y%m%d_%H%M%S')
-        clean_title = "".join(c for c in report.title if c.isalnum() or c in (' ', '-', '_')).strip()
-        clean_title = clean_title.replace(' ', '_')[:30]
-        base_filename = f"{clean_title}_{timestamp}"
-
-        title = report.title or "Rapport sans titre"
-        description = report.description or ""
-        created_at = report.created_at.strftime('%d/%m/%Y %H:%M')
-        created_by = report.created_by.username if report.created_by else "Inconnu"
-        report_type_display = dict(report.REPORT_TYPES).get(report.report_type, report.report_type)
-
-        try:
-            if report.format == 'pdf':
-                try:
-                    return self._generate_pdf(report, base_filename, title, description, created_at, created_by, report_type_display)
-                except Exception as e:
-                    print(f"Erreur génération PDF: {e}, fallback vers TXT")
-                    return self._generate_text_fallback(report, base_filename, title, description, created_at, created_by, report_type_display, 'pdf')
-            elif report.format in ['excel', 'xlsx']:
-                try:
-                    return self._generate_excel(report, base_filename, title, description, created_at, created_by, report_type_display)
-                except Exception as e:
-                    print(f"Erreur génération Excel: {e}, fallback vers CSV")
-                    return self._generate_csv_fallback(report, base_filename, title, description, created_at, created_by, report_type_display)
-            elif report.format == 'csv':
-                try:
-                    return self._generate_csv(report, base_filename, title, description, created_at, created_by, report_type_display)
-                except Exception as e:
-                    print(f"Erreur génération CSV: {e}, fallback vers TXT")
-                    return self._generate_text_fallback(report, base_filename, title, description, created_at, created_by, report_type_display, 'csv')
-            else:
-                return self._generate_text(report, base_filename, title, description, created_at, created_by, report_type_display)
-        except Exception as e:
-            print(f"Erreur générale: {e}, utilisation du fallback ultime")
-            return self._generate_text_fallback(report, base_filename, title, description, created_at, created_by, report_type_display, 'txt')
-
-    def _generate_pdf(self, report, base_filename, title, description, created_at, created_by, report_type_display):
-        if not REPORTLAB_AVAILABLE:
-            raise Exception("ReportLab n'est pas installé")
-        filename = base_filename + '.pdf'
-        buffer = BytesIO()
-        p = canvas.Canvas(buffer, pagesize=A4)
-        width, height = A4
-        p.setFont("Helvetica-Bold", 18)
-        p.drawString(2*cm, height-3*cm, title[:80])
-        p.setFont("Helvetica-Bold", 12)
-        p.drawString(2*cm, height-5*cm, "Informations générales:")
-        p.setFont("Helvetica", 11)
-        p.drawString(3*cm, height-6*cm, f"Créé le: {created_at}")
-        p.drawString(3*cm, height-7*cm, f"Créé par: {created_by}")
-        p.drawString(3*cm, height-8*cm, f"Type: {report_type_display}")
-        p.setFont("Helvetica-Bold", 12)
-        p.drawString(2*cm, height-10*cm, "Description:")
-        p.setFont("Helvetica", 10)
-        y_position = height-11*cm
-        words = description.split()
-        lines = []
-        current_line = ""
-        for word in words:
-            if len(current_line + " " + word) < 80:
-                current_line += (" " + word if current_line else word)
-            else:
-                lines.append(current_line)
-                current_line = word
-        if current_line:
-            lines.append(current_line)
-        for line in lines:
-            p.drawString(3*cm, y_position, line)
-            y_position -= 0.5*cm
-        if report.parameters:
-            y_position -= 1*cm
-            p.setFont("Helvetica-Bold", 12)
-            p.drawString(2*cm, y_position, "Paramètres:")
-            y_position -= 0.8*cm
-            p.setFont("Helvetica", 10)
-            for key, value in report.parameters.items():
-                p.drawString(3*cm, y_position, f"{key}: {value}")
-                y_position -= 0.5*cm
-        p.setFont("Helvetica-Oblique", 8)
-        p.drawString(2*cm, 2*cm, f"Généré le {timezone.now().strftime('%d/%m/%Y %H:%M')} - OFIS")
-        p.showPage()
-        p.save()
-        buffer.seek(0)
-        return buffer.getvalue(), filename, 'application/pdf'
-
-    def _generate_excel(self, report, base_filename, title, description, created_at, created_by, report_type_display):
-        if not OPENPYXL_AVAILABLE:
-            raise Exception("OpenPyXL n'est pas installé")
-        filename = base_filename + '.xlsx'
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "Rapport"
-        ws['A1'] = title
-        ws['A1'].font = openpyxl.styles.Font(bold=True, size=14)
-        ws.merge_cells('A1:C1')
-        ws['A3'] = "Date de création:"
-        ws['B3'] = created_at
-        ws['A4'] = "Créé par:"
-        ws['B4'] = created_by
-        ws['A5'] = "Type de rapport:"
-        ws['B5'] = report_type_display
-        ws['A7'] = "Description:"
-        ws['A8'] = description
-        ws.merge_cells('A8:C8')
-        if report.parameters:
-            ws['A10'] = "Paramètres:"
-            ws['A10'].font = openpyxl.styles.Font(bold=True)
-            row = 11
-            for key, value in report.parameters.items():
-                ws[f'A{row}'] = key
-                ws[f'B{row}'] = str(value)
-                row += 1
-        for column in ['A', 'B', 'C']:
-            ws.column_dimensions[column].width = 20
-        ws['A20'] = f"Généré le {timezone.now().strftime('%d/%m/%Y %H:%M')} - OFIS"
-        ws['A20'].font = openpyxl.styles.Font(italic=True, size=8)
-        buffer = BytesIO()
-        wb.save(buffer)
-        buffer.seek(0)
-        return buffer.getvalue(), filename, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-
-    def _generate_csv(self, report, base_filename, title, description, created_at, created_by, report_type_display):
-        filename = base_filename + '.csv'
-        buffer = BytesIO()
-        writer = csv.writer(buffer)
-        writer.writerow([title])
-        writer.writerow([])
-        writer.writerow(["Date de création:", created_at])
-        writer.writerow(["Créé par:", created_by])
-        writer.writerow(["Type:", report_type_display])
-        writer.writerow([])
-        writer.writerow(["Description:"])
-        writer.writerow([description])
-        if report.parameters:
-            writer.writerow([])
-            writer.writerow(["Paramètres:"])
-            for key, value in report.parameters.items():
-                writer.writerow([key, value])
-        writer.writerow([])
-        writer.writerow([f"Généré le {timezone.now().strftime('%d/%m/%Y %H:%M')} - OFIS"])
-        buffer.seek(0)
-        return buffer.getvalue(), filename, 'text/csv'
-
-    def _generate_text(self, report, base_filename, title, description, created_at, created_by, report_type_display):
-        filename = base_filename + '.txt'
-        content = f"""
-========================================
-{title}
-========================================
-
-INFORMATIONS GÉNÉRALES
-----------------------------------------
-Date de création: {created_at}
-Créé par: {created_by}
-Type: {report_type_display}
-
-DESCRIPTION
-----------------------------------------
-{description}
-
-PARAMÈTRES
-----------------------------------------
-"""
-        if report.parameters:
-            for key, value in report.parameters.items():
-                content += f"{key}: {value}\n"
-        else:
-            content += "Aucun paramètre\n"
-        content += f"\n\nGénéré le {timezone.now().strftime('%d/%m/%Y %H:%M')} - OFIS"
-        return content.encode('utf-8'), filename, 'text/plain'
-
-    def _generate_text_fallback(self, report, base_filename, title, description, created_at, created_by, report_type_display, original_format):
-        filename = f"{base_filename}_fallback.txt"
-        content = f"""
-==================================================
-⚠️  RAPPORT GÉNÉRÉ EN FORMAT TEXTE (FALLBACK)  ⚠️
-==================================================
-
-Le format demandé ({original_format.upper()}) n'a pas pu être généré.
-Cause possible: Bibliothèque manquante ou erreur de génération.
-
-------------------------------------------
-INFORMATIONS DU RAPPORT
-------------------------------------------
-Titre: {title}
-Date: {created_at}
-Créé par: {created_by}
-Type: {report_type_display}
-Format original demandé: {original_format}
-
-------------------------------------------
-DESCRIPTION
-------------------------------------------
-{description}
-
-------------------------------------------
-PARAMÈTRES
-------------------------------------------
-"""
-        if report.parameters:
-            for key, value in report.parameters.items():
-                content += f"{key}: {value}\n"
-        else:
-            content += "Aucun paramètre\n"
-        content += f"""
-------------------------------------------
-Généré le {timezone.now().strftime('%d/%m/%Y %H:%M')} - OFIS
-==================================================
-"""
-        return content.encode('utf-8'), filename, 'text/plain'
-
-    def _generate_csv_fallback(self, report, base_filename, title, description, created_at, created_by, report_type_display):
-        filename = base_filename + '.csv'
-        buffer = BytesIO()
-        writer = csv.writer(buffer)
-        writer.writerow(["RAPPORT", title])
-        writer.writerow([])
-        writer.writerow(["Date création", created_at])
-        writer.writerow(["Créé par", created_by])
-        writer.writerow(["Type", report_type_display])
-        writer.writerow([])
-        writer.writerow(["Description"])
-        writer.writerow([description])
-        if report.parameters:
-            writer.writerow([])
-            writer.writerow(["Paramètres"])
-            for key, value in report.parameters.items():
-                writer.writerow([key, value])
-        buffer.seek(0)
-        return buffer.getvalue(), filename, 'text/csv'
-
-    @action(detail=True, methods=['get'])
-    def download(self, request, pk=None):
-        report = self.get_object()
-        if not report.file:
-            return Response({'error': 'Aucun fichier disponible'}, status=status.HTTP_404_NOT_FOUND)
-        try:
-            if not os.path.exists(report.file.path):
-                return Response({'error': 'Fichier non trouvé'}, status=status.HTTP_404_NOT_FOUND)
-            report.download_count += 1
-            report.save()
-            GeneratedReportDownload.objects.create(
-                report=report,
-                downloaded_by=request.user,
-                ip_address=self._get_client_ip(request)
-            )
-            filename = report.original_filename or report.filename or f"rapport_{report.id}.pdf"
-            response = FileResponse(report.file.open('rb'), as_attachment=True, filename=filename)
-            return response
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    @action(detail=False, methods=['post'], url_path='upload')
-    def upload(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            report = serializer.save()
-            return Response(GeneratedReportSerializer(report, context=self.get_serializer_context()).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=False, methods=['get'])
-    def stats(self, request):
-        queryset = self.get_queryset()
-        now = timezone.now()
-        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        week_start = today_start - timedelta(days=today_start.weekday())
-        month_start = today_start.replace(day=1)
-        stats = {
-            'total_reports': queryset.count(),
-            'reports_this_month': queryset.filter(created_at__gte=month_start).count(),
-            'reports_this_week': queryset.filter(created_at__gte=week_start).count(),
-            'generated_today': queryset.filter(generated_at__gte=today_start, status='genere').count(),
-            'downloads_total': GeneratedReportDownload.objects.filter(report__in=queryset).count(),
-            'by_type': dict(queryset.values('report_type').annotate(count=Count('id')).values_list('report_type', 'count')),
-        }
-        return Response(stats)
-
-    def _get_client_ip(self, request):
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            return x_forwarded_for.split(',')[0]
-        return request.META.get('REMOTE_ADDR')
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
-# ===== REPORT VIEWS EXISTANTS =====
-class ReportViewSet(viewsets.ModelViewSet):
-    queryset = Report.objects.all().order_by('-reportDate')
-    serializer_class = ReportSerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save()
-
-
-class ReportUploadView(generics.CreateAPIView):
-    permission_classes = [IsAuthenticated]
-    parser_classes = (MultiPartParser, FormParser)
-    serializer_class = ReportSerializer
-
-    def post(self, request, *args, **kwargs):
-        file = request.FILES.get('file')
-        if not file:
-            return Response({'error': 'Aucun fichier fourni'}, status=400)
-        if file.size > 10 * 1024 * 1024:
-            return Response({'error': 'Fichier trop grand (max 10MB)'}, status=400)
-        report = Report.objects.create(
-            title=request.data.get('title', file.name),
-            description=request.data.get('description', ''),
-            file=file,
-            created_by=request.user
-        )
-        serializer = ReportSerializer(report)
-        return Response(serializer.data, status=201)
-
-
-class ReportDeleteView(generics.DestroyAPIView):
-    queryset = Report.objects.all()
-    permission_classes = [IsAuthenticated]
-
-    def perform_destroy(self, instance):
-        if instance.file and os.path.exists(instance.file.path):
-            os.remove(instance.file.path)
-        instance.delete()
-
-
-# ===== POSITION VIEWS =====
-class PositionListCreateView(generics.ListCreateAPIView):
-    serializer_class = PositionSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        team_id = self.request.query_params.get('team')
-        if team_id:
-            return Position.objects.filter(team_id=team_id)
-        return Position.objects.all()[:100]
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class TeamLatestPositionView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, team_id):
-        try:
-            latest = Position.objects.filter(team_id=team_id).first()
-            if latest:
-                serializer = PositionSerializer(latest)
-                return Response(serializer.data)
-            return Response({'detail': 'Aucune position trouvée'}, status=404)
-        except Exception as e:
-            return Response({'error': str(e)}, status=400)
-
-
-# ===== HELLO WORLD =====
-def hello_world(request):
-    return JsonResponse({"message": "Hello from OFIS API!"})
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 # ===== CLIENTS =====
 class ClientListCreate(generics.ListCreateAPIView):
-    queryset = Client.objects.all()
     serializer_class = ClientSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['firstName', 'lastName', 'company', 'email', 'phone']
+    ordering_fields = ['firstName', 'company', 'createdAt']
+    ordering = ['firstName']
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Client.objects.all()
+        
+        if not (user.is_staff or user.is_superuser):
+            queryset = queryset.filter(is_active=True)
+        
+        company = self.request.query_params.get('company')
+        if company:
+            queryset = queryset.filter(company__icontains=company)
+        
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None and (user.is_staff or user.is_superuser):
+            queryset = queryset.filter(is_active=is_active.lower() == 'true')
+        
+        return queryset
+
 
 class ClientRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
-    permission_classes = [IsAuthenticated]
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        try:
-            instance.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except (ProtectedError, IntegrityError):
-            return Response(
-                {"detail": "Ce client ne peut pas être supprimé car il est référencé par d'autres enregistrements (missions, bons de commande, ordres de travail, rapports, etc.)."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-
-# ===== TECHNICIENS =====
-class TechnicianListCreate(generics.ListCreateAPIView):
-    queryset = Technician.objects.all()
-    serializer_class = TechnicianSerializer
-    permission_classes = [IsAuthenticated]
-
-
-# ===== MANAGERS =====
-class ManagerListCreate(generics.ListCreateAPIView):
-    queryset = Manager.objects.all()
-    serializer_class = ManagerSerializer
-    permission_classes = [IsAuthenticated]
-
-
-# ===== MISSIONS =====
-class MissionListCreate(generics.ListCreateAPIView):
-    queryset = Mission.objects.all()
-    serializer_class = MissionSerializer
     permission_classes = [IsAuthenticated]
 
 
@@ -532,516 +72,340 @@ class UserListCreate(generics.ListCreateAPIView):
     queryset = User.objects.all().order_by('username')
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
-
-
-class UserRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
-
-
-# ===== TECHNICIEN DETAIL VIEWS =====
-class TechnicianRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Technician.objects.all()
-    serializer_class = TechnicianSerializer
-    permission_classes = [IsAuthenticated]
-
-
-# ===== MANAGER DETAIL VIEWS =====
-class ManagerRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Manager.objects.all()
-    serializer_class = ManagerSerializer
-    permission_classes = [IsAuthenticated]
-
-
-# ===== MISSION DETAIL VIEWS =====
-class MissionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Mission.objects.all()
-    serializer_class = MissionSerializer
-    permission_classes = [IsAuthenticated]
-
-
-# ===== TEAM VIEWS =====
-class TeamListCreate(generics.ListCreateAPIView):
-    queryset = Team.objects.all()
-    serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated]
-
-
-class TeamRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Team.objects.all()
-    serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated]
-
-
-# ========== NOUVELLES VUES ADMIN DATABASE CORRIGÉES ==========
-import os
-from django.db import connection
-from django.http import HttpResponse
-from datetime import datetime
-import glob
-import json
-
-class AdminTablesView(generics.GenericAPIView):
-    permission_classes = [IsAdminUser]
-    def get(self, request):
-        tables = []
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
-            for table in cursor.fetchall():
-                table_name = table[0]
-                cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
-                count = cursor.fetchone()[0]
-                tables.append({'name': table_name, 'count': count})
-        return Response(tables)
-
-
-class AdminBackupView(generics.GenericAPIView):
-    permission_classes = [IsAdminUser]
-    def post(self, request):
-        try:
-            backup_dir = os.path.join(settings.BASE_DIR, 'backups')
-            os.makedirs(backup_dir, exist_ok=True)
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            backup_file = os.path.join(backup_dir, f'backup_{timestamp}.sql')
-            with open(backup_file, 'w', encoding='utf-8') as f:
-                for line in connection.connection.iterdump():
-                    f.write('%s\n' % line)
-            response = FileResponse(open(backup_file, 'rb'), as_attachment=True, filename=f'backup_{timestamp}.sql')
-            return response
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
-
-
-class AdminRestoreView(generics.GenericAPIView):
-    permission_classes = [IsAdminUser]
-    parser_classes = [MultiPartParser, FormParser]
-    def post(self, request):
-        try:
-            backup_file = request.FILES.get('backup')
-            if not backup_file:
-                return Response({'error': 'Aucun fichier fourni'}, status=400)
-            content = backup_file.read().decode('utf-8')
-            connection.close()
-            with connection.cursor() as cursor:
-                cursor.executescript(content)
-            return Response({'message': 'Base de données restaurée avec succès'})
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
-
-
-class AdminOptimizeView(generics.GenericAPIView):
-    permission_classes = [IsAdminUser]
-    def post(self, request):
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("VACUUM;")
-            return Response({'message': 'Base de données optimisée avec succès'})
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
-
-
-class AdminBackupHistoryView(generics.GenericAPIView):
-    permission_classes = [IsAdminUser]
-    def get(self, request):
-        backup_dir = os.path.join(settings.BASE_DIR, 'backups')
-        os.makedirs(backup_dir, exist_ok=True)
-        backups = []
-        for file in glob.glob(os.path.join(backup_dir, '*.sql')):
-            stat = os.stat(file)
-            backups.append({
-                'filename': os.path.basename(file),
-                'date': datetime.fromtimestamp(stat.st_ctime).strftime('%d/%m/%Y %H:%M'),
-                'size': f"{stat.st_size / 1024:.2f} KB"
-            })
-        backups.sort(key=lambda x: x['date'], reverse=True)
-        return Response(backups)
-
-
-class AdminTableView(generics.GenericAPIView):
-    permission_classes = [IsAdminUser]
-    def get(self, request, table_name):
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(f"SELECT * FROM {table_name} LIMIT 100")
-                columns = [col[0] for col in cursor.description]
-                rows = cursor.fetchall()
-                data = []
-                for row in rows:
-                    item = {}
-                    for i, col in enumerate(columns):
-                        item[col] = row[i]
-                    data.append(item)
-                return Response(data)
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
-
-
-class AdminTableExportView(generics.GenericAPIView):
-    permission_classes = [IsAdminUser]
-    def get(self, request, table_name):
-        try:
-            import csv
-            from io import StringIO
-            with connection.cursor() as cursor:
-                cursor.execute(f"SELECT * FROM {table_name}")
-                columns = [col[0] for col in cursor.description]
-                rows = cursor.fetchall()
-                output = StringIO()
-                writer = csv.writer(output)
-                writer.writerow(columns)
-                writer.writerows(rows)
-                response = HttpResponse(output.getvalue(), content_type='text/csv')
-                response['Content-Disposition'] = f'attachment; filename="{table_name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv"'
-                return response
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
-
-
-# ===== NOUVELLES VUES POUR LA GESTION DES ÉQUIPES =====
-
-class ServiceViewSet(viewsets.ModelViewSet):
-    queryset = Service.objects.all()
-    serializer_class = ServiceSerializer
-    permission_classes = [IsAuthenticated]
-
-    @action(detail=True, methods=['get'])
-    def teams(self, request, pk=None):
-        service = self.get_object()
-        teams = service.teams.all()
-        serializer = TeamSerializer(teams, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    @action(detail=True, methods=['get'])
-    def equipment(self, request, pk=None):
-        service = self.get_object()
-        equipment = service.equipment.all()
-        serializer = EquipmentSerializer(equipment, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    @action(detail=True, methods=['get'])
-    def missions(self, request, pk=None):
-        service = self.get_object()
-        missions = MissionV2.objects.filter(service=service)
-        serializer = MissionV2Serializer(missions, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class EquipmentViewSet(viewsets.ModelViewSet):
-    queryset = Equipment.objects.all()
-    serializer_class = EquipmentSerializer
-    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['username', 'first_name', 'last_name', 'email']
+    ordering_fields = ['username', 'date_joined']
+    ordering = ['username']
 
     def get_queryset(self):
-        queryset = Equipment.objects.all()
-        service = self.request.query_params.get('service')
-        team = self.request.query_params.get('team')
-        if service:
-            queryset = queryset.filter(service__name=service)
-        if team:
-            queryset = queryset.filter(team_id=team)
+        user = self.request.user
+        queryset = User.objects.all()
+        
+        if not (user.is_staff or user.is_superuser):
+            queryset = queryset.filter(is_staff=False, is_superuser=False)
+        
+        role = self.request.query_params.get('role')
+        if role == 'technicien':
+            queryset = queryset.filter(is_staff=False, is_superuser=False)
+            queryset = queryset.exclude(groups__name='cadre')
+        elif role == 'cadre':
+            queryset = queryset.filter(groups__name='cadre')
+        elif role == 'admin':
+            queryset = queryset.filter(is_staff=True) | queryset.filter(is_superuser=True)
+        
         return queryset
 
 
-# ===== MISSION V2 VIEWSET CORRIGÉ =====
-class MissionV2ViewSet(viewsets.ModelViewSet):
-    queryset = MissionV2.objects.all()
-    serializer_class = MissionV2Serializer
+# ===== PROJETS =====
+class ProjetViewSet(viewsets.ModelViewSet):
+    queryset = Projet.objects.all()
+    serializer_class = ProjetSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['nom', 'description']
+    ordering_fields = ['date_debut', 'date_fin', 'created_at', 'estimation_heures']
+    ordering = ['-date_debut']
 
     def get_queryset(self):
-        queryset = MissionV2.objects.all()
-        status = self.request.query_params.get('status')
-        service = self.request.query_params.get('service')
-        team = self.request.query_params.get('team')
-        if status:
-            queryset = queryset.filter(status=status)
-        if service:
-            queryset = queryset.filter(service__name=service)
-        if team:
-            queryset = queryset.filter(team_id=team)
-        return queryset
-
-    def perform_create(self, serializer):
-        mission = serializer.save(created_by=self.request.user)
-        print(f"✅ Mission créée: {mission.title}")
-        print(f"👥 Techniciens assignés: {mission.assigned_to.all()}")
-
-    @action(detail=True, methods=['post'])
-    def start(self, request, pk=None):
-        mission = self.get_object()
-        mission.status = 'en_cours'
-        mission.save()
-        return Response({'status': 'Mission démarrée', 'mission_id': mission.id})
-
-    @action(detail=True, methods=['post'])
-    def complete(self, request, pk=None):
-        mission = self.get_object()
-        mission.status = 'terminee'
-        mission.actual_hours = request.data.get('actual_hours', mission.estimated_hours)
-        mission.save()
-        return Response({'status': 'Mission terminée', 'mission_id': mission.id})
-
-    @action(detail=True, methods=['post'])
-    def assign(self, request, pk=None):
-        mission = self.get_object()
-        user_ids = request.data.get('user_ids', [])
-        mission.assigned_to.clear()
-        for user_id in user_ids:
+        user = self.request.user
+        queryset = Projet.objects.all()
+        
+        if not (user.is_staff or user.is_superuser):
             try:
-                user = User.objects.get(id=user_id)
-                mission.assigned_to.add(user)
-                print(f"✅ Technicien {user.username} assigné")
-            except User.DoesNotExist:
-                print(f"❌ Utilisateur {user_id} non trouvé")
-        return Response({
-            'status': 'Techniciens assignés',
-            'assigned_to_ids': [user.id for user in mission.assigned_to.all()]
-        })
-
-
-class MissionReportViewSet(viewsets.ModelViewSet):
-    queryset = MissionReport.objects.all()
-    serializer_class = MissionReportSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        queryset = MissionReport.objects.all()
-        mission_id = self.request.query_params.get('mission')
-        if mission_id:
-            queryset = queryset.filter(mission_id=mission_id)
-        return queryset
-
-    def perform_create(self, serializer):
-        serializer.save(technician=self.request.user)
-
-
-# ===== DASHBOARD STATS VIEW (MODIFIÉ) =====
-from .models import OrdreTravail, SuiviOT, RapportJournalier, RapportHebdoCadre, Client
-from django.db.models import Sum
-from datetime import date, timedelta
-from rest_framework import generics, status
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-
-class DashboardStatsView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-        is_staff = user.is_staff or user.is_superuser
-
-        # OT
-        ots = OrdreTravail.objects.all()
-        if not is_staff:
-            ots = ots.filter(technicien=user)
-        ot_counts = {
-            'planifie': ots.filter(statut='planifie').count(),
-            'en_cours': ots.filter(statut='en_cours').count(),
-            'a_valider': ots.filter(statut='termine', statut_validation='en_attente').count(),
-            'valide': ots.filter(statut_validation='valide').count(),
-            'rejete': ots.filter(statut_validation='rejete').count(),
-        }
-
-        # Heures
-        suivis = SuiviOT.objects.all()
-        if not is_staff:
-            suivis = suivis.filter(technicien=user)
-        total_heures = suivis.aggregate(total=Sum('heures'))['total'] or 0
-
-        # Rapports journaliers
-        rapports_journaliers = RapportJournalier.objects.all()
-        if not is_staff:
-            rapports_journaliers = rapports_journaliers.filter(technicien=user)
-        total_rapports_journaliers = rapports_journaliers.count()
-
-        # Rapports hebdomadaires
-        rapports_hebdo = RapportHebdoCadre.objects.all()
-        if not is_staff:
-            rapports_hebdo = rapports_hebdo.filter(cadre=user)
-        total_rapports_hebdo = rapports_hebdo.count()
-
-        # Clients (seulement pour staff)
-        total_clients = Client.objects.count() if is_staff else 0
-
-        # Évolution des heures sur 7 jours
-        today = date.today()
-        last_7_days = [today - timedelta(days=i) for i in range(6, -1, -1)]
-        heures_par_jour = []
-        for d in last_7_days:
-            total = SuiviOT.objects.filter(date=d).aggregate(total=Sum('heures'))['total'] or 0
-            if not is_staff:
-                total = SuiviOT.objects.filter(date=d, technicien=user).aggregate(total=Sum('heures'))['total'] or 0
-            heures_par_jour.append({'date': d.strftime('%Y-%m-%d'), 'heures': float(total)})
-
-        return Response({
-            'ot_counts': ot_counts,
-            'total_heures': total_heures,
-            'total_rapports_journaliers': total_rapports_journaliers,
-            'total_rapports_hebdo': total_rapports_hebdo,
-            'total_clients': total_clients,
-            'heures_par_jour': heures_par_jour,
-        })
-
-# ===== BONS DE COMMANDE =====
-class BonDeCommandeViewSet(viewsets.ModelViewSet):
-    queryset = BonDeCommande.objects.all().order_by('-date_creation')
-    serializer_class = BonDeCommandeSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
+                technician = Technician.objects.get(user=user)
+                if technician.sous_services.exists():
+                    techniciens = Technician.objects.filter(
+                        sous_services__in=technician.sous_services.all()
+                    ).distinct()
+                    techniciens_ids = [t.user.id for t in techniciens]
+                    queryset = queryset.filter(
+                        models.Q(chef_projet=user) | 
+                        models.Q(intervenants__in=techniciens_ids)
+                    ).distinct()
+                else:
+                    queryset = queryset.filter(intervenants=user)
+            except Technician.DoesNotExist:
+                queryset = queryset.filter(intervenants=user)
+        
         statut = self.request.query_params.get('statut')
         if statut:
             queryset = queryset.filter(statut=statut)
-        return queryset
+        
+        chef_id = self.request.query_params.get('chef_projet')
+        if chef_id and (user.is_staff or user.is_superuser):
+            queryset = queryset.filter(chef_projet_id=chef_id)
+        
+        intervenant_id = self.request.query_params.get('intervenant')
+        if intervenant_id:
+            queryset = queryset.filter(intervenants__id=intervenant_id)
+        
+        date_debut = self.request.query_params.get('date_debut')
+        if date_debut:
+            queryset = queryset.filter(date_debut__gte=date_debut)
+        
+        date_fin = self.request.query_params.get('date_fin')
+        if date_fin:
+            queryset = queryset.filter(date_fin__lte=date_fin)
+        
+        return queryset.distinct()
+
+    def perform_create(self, serializer):
+        if not (self.request.user.is_staff or self.request.user.is_superuser):
+            raise PermissionDenied("Seuls les managers peuvent créer des projets")
+        serializer.save()
+
+    @action(detail=True, methods=['post'])
+    def ajouter_heures(self, request, pk=None):
+        projet = self.get_object()
+        
+        if projet.chef_projet.id != request.user.id and not request.user.is_staff:
+            return Response({'error': 'Seul le chef de projet peut ajouter des heures'}, status=403)
+        
+        intervenant_id = request.data.get('intervenant')
+        date = request.data.get('date')
+        heures = request.data.get('heures')
+        description = request.data.get('description', '')
+        heure_debut = request.data.get('heure_debut')
+        heure_fin = request.data.get('heure_fin')
+        
+        if not intervenant_id or not date or not heures:
+            return Response({'error': 'intervenant, date et heures sont requis'}, status=400)
+        
+        try:
+            intervenant = User.objects.get(id=intervenant_id)
+        except User.DoesNotExist:
+            return Response({'error': 'Intervenant non trouvé'}, status=404)
+        
+        heure_projet = HeureProjet.objects.create(
+            projet=projet,
+            intervenant=intervenant,
+            date=date,
+            heure_debut=heure_debut,
+            heure_fin=heure_fin,
+            heures=heures,
+            description=description
+        )
+        
+        serializer = HeureProjetSerializer(heure_projet)
+        return Response(serializer.data, status=201)
 
     @action(detail=True, methods=['get'])
-    def qr(self, request, pk=None):
-        """Génère et retourne l'image QR du bon"""
-        bon = self.get_object()
-        validation_url = f"http://localhost:3000/valider-bon/{bon.qr_code}"
-        qr = qrcode.make(validation_url)
-        buffer = BytesIO()
-        qr.save(buffer, format='PNG')
-        img_str = base64.b64encode(buffer.getvalue()).decode()
-        return Response({'qr_code': f"data:image/png;base64,{img_str}"})
-
-    @action(detail=False, methods=['post'], url_path='valider/(?P<qr_code>[^/.]+)')
-    def valider_par_qr(self, request, qr_code=None):
-        """Valide un bon à partir de son qr_code (scanné)"""
-        try:
-            bon = BonDeCommande.objects.get(qr_code=qr_code)
-            bon.statut = 'valide'
-            bon.date_validation = timezone.now()
-            bon.save()
-            return Response({'status': 'Bon validé', 'bon': self.get_serializer(bon).data})
-        except BonDeCommande.DoesNotExist:
-            return Response({'error': 'Bon non trouvé'}, status=404)
+    def heures(self, request, pk=None):
+        projet = self.get_object()
+        heures = projet.heures.all()
+        serializer = HeureProjetSerializer(heures, many=True)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['post'])
-    def valider(self, request, pk=None):
-        """Valider un bon (changer statut à 'valide')"""
-        bon = self.get_object()
-        bon.statut = 'valide'
-        bon.date_validation = timezone.now()
-        bon.save()
-        return Response({'status': 'Bon validé', 'bon': self.get_serializer(bon).data})
+    def ajouter_intervenant(self, request, pk=None):
+        projet = self.get_object()
+        
+        if projet.chef_projet.id != request.user.id and not request.user.is_staff:
+            return Response({'error': 'Non autorisé'}, status=403)
+        
+        intervenant_id = request.data.get('intervenant_id')
+        if not intervenant_id:
+            return Response({'error': 'intervenant_id requis'}, status=400)
+        
+        try:
+            intervenant = User.objects.get(id=intervenant_id)
+            projet.intervenants.add(intervenant)
+            return Response({
+                'status': 'Intervenant ajouté',
+                'intervenants': [u.id for u in projet.intervenants.all()]
+            })
+        except User.DoesNotExist:
+            return Response({'error': 'Intervenant non trouvé'}, status=404)
 
     @action(detail=True, methods=['post'])
-    def rejeter(self, request, pk=None):
-        """Rejeter un bon (changer statut à 'annule')"""
-        bon = self.get_object()
-        bon.statut = 'annule'
-        bon.save()
-        return Response({'status': 'Bon rejeté', 'bon': self.get_serializer(bon).data})
+    def retirer_intervenant(self, request, pk=None):
+        projet = self.get_object()
+        
+        if projet.chef_projet.id != request.user.id and not request.user.is_staff:
+            return Response({'error': 'Non autorisé'}, status=403)
+        
+        intervenant_id = request.data.get('intervenant_id')
+        if not intervenant_id:
+            return Response({'error': 'intervenant_id requis'}, status=400)
+        
+        projet.intervenants.remove(intervenant_id)
+        return Response({
+            'status': 'Intervenant retiré',
+            'intervenants': [u.id for u in projet.intervenants.all()]
+        })
 
+    @action(detail=True, methods=['get'])
+    def historique(self, request, pk=None):
+        projet = self.get_object()
+        historique = []
+        
+        for heure in projet.heures.all():
+            historique.append({
+                'type': 'heure',
+                'date': heure.date.isoformat(),
+                'intervenant': heure.intervenant.username,
+                'heures': float(heure.heures),
+                'description': heure.description,
+                'created_at': heure.created_at.isoformat()
+            })
+        
+        historique.sort(key=lambda x: x['date'], reverse=True)
+        return Response(historique)
 
-# ===== RAPPORTS JOURNALIERS, HEBDOMADAIRES, PROJET =====
-
-class RapportJournalierViewSet(viewsets.ModelViewSet):
-    queryset = RapportJournalier.objects.all()
-    serializer_class = RapportJournalierSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_staff or user.is_superuser:
-            return RapportJournalier.objects.all()
-        return RapportJournalier.objects.filter(technicien=user)
-
-    def perform_create(self, serializer):
-        serializer.save(technicien=self.request.user)
-
-class RapportHebdoCadreViewSet(viewsets.ModelViewSet):
-    serializer_class = RapportHebdoCadreSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-
-        # Admin / staff voit tout
-        if user.is_staff or user.is_superuser:
-            return RapportHebdoCadre.objects.all().order_by('-created_at')
-
-        # Sinon l'utilisateur ne voit que ses rapports
-        return RapportHebdoCadre.objects.filter(cadre=user).order_by('-created_at')
-
-    def perform_create(self, serializer):
-        serializer.save(cadre=self.request.user)
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(cadre=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @action(detail=True, methods=['post'])
-    def ajouter_ligne(self, request, pk=None):
-        rapport = self.get_object()
-        serializer = LigneRapportHebdoCadreSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save(rapport=rapport)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=['put'], url_path='lignes/(?P<ligne_id>[^/.]+)')
-    def modifier_ligne(self, request, pk=None, ligne_id=None):
-        rapport = self.get_object()
-
-        try:
-            ligne = rapport.lignes.get(id=ligne_id)
-        except LigneRapportHebdoCadre.DoesNotExist:
-            return Response({"detail": "Ligne introuvable"}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = LigneRapportHebdoCadreSerializer(ligne, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=['delete'], url_path='lignes/(?P<ligne_id>[^/.]+)')
-    def supprimer_ligne(self, request, pk=None, ligne_id=None):
-        rapport = self.get_object()
-
-        try:
-            ligne = rapport.lignes.get(id=ligne_id)
-        except LigneRapportHebdoCadre.DoesNotExist:
-            return Response({"detail": "Ligne introuvable"}, status=status.HTTP_404_NOT_FOUND)
-
-        ligne.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-# ===== RAPPORTS PROJET (pour les cadres) =====
-
-
-
-# ===== SUIVI MÉDICAL =====
-class SuiviMedicalViewSet(viewsets.ModelViewSet):
-    queryset = SuiviMedical.objects.all().order_by('nom')
-    serializer_class = SuiviMedicalSerializer
-    permission_classes = [IsAuthenticated]
+    @action(detail=True, methods=['get'])
+    def verifier_alertes(self, request, pk=None):
+        projet = self.get_object()
+        
+        alertes = []
+        heures_consommees = projet.heures_consommees
+        estimation = float(projet.estimation_heures)
+        cout = float(projet.cout_projet) if projet.cout_projet else 0
+        benefice_attendu = float(projet.benefice_attendu) if projet.benefice_attendu else 0
+        
+        # Récupérer la dernière date de saisie
+        derniere_heure = projet.heures.order_by('-date').first()
+        
+        # 1. Dépassement d'heures (AFFICHER TOUJOURS, même si terminé)
+        if heures_consommees > estimation:
+            depassement = heures_consommees - estimation
+            alertes.append({
+                'type': 'depassement_heures',
+                'message': f'⚠️ Dépassement de {depassement:.1f} heures sur le projet {projet.nom}',
+                'severite': 'warning'
+            })
+        
+        # 2. Dépassement de délai (uniquement si projet non terminé)
+        if projet.date_fin and derniere_heure:
+            date_fin_prevue = projet.date_fin
+            derniere_date_saisie = derniere_heure.date
+            
+            # Vérifier si le projet est terminé pour les délais
+            est_termine = heures_consommees >= estimation
+            
+            if not est_termine and derniere_date_saisie > date_fin_prevue:
+                jours_retard = (derniere_date_saisie - date_fin_prevue).days
+                alertes.append({
+                    'type': 'depassement_delai',
+                    'message': f'⚠️ Retard de {jours_retard} jour(s) sur le projet {projet.nom}',
+                    'severite': 'warning'
+                })
+        
+        # 3. Marge critique (<15%) - toujours afficher
+        if cout > 0 and benefice_attendu > 0:
+            marge_attendue = (benefice_attendu / cout) * 100
+            if marge_attendue < 15:
+                alertes.append({
+                    'type': 'marge_critique',
+                    'message': f'🔴 Marge projet à {marge_attendue:.1f}% (seuil critique 15%) - Projet non rentable!',
+                    'severite': 'critical'
+                })
+        
+        return Response(alertes)
+    
+    @action(detail=True, methods=['get'])
+    def impact_retard(self, request, pk=None):
+        projet = self.get_object()
+        
+        if not projet.date_fin:
+            return Response({'impact': None, 'message': 'Pas de date de fin définie'})
+        
+        # Récupérer la dernière date de saisie d'heures
+        derniere_heure = projet.heures.order_by('-date').first()
+        
+        if not derniere_heure:
+            return Response({'impact': None, 'message': 'Aucune heure saisie'})
+        
+        # Vérifier si le projet est terminé
+        heures_consommees = projet.heures_consommees
+        estimation = float(projet.estimation_heures)
+        est_termine = heures_consommees >= estimation
+        
+        # Si projet terminé, pas d'impact retard
+        if est_termine:
+            return Response({'impact': None, 'message': 'Projet terminé'})
+        
+        date_fin_prevue = projet.date_fin
+        derniere_date_saisie = derniere_heure.date
+        
+        if derniere_date_saisie <= date_fin_prevue:
+            return Response({'impact': None, 'message': 'Pas de retard'})
+        
+        jours_retard = (derniere_date_saisie - date_fin_prevue).days
+        cout = float(projet.cout_projet) if projet.cout_projet else 0
+        benefice_attendu = float(projet.benefice_attendu) if projet.benefice_attendu else 0
+        
+        if cout == 0 or benefice_attendu == 0:
+            return Response({'impact': None, 'message': 'Données financières manquantes'})
+        
+        marge_attendue = (benefice_attendu / cout) * 100
+        penalite_par_jour = 1.0
+        perte_marge = min(jours_retard * penalite_par_jour, marge_attendue)
+        nouveau_benefice = benefice_attendu * (1 - perte_marge / 100)
+        nouvelle_marge = marge_attendue - perte_marge
+        
+        return Response({
+            'jours_retard': jours_retard,
+            'perte_marge': round(perte_marge, 1),
+            'marge_attendue': round(marge_attendue, 1),
+            'nouveau_benefice': round(nouveau_benefice, 0),
+            'nouvelle_marge': round(nouvelle_marge, 1),
+            'est_critique': nouvelle_marge < 15
+        })
 
 
 # ===== ORDRES DE TRAVAIL =====
-from rest_framework.parsers import MultiPartParser, FormParser
-from .models import OrdreTravail, DocumentOT
-from .serializers import OrdreTravailSerializer, DocumentOTSerializer
-
 class OrdreTravailViewSet(viewsets.ModelViewSet):
-    queryset = OrdreTravail.objects.all().order_by('-date_creation')
+    queryset = OrdreTravail.objects.all()
     serializer_class = OrdreTravailSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['reference', 'objet', 'reference_externe', 'client_rapport__company']
+    ordering_fields = ['date_creation', 'date_debut', 'date_fin', 'reference']
+    ordering = ['-date_creation']
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff or user.is_superuser:
-            return OrdreTravail.objects.all()
-        return OrdreTravail.objects.filter(technicien=user)
+        queryset = OrdreTravail.objects.all()
+        
+        if not (user.is_staff or user.is_superuser):
+            try:
+                technician = Technician.objects.get(user=user)
+                if technician.sous_services.exists():
+                    techniciens = Technician.objects.filter(
+                        sous_services__in=technician.sous_services.all()
+                    ).distinct()
+                    techniciens_ids = [t.user.id for t in techniciens]
+                    queryset = queryset.filter(techniciens__in=techniciens_ids).distinct()
+                else:
+                    queryset = queryset.filter(techniciens=user)
+            except Technician.DoesNotExist:
+                queryset = queryset.filter(techniciens=user)
+        
+        statut = self.request.query_params.get('statut')
+        if statut:
+            queryset = queryset.filter(statut=statut)
+        
+        validation = self.request.query_params.get('validation')
+        if validation:
+            queryset = queryset.filter(statut_validation=validation)
+        
+        client_id = self.request.query_params.get('client')
+        if client_id:
+            queryset = queryset.filter(client_rapport_id=client_id)
+        
+        technicien_id = self.request.query_params.get('technicien')
+        if technicien_id:
+            queryset = queryset.filter(techniciens__id=technicien_id)
+        
+        date_debut = self.request.query_params.get('date_debut')
+        if date_debut:
+            queryset = queryset.filter(date_creation__date__gte=date_debut)
+        
+        date_fin = self.request.query_params.get('date_fin')
+        if date_fin:
+            queryset = queryset.filter(date_creation__date__lte=date_fin)
+        
+        return queryset.distinct()
 
     @action(detail=True, methods=['post'])
     def demarrer(self, request, pk=None):
@@ -1058,34 +422,11 @@ class OrdreTravailViewSet(viewsets.ModelViewSet):
         ot = self.get_object()
         if ot.statut != 'en_cours':
             return Response({'error': 'Seul un OT en cours peut être terminé'}, status=400)
-        serializer = self.get_serializer(ot, data=request.data, partial=True)
-        if serializer.is_valid():
-            ot = serializer.save()
-            ot.statut = 'termine'
-            ot.date_fin = timezone.now()
-            ot.statut_validation = 'en_attente'
-            ot.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
-
-    @action(detail=True, methods=['post'], parser_classes=[MultiPartParser, FormParser])
-    def upload_document(self, request, pk=None):
-        ot = self.get_object()
-        # Seule l'assistante (staff) peut uploader des documents après clôture technique
-        if not request.user.is_staff:
-            return Response({'error': 'Non autorisé'}, status=403)
-        type_doc = request.data.get('type')
-        fichier = request.FILES.get('fichier')
-        if not type_doc or not fichier:
-            return Response({'error': 'Type et fichier requis'}, status=400)
-        document = DocumentOT.objects.create(
-            ot=ot,
-            type=type_doc,
-            fichier=fichier,
-            nom=fichier.name
-        )
-        serializer = DocumentOTSerializer(document)
-        return Response(serializer.data, status=201)
+        ot.statut = 'termine'
+        ot.date_fin = timezone.now()
+        ot.statut_validation = 'en_attente'
+        ot.save()
+        return Response({'status': 'OT terminé', 'ot': self.get_serializer(ot).data})
 
     @action(detail=True, methods=['post'])
     def valider(self, request, pk=None):
@@ -1097,7 +438,7 @@ class OrdreTravailViewSet(viewsets.ModelViewSet):
         ot.statut_validation = 'valide'
         ot.valide_par = request.user
         ot.date_validation = timezone.now()
-        ot.date_archivage = timezone.now()  # Archivage automatique
+        ot.date_archivage = timezone.now()
         ot.save()
         return Response({'status': 'OT validé et archivé'})
 
@@ -1112,98 +453,702 @@ class OrdreTravailViewSet(viewsets.ModelViewSet):
         ot.save()
         return Response({'status': 'OT rejeté'})
 
-
-from django.contrib.auth.models import Group
-
-class RapportProjetCadreViewSet(viewsets.ModelViewSet):
-    serializer_class = RapportProjetCadreSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        # Les membres du staff (admin, manager) voient tous les rapports
-        if user.is_staff or user.is_superuser:
-            return RapportProjetCadre.objects.all().order_by('-date_creation')
-        # Sinon, le cadre ne voit que ses propres rapports
-        return RapportProjetCadre.objects.filter(cadre=user).order_by('-date_creation')
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        # Vérifier si l'utilisateur est dans le groupe "Cadres" ou est staff (pour debug)
-        if not user.is_staff and not user.groups.filter(name='Cadres').exists():
-            raise PermissionDenied("Seuls les cadres peuvent créer des rapports projet.")
-        serializer.save(cadre=user)
-
-
-
-
-
-class RapportHebdoCadreViewSet(viewsets.ModelViewSet):
-    serializer_class = RapportHebdoCadreSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_staff or user.is_superuser:
-            return RapportHebdoCadre.objects.all().order_by('-date_debut')
-        return RapportHebdoCadre.objects.filter(cadre=user).order_by('-date_debut')
-
-    def perform_create(self, serializer):
-        serializer.save(cadre=self.request.user)
+    @action(detail=True, methods=['post'])
+    def ajouter_technicien(self, request, pk=None):
+        ot = self.get_object()
+        technicien_id = request.data.get('technicien_id')
+        if not technicien_id:
+            return Response({'error': 'technicien_id requis'}, status=400)
+        try:
+            technicien = User.objects.get(id=technicien_id)
+            ot.techniciens.add(technicien)
+            ot.save()
+            return Response({'status': 'Technicien ajouté', 'techniciens': [t.id for t in ot.techniciens.all()]})
+        except User.DoesNotExist:
+            return Response({'error': 'Technicien non trouvé'}, status=404)
 
     @action(detail=True, methods=['post'])
-    def ajouter_ligne(self, request, pk=None):
-        rapport = self.get_object()
-        serializer = LigneRapportHebdoCadreSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(rapport=rapport)
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+    def retirer_technicien(self, request, pk=None):
+        ot = self.get_object()
+        technicien_id = request.data.get('technicien_id')
+        if not technicien_id:
+            return Response({'error': 'technicien_id requis'}, status=400)
+        ot.techniciens.remove(technicien_id)
+        return Response({'status': 'Technicien retiré', 'techniciens': [t.id for t in ot.techniciens.all()]})
 
-    @action(detail=True, methods=['put'], url_path='lignes/(?P<ligne_id>[^/.]+)')
-    def modifier_ligne(self, request, pk=None, ligne_id=None):
-        rapport = self.get_object()
+    @action(detail=True, methods=['post'], parser_classes=[MultiPartParser, FormParser])
+    def upload_document(self, request, pk=None):
+        ot = self.get_object()
+        
+        is_technicien = request.user in ot.techniciens.all()
+        is_assistant = request.user.groups.filter(name='assistant').exists()
+        
+        if not (request.user.is_staff or is_technicien or is_assistant):
+            return Response({'error': 'Non autorisé'}, status=403)
+        
+        type_doc = request.data.get('type')
+        fichier = request.FILES.get('fichier')
+        
+        if not type_doc or not fichier:
+            return Response({'error': 'Type et fichier requis'}, status=400)
+        
+        document = DocumentOT.objects.create(
+            ot=ot,
+            type=type_doc,
+            fichier=fichier,
+            nom=fichier.name
+        )
+        serializer = DocumentOTSerializer(document, context={'request': request})
+        return Response(serializer.data, status=201)
+
+    @action(detail=True, methods=['get'])
+    def historique(self, request, pk=None):
+        ot = self.get_object()
+        historique = []
+        
+        for suivi in ot.suivis.all():
+            historique.append({
+                'type': 'suivi',
+                'date': suivi.date.isoformat(),
+                'technicien': suivi.technicien.username,
+                'heures': float(suivi.heures),
+                'description': suivi.description,
+                'created_at': suivi.created_at.isoformat()
+            })
+        
+        for doc in ot.documents.all():
+            historique.append({
+                'type': doc.type,
+                'date': doc.uploaded_at.date().isoformat(),
+                'nom': doc.nom,
+                'fichier_url': doc.fichier.url if doc.fichier else None,
+                'uploaded_at': doc.uploaded_at.isoformat()
+            })
+        
+        historique.sort(key=lambda x: x['date'], reverse=True)
+        return Response(historique)
+
+    @action(detail=True, methods=['get'])
+    def timeline(self, request, pk=None):
+        ot = self.get_object()
+        
+        timeline_data = []
+        
+        for suivi in ot.suivis.all().order_by('-date'):
+            timeline_data.append({
+                'id': suivi.id,
+                'date': suivi.date,
+                'technicien': suivi.technicien.username,
+                'technicien_id': suivi.technicien.id,
+                'nature': 'Suivi d\'heures',
+                'description': suivi.description or 'Aucune description',
+                'duree': float(suivi.heures),
+                'avancement': None,
+                'rit_signe': False,
+                'pv_signe': False,
+                'date_debut': None,
+                'date_fin': None,
+                'documents': []
+            })
+        
+        rapports = RapportJournalier.objects.filter(
+            lignes__ot=ot
+        ).distinct().order_by('date')
+        
+        for rapport in rapports:
+            for ligne in rapport.lignes.filter(ot=ot):
+                documents = DocumentOT.objects.filter(
+                    ot=ot,
+                    uploaded_at__date=rapport.date
+                )
+                
+                timeline_data.append({
+                    'id': ligne.id,
+                    'date': rapport.date,
+                    'technicien': rapport.technicien.username,
+                    'technicien_id': rapport.technicien.id,
+                    'nature': ligne.nature_intervention,
+                    'description': ligne.description,
+                    'duree': float(ligne.duree),
+                    'avancement': ligne.avancement_resultat,
+                    'rit_signe': ligne.rit_signe,
+                    'pv_signe': ligne.pv_signe,
+                    'date_debut': ligne.date_debut,
+                    'date_fin': ligne.date_fin,
+                    'documents': [
+                        {
+                            'id': doc.id,
+                            'type': doc.type,
+                            'nom': doc.nom,
+                            'fichier_url': doc.fichier.url if doc.fichier else None
+                        }
+                        for doc in documents
+                    ]
+                })
+        
+        timeline_data.sort(key=lambda x: x['date'])
+        return Response(timeline_data)
+
+
+# ===== RAPPORTS JOURNALIERS =====
+class RapportJournalierViewSet(viewsets.ModelViewSet):
+    queryset = RapportJournalier.objects.all()
+    serializer_class = RapportJournalierSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['lignes__client__company', 'lignes__nature_intervention', 'lignes__description']
+    ordering_fields = ['date']
+    ordering = ['-date']
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = RapportJournalier.objects.all()
+        
+        if not (user.is_staff or user.is_superuser):
+            try:
+                technician = Technician.objects.get(user=user)
+                if technician.sous_services.exists():
+                    techniciens = Technician.objects.filter(
+                        sous_services__in=technician.sous_services.all()
+                    ).distinct()
+                    techniciens_ids = [t.user.id for t in techniciens]
+                    queryset = queryset.filter(technicien__in=techniciens_ids)
+                else:
+                    queryset = queryset.filter(technicien=user)
+            except Technician.DoesNotExist:
+                queryset = queryset.filter(technicien=user)
+        
+        return queryset.distinct()
+
+    def perform_create(self, serializer):
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            raise PermissionDenied("Un administrateur ne peut pas créer de rapport journalier")
+        serializer.save(technicien=self.request.user)
+
+
+# ===== RAPPORTS HEBDOMADAIRES CADRE =====
+class RapportHebdoCadreViewSet(viewsets.ModelViewSet):
+    queryset = RapportHebdoCadre.objects.all()
+    serializer_class = RapportHebdoCadreSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['resume', 'actions_notables']
+    ordering_fields = ['date_debut', 'created_at']
+    ordering = ['-date_debut']
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = RapportHebdoCadre.objects.all()
+        
+        if not (user.is_staff or user.is_superuser):
+            queryset = queryset.filter(cadre=user)
+        
+        type_rapport = self.request.query_params.get('type')
+        if type_rapport:
+            queryset = queryset.filter(type=type_rapport)
+        
+        cadre_id = self.request.query_params.get('cadre')
+        if cadre_id and (user.is_staff or user.is_superuser):
+            queryset = queryset.filter(cadre_id=cadre_id)
+        
+        date_debut = self.request.query_params.get('date_debut')
+        if date_debut:
+            queryset = queryset.filter(date_debut__gte=date_debut)
+        
+        date_fin = self.request.query_params.get('date_fin')
+        if date_fin:
+            queryset = queryset.filter(date_fin__lte=date_fin)
+        
+        return queryset.distinct()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        date_debut = serializer.validated_data.get('date_debut')
+        date_fin = serializer.validated_data.get('date_fin')
+        
+        nb_interventions = 0
+        heures_total = 0
+        
         try:
-            ligne = rapport.lignes.get(id=ligne_id)
-        except LigneRapportHebdoCadre.DoesNotExist:
-            return Response({'error': 'Ligne non trouvée'}, status=404)
-        serializer = LigneRapportHebdoCadreSerializer(ligne, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+            technician = Technician.objects.get(user=user)
+            if technician.sous_services.exists():
+                techniciens = Technician.objects.filter(
+                    sous_services__in=technician.sous_services.all()
+                ).distinct()
+                techniciens_ids = [t.user.id for t in techniciens]
+                
+                rapports = RapportJournalier.objects.filter(
+                    technicien__in=techniciens_ids,
+                    date__gte=date_debut,
+                    date__lte=date_fin
+                )
+                nb_interventions = rapports.count()
+                
+                for rapport in rapports:
+                    for ligne in rapport.lignes.all():
+                        heures_total += float(ligne.duree)
+        except Technician.DoesNotExist:
+            pass
+        
+        serializer.save(
+            cadre=user,
+            nb_interventions=nb_interventions,
+            heures_total=heures_total
+        )
 
-    @action(detail=True, methods=['delete'], url_path='lignes/(?P<ligne_id>[^/.]+)')
-    def supprimer_ligne(self, request, pk=None, ligne_id=None):
-        rapport = self.get_object()
-        try:
-            ligne = rapport.lignes.get(id=ligne_id)
-        except LigneRapportHebdoCadre.DoesNotExist:
-            return Response({'error': 'Ligne non trouvée'}, status=404)
-        ligne.delete()
-        return Response({'status': 'Ligne supprimée'}, status=204)
 
-
-
-
-
-
-from .models import SuiviOT
-from .serializers import SuiviOTSerializer
-
+# ===== SUIVI OT =====
 class SuiviOTViewSet(viewsets.ModelViewSet):
+    queryset = SuiviOT.objects.all()
     serializer_class = SuiviOTSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['date']
+    ordering = ['-date']
 
     def get_queryset(self):
         user = self.request.user
         queryset = SuiviOT.objects.all()
+        
         if not (user.is_staff or user.is_superuser):
             queryset = queryset.filter(technicien=user)
+        
         ot_id = self.request.query_params.get('ot')
         if ot_id:
             queryset = queryset.filter(ot_id=ot_id)
+        
         return queryset
 
     def perform_create(self, serializer):
         serializer.save(technicien=self.request.user)
+
+
+# ===== DOCUMENTS OT =====
+class DocumentOTViewSet(viewsets.ModelViewSet):
+    queryset = DocumentOT.objects.all()
+    serializer_class = DocumentOTSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['uploaded_at']
+    ordering = ['-uploaded_at']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return DocumentOT.objects.all()
+        return DocumentOT.objects.filter(ot__techniciens=user)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        ot = serializer.validated_data.get('ot')
+        
+        is_technicien = user in ot.techniciens.all()
+        is_assistant = user.groups.filter(name='assistant').exists()
+        
+        if not (user.is_staff or is_technicien or is_assistant):
+            raise PermissionDenied("Vous n'êtes pas autorisé à ajouter des documents")
+        
+        serializer.save()
+
+
+# ===== TECHNICIENS =====
+class TechnicianViewSet(viewsets.ModelViewSet):
+    queryset = Technician.objects.all()
+    serializer_class = TechnicianSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['user__username', 'user__first_name', 'user__last_name', 'phone']
+    ordering_fields = ['user__username', 'hire_date', 'taux_horaire']
+    ordering = ['user__username']
+
+
+# ===== NOTIFICATIONS =====
+class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return Notification.objects.all()
+        return Notification.objects.filter(projet__intervenants=user)
+
+    @action(detail=True, methods=['post'])
+    def marquer_lue(self, request, pk=None):
+        notification = self.get_object()
+        notification.est_lue = True
+        notification.save()
+        return Response({'status': 'Notification marquée comme lue'})
+
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        user = request.user
+        if user.is_staff or user.is_superuser:
+            count = Notification.objects.filter(est_lue=False).count()
+        else:
+            count = Notification.objects.filter(projet__intervenants=user, est_lue=False).count()
+        return Response({'unread_count': count})
+
+
+# ===== DASHBOARD =====
+class DashboardStatsView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        is_staff = user.is_staff or user.is_superuser
+
+        ots = OrdreTravail.objects.all()
+        if not is_staff:
+            try:
+                technician = Technician.objects.get(user=user)
+                if technician.sous_services.exists():
+                    techniciens = Technician.objects.filter(
+                        sous_services__in=technician.sous_services.all()
+                    ).distinct()
+                    techniciens_ids = [t.user.id for t in techniciens]
+                    ots = ots.filter(techniciens__in=techniciens_ids)
+                else:
+                    ots = ots.filter(techniciens=user)
+            except Technician.DoesNotExist:
+                ots = ots.filter(techniciens=user)
+
+        ot_counts = {
+            'planifie': ots.filter(statut='planifie').count(),
+            'en_cours': ots.filter(statut='en_cours').count(),
+            'a_valider': ots.filter(statut='termine', statut_validation='en_attente').count(),
+            'valide': ots.filter(statut_validation='valide').count(),
+            'rejete': ots.filter(statut_validation='rejete').count(),
+        }
+
+        rapports = RapportJournalier.objects.all()
+        if not is_staff:
+            try:
+                technician = Technician.objects.get(user=user)
+                if technician.sous_services.exists():
+                    techniciens_ids = [t.user.id for t in Technician.objects.filter(
+                        sous_services__in=technician.sous_services.all()
+                    ).distinct()]
+                    rapports = rapports.filter(technicien__in=techniciens_ids)
+                else:
+                    rapports = rapports.filter(technicien=user)
+            except Technician.DoesNotExist:
+                rapports = rapports.filter(technicien=user)
+        
+        total_heures = 0
+        for rapport in rapports:
+            for ligne in rapport.lignes.all():
+                total_heures += float(ligne.duree)
+
+        suivis = SuiviOT.objects.all()
+        if not is_staff:
+            try:
+                technician = Technician.objects.get(user=user)
+                if technician.sous_services.exists():
+                    techniciens_ids = [t.user.id for t in Technician.objects.filter(
+                        sous_services__in=technician.sous_services.all()
+                    ).distinct()]
+                    suivis = suivis.filter(technicien__in=techniciens_ids)
+                else:
+                    suivis = suivis.filter(technicien=user)
+            except Technician.DoesNotExist:
+                suivis = suivis.filter(technicien=user)
+
+        for suivi in suivis:
+            total_heures += float(suivi.heures)
+
+        total_rapports_journaliers = rapports.count()
+        total_rapports_hebdo = RapportHebdoCadre.objects.filter(cadre=user if not is_staff else models.Q()).count()
+        total_clients = Client.objects.filter(is_active=True if not is_staff else models.Q()).count()
+
+        heures_par_jour = []
+        for i in range(6, -1, -1):
+            date = datetime.now().date() - timedelta(days=i)
+            date_str = date.strftime('%Y-%m-%d')
+            
+            heures_jour = 0
+            rapports_jour = rapports.filter(date=date_str)
+            for rapport in rapports_jour:
+                for ligne in rapport.lignes.all():
+                    heures_jour += float(ligne.duree)
+            suivis_jour = suivis.filter(date=date_str)
+            for suivi in suivis_jour:
+                heures_jour += float(suivi.heures)
+            
+            heures_par_jour.append({
+                'date': date.strftime('%d/%m'),
+                'heures': round(heures_jour, 1)
+            })
+
+        heures_par_technicien = []
+        techniciens = User.objects.filter(is_staff=False, is_superuser=False)
+        
+        if not is_staff:
+            try:
+                technician = Technician.objects.get(user=user)
+                if technician.sous_services.exists():
+                    techniciens_ids = [t.user.id for t in Technician.objects.filter(
+                        sous_services__in=technician.sous_services.all()
+                    ).distinct()]
+                    techniciens = techniciens.filter(id__in=techniciens_ids)
+            except Technician.DoesNotExist:
+                pass
+        
+        for technicien in techniciens:
+            total_suivi = SuiviOT.objects.filter(technicien=technicien).aggregate(total=Sum('heures'))['total'] or 0
+            total_rapport = 0
+            for rapport in RapportJournalier.objects.filter(technicien=technicien):
+                for ligne in rapport.lignes.all():
+                    total_rapport += float(ligne.duree)
+            
+            total = float(total_suivi) + total_rapport
+            if total > 0:
+                heures_par_technicien.append({
+                    'nom': technicien.username,
+                    'heures': round(total, 1)
+                })
+        
+        heures_par_technicien.sort(key=lambda x: x['heures'], reverse=True)
+
+        repartition_sous_service = []
+        for ss in SousService.objects.all():
+            total_heures_ss = 0
+            techniciens_ss = Technician.objects.filter(sous_services=ss)
+            for tech in techniciens_ss:
+                for rapport in RapportJournalier.objects.filter(technicien=tech.user):
+                    for ligne in rapport.lignes.all():
+                        total_heures_ss += float(ligne.duree)
+                for suivi in SuiviOT.objects.filter(technicien=tech.user):
+                    total_heures_ss += float(suivi.heures)
+            
+            if total_heures_ss > 0:
+                repartition_sous_service.append({
+                    'nom': f"{ss.service_parent} - {ss.nom}",
+                    'heures': round(total_heures_ss, 1)
+                })
+
+        evolution_mensuelle = []
+        aujourdhui = datetime.now().date()
+        
+        for i in range(5, -1, -1):
+            mois = aujourdhui.replace(day=1) - timedelta(days=30*i)
+            mois_suivant = (mois.replace(day=28) + timedelta(days=4)).replace(day=1)
+            
+            total_mois = 0
+            rapports_mois = RapportJournalier.objects.filter(date__gte=mois, date__lt=mois_suivant)
+            suivis_mois = SuiviOT.objects.filter(date__gte=mois, date__lt=mois_suivant)
+            
+            if not is_staff:
+                try:
+                    technician = Technician.objects.get(user=user)
+                    if technician.sous_services.exists():
+                        techniciens_ids = [t.user.id for t in Technician.objects.filter(
+                            sous_services__in=technician.sous_services.all()
+                        ).distinct()]
+                        rapports_mois = rapports_mois.filter(technicien__in=techniciens_ids)
+                        suivis_mois = suivis_mois.filter(technicien__in=techniciens_ids)
+                except Technician.DoesNotExist:
+                    pass
+            
+            for rapport in rapports_mois:
+                for ligne in rapport.lignes.all():
+                    total_mois += float(ligne.duree)
+            
+            for suivi in suivis_mois:
+                total_mois += float(suivi.heures)
+            
+            evolution_mensuelle.append({
+                'mois': mois.strftime('%b %Y'),
+                'heures': round(total_mois, 1)
+            })
+
+        return Response({
+            'ot_counts': ot_counts,
+            'total_heures': round(total_heures, 1),
+            'total_rapports_journaliers': total_rapports_journaliers,
+            'total_rapports_hebdo': total_rapports_hebdo,
+            'total_clients': total_clients,
+            'heures_par_jour': heures_par_jour,
+            'heures_par_technicien': heures_par_technicien,
+            'repartition_sous_service': repartition_sous_service,
+            'evolution_mensuelle': evolution_mensuelle,
+        })
+
+
+# ===== FONCTIONS UTILITAIRES =====
+def hello_world(request):
+    return JsonResponse({"message": "Hello from OFIS API!"})
+
+
+from rest_framework.decorators import api_view
+
+@api_view(['POST'])
+def test_login(request):
+    from django.contrib.auth import authenticate
+    from rest_framework_simplejwt.tokens import RefreshToken
+    
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(username=username, password=password)
+    if user:
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'username': user.username,
+            'user_id': user.id,
+        })
+    return Response({'error': 'Invalid credentials'}, status=400)
+
+# ===== TICKETS =====
+# ===== TICKETS =====
+class TicketViewSet(viewsets.ModelViewSet):
+    queryset = Ticket.objects.all()
+    serializer_class = TicketSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['titre', 'description', 'client__company', 'numero']
+    ordering_fields = ['date_creation', 'priorite', 'statut', 'numero']
+    ordering = ['-date_creation']
+    
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Ticket.objects.all()
+        
+        # Vérifier les groupes
+        is_technicien = user.groups.filter(name='technicien').exists()
+        is_manager = user.is_staff or user.is_superuser
+        
+        # Technicien : ne voit que ses tickets assignés
+        if is_technicien and not is_manager:
+            queryset = queryset.filter(technicien_assigne=user)
+        
+        # Filtres
+        statut = self.request.query_params.get('statut')
+        if statut:
+            queryset = queryset.filter(statut=statut)
+        
+        priorite = self.request.query_params.get('priorite')
+        if priorite:
+            queryset = queryset.filter(priorite=priorite)
+        
+        client_id = self.request.query_params.get('client')
+        if client_id:
+            queryset = queryset.filter(client_id=client_id)
+        
+        technicien_id = self.request.query_params.get('technicien')
+        if technicien_id:
+            queryset = queryset.filter(technicien_assigne_id=technicien_id)
+        
+        return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(cree_par=self.request.user)
+        TicketHistorique.objects.create(
+            ticket=serializer.instance,
+            utilisateur=self.request.user,
+            action='Création du ticket',
+            details=f"Ticket créé avec priorité {serializer.instance.get_priorite_display()}"
+        )
+    
+    @action(detail=True, methods=['post'])
+    def assigner(self, request, pk=None):
+        ticket = self.get_object()
+        technicien_id = request.data.get('technicien_id')
+        
+        if not technicien_id:
+            return Response({'error': 'technicien_id requis'}, status=400)
+        
+        try:
+            technicien = User.objects.get(id=technicien_id)
+        except User.DoesNotExist:
+            return Response({'error': 'Technicien non trouvé'}, status=404)
+        
+        ancien_technicien = ticket.technicien_assigne
+        ticket.technicien_assigne = technicien
+        ticket.save()
+        
+        TicketHistorique.objects.create(
+            ticket=ticket,
+            utilisateur=request.user,
+            action='Assignation',
+            details=f"Assigné à {technicien.username} (était {ancien_technicien.username if ancien_technicien else 'non assigné'})"
+        )
+        
+        return Response({'status': 'Technicien assigné'})
+    
+    @action(detail=True, methods=['post'])
+    def changer_statut(self, request, pk=None):
+        ticket = self.get_object()
+        nouveau_statut = request.data.get('statut')
+        
+        if nouveau_statut not in ['nouveau', 'en_cours', 'resolu', 'ferme']:
+            return Response({'error': 'Statut invalide'}, status=400)
+        
+        ancien_statut = ticket.statut
+        ticket.statut = nouveau_statut
+        
+        if nouveau_statut == 'resolu' and not ticket.date_resolution:
+            ticket.date_resolution = timezone.now()
+        elif nouveau_statut == 'ferme' and not ticket.date_fermeture:
+            ticket.date_fermeture = timezone.now()
+        
+        ticket.save()
+        
+        TicketHistorique.objects.create(
+            ticket=ticket,
+            utilisateur=request.user,
+            action='Changement de statut',
+            details=f"Statut changé de {ancien_statut} à {nouveau_statut}"
+        )
+        
+        return Response({'status': 'Statut mis à jour'})
+    
+    @action(detail=True, methods=['post'])
+    def ajouter_temps(self, request, pk=None):
+        ticket = self.get_object()
+        heures = request.data.get('heures')
+        
+        if not heures:
+            return Response({'error': 'heures requis'}, status=400)
+        
+        try:
+            heures = float(heures)
+        except ValueError:
+            return Response({'error': 'heures doit être un nombre'}, status=400)
+        
+        ticket.temps_passe = float(ticket.temps_passe) + heures
+        ticket.save()
+        
+        TicketHistorique.objects.create(
+            ticket=ticket,
+            utilisateur=request.user,
+            action='Ajout de temps',
+            details=f"{heures} heures ajoutées (total: {ticket.temps_passe}h)"
+        )
+        
+        return Response({'status': 'Temps ajouté', 'total': ticket.temps_passe})
+    
+    @action(detail=True, methods=['post'])
+    def ajouter_solution(self, request, pk=None):
+        ticket = self.get_object()
+        solution = request.data.get('solution')
+        
+        if not solution:
+            return Response({'error': 'solution requise'}, status=400)
+        
+        ticket.solution = solution
+        ticket.save()
+        
+        TicketHistorique.objects.create(
+            ticket=ticket,
+            utilisateur=request.user,
+            action='Solution ajoutée',
+            details=solution[:200]
+        )
+        
+        return Response({'status': 'Solution ajoutée'})
