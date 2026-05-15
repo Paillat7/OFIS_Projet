@@ -70,7 +70,7 @@ const LoginPage = ({ onLogin }) => {
             </div>
             <div className="welcome-box">
               <h2>Bienvenue</h2>
-              <p>Application interne de suivi des missions</p>
+              <p>Application interne de suivi de Projets et Interventions</p>
             </div>
           </div>
 
