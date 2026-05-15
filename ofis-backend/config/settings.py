@@ -93,6 +93,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
     FRONTEND_URL,
+    "https://ofis-projet.vercel.app",   # ← URL de votre frontend sur Vercel (ajoutée)
 ]
 CORS_ALLOW_ALL_ORIGINS = False
 
