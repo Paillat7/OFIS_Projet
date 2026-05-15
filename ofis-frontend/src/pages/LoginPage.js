@@ -8,10 +8,7 @@ import './Pages.css';
 
 const LoginPage = ({ onLogin }) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    username: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,49 +17,29 @@ const LoginPage = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       const result = await authService.login(formData);
-      
       if (result.success) {
-        setLoading(false);
-        if (onLogin) {
-          onLogin(result.user);
-        }
-        // Redirection vers la racine
+        if (onLogin) onLogin(result.user);
         navigate('/');
       } else {
         setError(result.error || 'Identifiants incorrects');
-        setLoading(false);
       }
     } catch (err) {
       setError('Erreur de connexion');
+    } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
     <div className="login-page">
       <div className="login-container">
         <div className="login-card">
-          <div className="login-logo-wrapper">
-            <img 
-              src="/images/ofis-logo.png" 
-              alt="OFIS" 
-              className="login-logo"
-            />
-            <p className="login-logo-tagline">
-              IT. Services. People. You trust.
-            </p>
-          </div>
-
           <div className="login-header">
             <div className="logo-container">
               <h1 className="logo">OFIS</h1>
@@ -70,7 +47,7 @@ const LoginPage = ({ onLogin }) => {
             </div>
             <div className="welcome-box">
               <h2>Bienvenue</h2>
-              <p>Application interne de suivi de Projets et Interventions</p>
+              <p>Application interne de suivi des missions</p>
             </div>
           </div>
 
@@ -79,12 +56,7 @@ const LoginPage = ({ onLogin }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
-            {error && (
-              <div className="error-message">
-                {error}
-              </div>
-            )}
-
+            {error && <div className="error-message">{error}</div>}
             <Input
               label="Identifiant"
               name="username"
@@ -95,7 +67,6 @@ const LoginPage = ({ onLogin }) => {
               icon={<FaUser />}
               required
             />
-
             <Input
               label="Mot de passe"
               name="password"
@@ -106,38 +77,19 @@ const LoginPage = ({ onLogin }) => {
               icon={<FaLock />}
               required
               rightIcon={
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
+                <button type="button" className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               }
             />
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="large"
-              isLoading={loading}
-              className="login-button"
-            >
+            <Button type="submit" variant="primary" size="large" isLoading={loading}>
               Se connecter
             </Button>
-
-            <div className="login-links">
-              <button type="button" className="forgot-link">
-                 Mot de passe oublié ?
-              </button>
-            </div>
           </form>
 
           <div className="login-footer">
             <p className="version">Version 1.0 • © 2026 OFIS</p>
-            <p className="security-note">
-              <i className="lock-icon">🔒</i> Accès sécurisé réservé aux employés
-            </p>
+            <p className="security-note">🔒 Accès sécurisé réservé aux employés</p>
           </div>
         </div>
       </div>
