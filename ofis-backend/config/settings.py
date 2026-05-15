@@ -31,11 +31,12 @@ INSTALLED_APPS = [
     'notifications',
 ]
 
+# ===== MIDDLEWARE (ordre corrigé) =====
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # Doit être le plus haut
+    "django.middleware.common.CommonMiddleware",  # Juste après CorsMiddleware
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -93,7 +94,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
     FRONTEND_URL,
-    "https://ofis-projet.vercel.app",   # ← URL de votre frontend sur Vercel (ajoutée)
+    "https://ofis-projet.vercel.app",   # ← URL de votre frontend sur Vercel
 ]
 CORS_ALLOW_ALL_ORIGINS = False
 
