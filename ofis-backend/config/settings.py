@@ -34,7 +34,7 @@ INSTALLED_APPS = [
 # ===== MIDDLEWARE (ordre corrigé) =====
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",  # Doit être le plus haut
-    "django.middleware.common.CommonMiddleware",  # Juste après CorsMiddleware
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -86,17 +86,31 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
 
-# ===== CORS =====
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:3001",
-    FRONTEND_URL,
-    "https://ofis-projet.vercel.app",   # ← URL de votre frontend sur Vercel
+# ===== CORS (configuration ouverte pour la démo) =====
+# Autoriser toutes les origines (temporaire) – à désactiver après la démo
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Si vous voulez garder une liste, vous pouvez la commenter car elle n'est pas utilisée avec CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+#     "http://localhost:3001",
+#     "http://127.0.0.1:3000",
+#     "http://127.0.0.1:3001",
+#     "https://ofis-projet.vercel.app",
+# ]
+
+# Autoriser les en-têtes nécessaires (dont Authorization)
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
 ]
-CORS_ALLOW_ALL_ORIGINS = False
 
 # ===== REST FRAMEWORK =====
 REST_FRAMEWORK = {
