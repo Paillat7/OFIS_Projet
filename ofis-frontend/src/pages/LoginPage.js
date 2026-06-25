@@ -5,6 +5,8 @@ import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import { authService } from '../services/authService';
 import './Pages.css';
+// ===== IMPORT DU LOGO =====
+import ofisLogo from '../assets/images/ofis-logo.png';
 
 const LoginPage = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -42,7 +44,12 @@ const LoginPage = ({ onLogin }) => {
         <div className="login-card">
           <div className="login-header">
             <div className="logo-container">
-              <h1 className="logo">OFIS</h1>
+              {/* ===== LOGO IMAGE ===== */}
+              <img 
+                src={ofisLogo} 
+                alt="OFIS" 
+                style={{ height: '60px', marginBottom: '8px' }} 
+              />
               <p className="tagline">IT. Services. People. You trust.</p>
             </div>
             <div className="welcome-box">

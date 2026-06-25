@@ -17,22 +17,27 @@ const ProjetList = () => {
   const canCreate = isAdminOrManager || isCadre;
 
   const isMounted = useRef(true);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, []);
 
   const chargerProjets = async () => {
     setLoading(true);
+    abortControllerRef.current = new AbortController();
     try {
-      const data = await projetService.getAll();
+      const data = await projetService.getAll({ signal: abortControllerRef.current.signal });
       if (isMounted.current) {
         setProjets(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      if (isMounted.current) {
+      if (isMounted.current && error.name !== 'AbortError') {
         console.error('Erreur chargement projets', error);
         setProjets([]);
       }
@@ -42,8 +47,9 @@ const ProjetList = () => {
   };
 
   const chargerTauxHoraires = async () => {
+    abortControllerRef.current = new AbortController();
     try {
-      const data = await api.get('/technicians/');
+      const data = await api.get('/technicians/', { signal: abortControllerRef.current.signal });
       const tauxMap = {};
       data.forEach(tech => {
         tauxMap[tech.user_id] = tech.taux_horaire || 0;
@@ -52,7 +58,7 @@ const ProjetList = () => {
         setTauxHoraires(tauxMap);
       }
     } catch (error) {
-      if (isMounted.current) {
+      if (isMounted.current && error.name !== 'AbortError') {
         console.error('Erreur chargement taux horaires:', error);
       }
     }

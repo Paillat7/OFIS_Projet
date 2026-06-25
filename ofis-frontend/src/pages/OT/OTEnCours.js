@@ -17,20 +17,25 @@ const OTEnCours = () => {
   const isManager = user?.role === 'manager' || user?.role === 'admin';
 
   const isMounted = useRef(true);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, []);
 
   const chargerOT = async () => {
     setLoading(true);
+    abortControllerRef.current = new AbortController();
     try {
       const params = {};
       if (search) params.search = search;
       if (filters.statut) params.statut = filters.statut;
-      const data = await otService.getAll(params);
+      const data = await otService.getAll(params, { signal: abortControllerRef.current.signal });
       if (isMounted.current) {
         const enCours = Array.isArray(data)
           ? data.filter(ot => ot.statut === 'planifie' || ot.statut === 'en_cours')
@@ -38,7 +43,7 @@ const OTEnCours = () => {
         setOts(enCours);
       }
     } catch (error) {
-      if (isMounted.current) {
+      if (isMounted.current && error.name !== 'AbortError') {
         console.error('Erreur chargement OT', error);
         setOts([]);
       }

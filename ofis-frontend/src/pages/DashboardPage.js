@@ -23,23 +23,28 @@ const DashboardPage = () => {
   const isTechnicien = role === 'technicien';
 
   const isMounted = useRef(true);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, []);
 
   const loadStats = useCallback(async () => {
     setLoading(true);
+    abortControllerRef.current = new AbortController();
     try {
-      const data = await api.getDashboardStats();
+      const data = await api.getDashboardStats({ signal: abortControllerRef.current.signal });
       if (isMounted.current) {
         setStats(data);
         setError(null);
       }
     } catch (err) {
-      if (isMounted.current) {
+      if (isMounted.current && err.name !== 'AbortError') {
         console.error('Erreur chargement stats', err);
         setError('Impossible de charger les statistiques');
       }

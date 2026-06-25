@@ -17,26 +17,31 @@ const OrdresTravailList = () => {
   const isManager = user?.role === 'manager' || user?.role === 'admin';
 
   const isMounted = useRef(true);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, []);
 
   const chargerOts = async () => {
     setLoading(true);
+    abortControllerRef.current = new AbortController();
     try {
       const params = {};
       if (search) params.search = search;
       if (filters.statut) params.statut = filters.statut;
       if (filters.validation) params.validation = filters.validation;
-      const data = await otService.getAll(params);
+      const data = await otService.getAll(params, { signal: abortControllerRef.current.signal });
       if (isMounted.current) {
         setOts(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      if (isMounted.current) {
+      if (isMounted.current && error.name !== 'AbortError') {
         console.error('Erreur chargement OT', error);
         setOts([]);
       }

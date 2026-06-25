@@ -16,27 +16,31 @@ const TicketList = () => {
   const isAssistant = user?.role === 'assistant';
   const canCreate = isAssistant || isManagerOrAdmin;
 
-  // ===== FLAG =====
   const isMounted = useRef(true);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, []);
 
   const chargerTickets = async () => {
     setLoading(true);
+    abortControllerRef.current = new AbortController();
     try {
       const params = {};
       if (filtreStatut) params.statut = filtreStatut;
       if (filtrePriorite) params.priorite = filtrePriorite;
-      const data = await ticketService.getAll(params);
+      const data = await ticketService.getAll(params, { signal: abortControllerRef.current.signal });
       if (isMounted.current) {
         setTickets(Array.isArray(data) ? data : []);
       }
     } catch (error) {
-      if (isMounted.current) {
+      if (isMounted.current && error.name !== 'AbortError') {
         console.error('Erreur chargement tickets:', error);
         setTickets([]);
       }
@@ -93,7 +97,6 @@ const TicketList = () => {
         )}
       </div>
 
-      {/* Filtres */}
       <Card style={{ marginBottom: '1rem' }}>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <select value={filtreStatut} onChange={(e) => setFiltreStatut(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
@@ -114,7 +117,6 @@ const TicketList = () => {
         </div>
       </Card>
 
-      {/* Liste des tickets */}
       <div style={{ display: 'grid', gap: '1rem' }}>
         {tickets.length === 0 ? (
           <Card><p>Aucun ticket trouvé.</p></Card>
