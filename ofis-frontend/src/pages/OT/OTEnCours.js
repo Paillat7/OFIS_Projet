@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
@@ -16,9 +16,13 @@ const OTEnCours = () => {
   const user = authService.getCurrentUser();
   const isManager = user?.role === 'manager' || user?.role === 'admin';
 
+  const isMounted = useRef(true);
+
   useEffect(() => {
-    chargerOT();
-  }, [filters, search]);
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const chargerOT = async () => {
     setLoading(true);
@@ -26,19 +30,26 @@ const OTEnCours = () => {
       const params = {};
       if (search) params.search = search;
       if (filters.statut) params.statut = filters.statut;
-      
       const data = await otService.getAll(params);
-      const enCours = Array.isArray(data)
-        ? data.filter(ot => ot.statut === 'planifie' || ot.statut === 'en_cours')
-        : [];
-      setOts(enCours);
+      if (isMounted.current) {
+        const enCours = Array.isArray(data)
+          ? data.filter(ot => ot.statut === 'planifie' || ot.statut === 'en_cours')
+          : [];
+        setOts(enCours);
+      }
     } catch (error) {
-      console.error('Erreur chargement OT', error);
-      setOts([]);
+      if (isMounted.current) {
+        console.error('Erreur chargement OT', error);
+        setOts([]);
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    chargerOT();
+  }, [filters, search]);
 
   const handleDemarrer = async (id) => {
     if (window.confirm('Démarrer cet OT ?')) {
@@ -68,7 +79,6 @@ const OTEnCours = () => {
   const getAvancementBar = (heuresConsommees, estimationHeures) => {
     const hConsommees = parseFloat(heuresConsommees) || 0;
     const hEstimation = parseFloat(estimationHeures) || 0;
-    
     if (!hEstimation || hEstimation === 0) {
       return <span style={{ fontSize: '0.75rem' }}>-</span>;
     }
@@ -76,10 +86,10 @@ const OTEnCours = () => {
     return (
       <div style={{ minWidth: '100px' }}>
         <div style={{ background: '#e0e0e0', borderRadius: '4px', height: '6px', overflow: 'hidden' }}>
-          <div style={{ 
-            background: pourcentage >= 100 ? '#10b981' : '#3b82f6', 
-            width: `${pourcentage}%`, 
-            height: '6px' 
+          <div style={{
+            background: pourcentage >= 100 ? '#10b981' : '#3b82f6',
+            width: `${pourcentage}%`,
+            height: '6px'
           }} />
         </div>
         <span style={{ fontSize: '0.7rem' }}>
@@ -89,35 +99,29 @@ const OTEnCours = () => {
     );
   };
 
-  // ===== COULEUR DE LA LIGNE (délai + heures) =====
   const getLigneCouleur = (ot) => {
     if (!ot) return '#ffffff';
     if (ot.statut === 'termine') return '#e8f5e9';
-
     const estEnRetardDelai = ot.est_en_retard || false;
     const heuresConsommees = parseFloat(ot.heures_consommees) || 0;
     const heuresEstimees = parseFloat(ot.estimation_heures) || 0;
     const ecartHeures = heuresConsommees - heuresEstimees;
     const seuilHeures = 1.0;
     const estEnRetardHeures = ecartHeures > seuilHeures;
-
     if (estEnRetardDelai || estEnRetardHeures) return '#fee2e2';
     if (ot.statut === 'en_cours') return '#fff3e0';
     return '#e8f5e9';
   };
 
-  // ===== STATUT VISUEL =====
   const getStatutVisuel = (ot) => {
     if (!ot) return { label: '-', couleur: '#6b7280' };
     if (ot.statut === 'termine') return { label: '✅ Terminé', couleur: '#4caf50' };
-
     const estEnRetardDelai = ot.est_en_retard || false;
     const heuresConsommees = parseFloat(ot.heures_consommees) || 0;
     const heuresEstimees = parseFloat(ot.estimation_heures) || 0;
     const ecartHeures = heuresConsommees - heuresEstimees;
     const seuilHeures = 1.0;
     const estEnRetardHeures = ecartHeures > seuilHeures;
-
     if (estEnRetardDelai && estEnRetardHeures) return { label: '🔴 Retard (délai + heures)', couleur: '#ef4444' };
     if (estEnRetardDelai) return { label: '🔴 Retard (délai)', couleur: '#ef4444' };
     if (estEnRetardHeures) return { label: '🔴 Dépassement d\'heures', couleur: '#ef4444' };
@@ -142,32 +146,32 @@ const OTEnCours = () => {
               style={{ padding: '0.5rem 0.5rem 0.5rem 2rem', width: '280px', borderRadius: '4px', border: '1px solid #ccc' }}
             />
           </div>
-          <button 
-            onClick={() => setShowFilters(!showFilters)} 
-            style={{ 
-              padding: '0.5rem 1rem', 
-              background: showFilters ? '#1976D2' : '#f0f0f0', 
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            style={{
+              padding: '0.5rem 1rem',
+              background: showFilters ? '#1976D2' : '#f0f0f0',
               color: showFilters ? 'white' : '#333',
-              border: '1px solid #ccc', 
-              borderRadius: '4px', 
-              cursor: 'pointer', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.5rem' 
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}
           >
             <FaFilter /> Filtres
           </button>
           {filters.statut && (
-            <button 
-              onClick={() => setFilters({ statut: '' })} 
-              style={{ 
-                padding: '0.5rem 1rem', 
-                background: '#fee2e2', 
-                border: '1px solid #fecaca', 
-                borderRadius: '4px', 
-                cursor: 'pointer', 
-                color: '#dc2626' 
+            <button
+              onClick={() => setFilters({ statut: '' })}
+              style={{
+                padding: '0.5rem 1rem',
+                background: '#fee2e2',
+                border: '1px solid #fecaca',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                color: '#dc2626'
               }}
             >
               Effacer
@@ -188,9 +192,9 @@ const OTEnCours = () => {
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <div>
               <label style={{ fontSize: '0.75rem', marginRight: '0.5rem' }}>Statut :</label>
-              <select 
-                value={filters.statut} 
-                onChange={(e) => setFilters({ ...filters, statut: e.target.value })} 
+              <select
+                value={filters.statut}
+                onChange={(e) => setFilters({ ...filters, statut: e.target.value })}
                 style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', minWidth: '150px' }}
               >
                 <option value="">Tous statuts</option>
@@ -208,13 +212,13 @@ const OTEnCours = () => {
         </Card>
       ) : (
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ 
-            width: '100%', 
-            borderCollapse: 'collapse', 
-            background: 'white', 
-            borderRadius: '8px', 
-            overflow: 'hidden', 
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)' 
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            background: 'white',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
           }}>
             <thead>
               <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #e0e0e0' }}>
@@ -239,26 +243,23 @@ const OTEnCours = () => {
                 const ecartHeures = heuresConsommees - estimationHeures;
                 const isTechnicien = ot.techniciens_ids?.includes(user?.id);
                 const peutSupprimer = isManager;
-                
-                const clientName = ot.client_rapport_name || 
-                                  ot.client_rapport?.company || 
-                                  (ot.client_rapport ? `${ot.client_rapport.firstName || ''} ${ot.client_rapport.lastName || ''}` : '-');
-                const techniciensList = ot.techniciens_names?.join(', ') || 
-                                       ot.techniciens?.map(t => t.username).join(', ') || 
-                                       '-';
-                
+                const clientName = ot.client_rapport_name ||
+                  ot.client_rapport?.company ||
+                  (ot.client_rapport ? `${ot.client_rapport.firstName || ''} ${ot.client_rapport.lastName || ''}` : '-');
+                const techniciensList = ot.techniciens_names?.join(', ') ||
+                  ot.techniciens?.map(t => t.username).join(', ') ||
+                  '-';
                 const ecartColor = ecartHeures > 1 ? '#ef4444' : ecartHeures < -1 ? '#10b981' : '#f59e0b';
                 const ecartLabel = ecartHeures > 1 ? '+' : '';
-                
                 return (
-                  <tr 
-                    key={ot.id} 
-                    style={{ 
+                  <tr
+                    key={ot.id}
+                    style={{
                       borderBottom: '1px solid #e0e0e0',
                       backgroundColor: bgColor,
                       transition: 'background-color 0.2s'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'} 
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
                     onMouseLeave={(e) => e.currentTarget.style.background = bgColor}
                   >
                     <td style={{ padding: '0.75rem' }}>
@@ -309,12 +310,12 @@ const OTEnCours = () => {
         </div>
       )}
 
-      <div style={{ 
-        marginTop: '1rem', 
-        display: 'flex', 
-        gap: '1.5rem', 
-        flexWrap: 'wrap', 
-        fontSize: '0.7rem', 
+      <div style={{
+        marginTop: '1rem',
+        display: 'flex',
+        gap: '1.5rem',
+        flexWrap: 'wrap',
+        fontSize: '0.7rem',
         color: '#666',
         padding: '0.5rem',
         background: '#f8f9fa',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
@@ -16,21 +16,28 @@ const ProjetList = () => {
   const isCadre = user?.role === 'cadre';
   const canCreate = isAdminOrManager || isCadre;
 
+  const isMounted = useRef(true);
+
   useEffect(() => {
-    chargerProjets();
-    chargerTauxHoraires();
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
   const chargerProjets = async () => {
     setLoading(true);
     try {
       const data = await projetService.getAll();
-      setProjets(Array.isArray(data) ? data : []);
+      if (isMounted.current) {
+        setProjets(Array.isArray(data) ? data : []);
+      }
     } catch (error) {
-      console.error('Erreur chargement projets', error);
-      setProjets([]);
+      if (isMounted.current) {
+        console.error('Erreur chargement projets', error);
+        setProjets([]);
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
@@ -41,11 +48,20 @@ const ProjetList = () => {
       data.forEach(tech => {
         tauxMap[tech.user_id] = tech.taux_horaire || 0;
       });
-      setTauxHoraires(tauxMap);
+      if (isMounted.current) {
+        setTauxHoraires(tauxMap);
+      }
     } catch (error) {
-      console.error('Erreur chargement taux horaires:', error);
+      if (isMounted.current) {
+        console.error('Erreur chargement taux horaires:', error);
+      }
     }
   };
+
+  useEffect(() => {
+    chargerProjets();
+    chargerTauxHoraires();
+  }, []);
 
   const handleDelete = async (id) => {
     if (window.confirm('Supprimer ce projet ?')) {
@@ -58,23 +74,16 @@ const ProjetList = () => {
     }
   };
 
-  // ===== FONCTION MODIFIÉE =====
   const getStatutProjet = (projet) => {
     const heuresConsommees = parseFloat(projet.heures_consommees) || 0;
     const estimationHeures = parseFloat(projet.estimation_heures) || 0;
-    
     const estEnDepassementHeures = heuresConsommees > estimationHeures;
-    
     const aujourdhui = new Date();
     aujourdhui.setHours(0, 0, 0, 0);
     const dateFinPrevue = projet.date_fin ? new Date(projet.date_fin) : null;
-    if (dateFinPrevue) {
-      dateFinPrevue.setHours(0, 0, 0, 0);
-    }
+    if (dateFinPrevue) dateFinPrevue.setHours(0, 0, 0, 0);
     const estEnRetardDelai = dateFinPrevue && aujourdhui > dateFinPrevue;
     const estTermine = heuresConsommees >= estimationHeures;
-    
-    // 1. PRIORITÉ AUX ALERTES (dépassement, retard)
     if (estEnDepassementHeures) {
       return { message: '🔴 Dépassement heures', couleur: '#ef4444', fond: '#fee2e2' };
     }
@@ -84,13 +93,9 @@ const ProjetList = () => {
     if (estTermine) {
       return { message: '✅ Terminé', couleur: '#4caf50', fond: '#e8f5e9' };
     }
-    
-    // 2. CAS SPÉCIFIQUE : projet "en cours" (sans alerte) => ORANGE
     if (projet.statut === 'en_cours') {
       return { message: '🟠 En cours', couleur: '#f59e0b', fond: '#fef3c7' };
     }
-    
-    // 3. AUTRES STATUTS (suspendu, etc.) => vert "dans les temps"
     return { message: '🟢 Dans les temps', couleur: '#4caf50', fond: '#e8f5e9' };
   };
 
@@ -118,7 +123,6 @@ const ProjetList = () => {
             const ecart = heuresConsommees - estimationHeures;
             const isChefProjet = user?.id === projet.chef_projet;
             const canDelete = isAdminOrManager || isChefProjet;
-            
             return (
               <Card key={projet.id} style={{ backgroundColor: statut.fond, borderLeft: `4px solid ${statut.couleur}`, transition: 'all 0.2s' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
@@ -133,12 +137,12 @@ const ProjetList = () => {
                     </div>
                     <p><strong>Chef de projet :</strong> {projet.chef_projet_name}</p>
                     <p><strong>Estimation :</strong> {estimationHeures} h</p>
-                    <p><strong>Heures consommées :</strong> 
+                    <p><strong>Heures consommées :</strong>
                       <span style={{ color: ecart > 0 ? '#ef4444' : '#4caf50', fontWeight: 'bold' }}>
                         {heuresConsommees} h
                       </span>
                     </p>
-                    <p><strong>Écart :</strong> 
+                    <p><strong>Écart :</strong>
                       <span style={{ color: ecart > 0 ? '#ef4444' : '#4caf50' }}>
                         {ecart > 0 ? `+${ecart} h` : `${ecart} h`}
                       </span>
@@ -146,7 +150,6 @@ const ProjetList = () => {
                     <p><strong>Avancement :</strong> {projet.avancement}%</p>
                     <p><strong>Statut :</strong> {projet.statut === 'en_cours' ? 'En cours' : projet.statut === 'termine' ? 'Terminé' : 'Suspendu'}</p>
                     <p><strong>Date fin prévue :</strong> {projet.date_fin ? new Date(projet.date_fin).toLocaleDateString() : 'Non définie'}</p>
-                    
                     {projet.cout_projet && (
                       <p><strong>💰 Coût projet :</strong> {projet.cout_projet.toLocaleString('fr-FR')} {projet.devise_cout || 'XAF'}</p>
                     )}

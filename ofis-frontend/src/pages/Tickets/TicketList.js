@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
@@ -16,9 +16,14 @@ const TicketList = () => {
   const isAssistant = user?.role === 'assistant';
   const canCreate = isAssistant || isManagerOrAdmin;
 
+  // ===== FLAG =====
+  const isMounted = useRef(true);
+
   useEffect(() => {
-    chargerTickets();
-  }, [filtreStatut, filtrePriorite]);
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const chargerTickets = async () => {
     setLoading(true);
@@ -27,14 +32,22 @@ const TicketList = () => {
       if (filtreStatut) params.statut = filtreStatut;
       if (filtrePriorite) params.priorite = filtrePriorite;
       const data = await ticketService.getAll(params);
-      setTickets(Array.isArray(data) ? data : []);
+      if (isMounted.current) {
+        setTickets(Array.isArray(data) ? data : []);
+      }
     } catch (error) {
-      console.error('Erreur chargement tickets:', error);
-      setTickets([]);
+      if (isMounted.current) {
+        console.error('Erreur chargement tickets:', error);
+        setTickets([]);
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    chargerTickets();
+  }, [filtreStatut, filtrePriorite]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Supprimer ce ticket ?')) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
@@ -16,9 +16,13 @@ const OrdresTravailList = () => {
   const user = authService.getCurrentUser();
   const isManager = user?.role === 'manager' || user?.role === 'admin';
 
+  const isMounted = useRef(true);
+
   useEffect(() => {
-    chargerOts();
-  }, [filters, search]);
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const chargerOts = async () => {
     setLoading(true);
@@ -27,16 +31,23 @@ const OrdresTravailList = () => {
       if (search) params.search = search;
       if (filters.statut) params.statut = filters.statut;
       if (filters.validation) params.validation = filters.validation;
-      
       const data = await otService.getAll(params);
-      setOts(Array.isArray(data) ? data : []);
+      if (isMounted.current) {
+        setOts(Array.isArray(data) ? data : []);
+      }
     } catch (error) {
-      console.error('Erreur chargement OT', error);
-      setOts([]);
+      if (isMounted.current) {
+        console.error('Erreur chargement OT', error);
+        setOts([]);
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    chargerOts();
+  }, [filters, search]);
 
   const handleDemarrer = async (id) => {
     if (window.confirm('Démarrer cet OT ?')) {
@@ -84,35 +95,29 @@ const OrdresTravailList = () => {
     );
   };
 
-  // ===== COULEUR DE LA LIGNE (délai + heures) =====
   const getLigneCouleur = (ot) => {
     if (!ot) return '#ffffff';
     if (ot.statut === 'termine') return '#e8f5e9';
-
     const estEnRetardDelai = ot.est_en_retard || false;
     const heuresConsommees = parseFloat(ot.heures_consommees) || 0;
     const heuresEstimees = parseFloat(ot.estimation_heures) || 0;
     const ecartHeures = heuresConsommees - heuresEstimees;
     const seuilHeures = 1.0;
     const estEnRetardHeures = ecartHeures > seuilHeures;
-
     if (estEnRetardDelai || estEnRetardHeures) return '#fee2e2';
     if (ot.statut === 'en_cours') return '#fff3e0';
     return '#e8f5e9';
   };
 
-  // ===== STATUT VISUEL =====
   const getStatutVisuel = (ot) => {
     if (!ot) return { label: '-', couleur: '#6b7280' };
     if (ot.statut === 'termine') return { label: '✅ Terminé', couleur: '#4caf50' };
-
     const estEnRetardDelai = ot.est_en_retard || false;
     const heuresConsommees = parseFloat(ot.heures_consommees) || 0;
     const heuresEstimees = parseFloat(ot.estimation_heures) || 0;
     const ecartHeures = heuresConsommees - heuresEstimees;
     const seuilHeures = 1.0;
     const estEnRetardHeures = ecartHeures > seuilHeures;
-
     if (estEnRetardDelai && estEnRetardHeures) return { label: '🔴 Retard (délai + heures)', couleur: '#ef4444' };
     if (estEnRetardDelai) return { label: '🔴 Retard (délai)', couleur: '#ef4444' };
     if (estEnRetardHeures) return { label: '🔴 Dépassement d\'heures', couleur: '#ef4444' };
@@ -203,9 +208,13 @@ const OrdresTravailList = () => {
                 const ecartHeures = heuresConsommees - estimationHeures;
                 const ecartColor = ecartHeures > 1 ? '#ef4444' : ecartHeures < -1 ? '#10b981' : '#f59e0b';
                 const ecartLabel = ecartHeures > 1 ? '+' : '';
-                
                 return (
-                  <tr key={ot.id} style={{ borderBottom: '1px solid #e0e0e0', backgroundColor: bgColor }} onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'} onMouseLeave={(e) => e.currentTarget.style.background = bgColor}>
+                  <tr
+                    key={ot.id}
+                    style={{ borderBottom: '1px solid #e0e0e0', backgroundColor: bgColor }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = bgColor}
+                  >
                     <td style={{ padding: '0.75rem' }}>
                       <span style={{ color: statutVisuel.couleur, fontWeight: 'bold', fontSize: '0.85rem' }}>
                         {statutVisuel.label}

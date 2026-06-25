@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/common/Card';
-import { 
-  FaFileAlt, FaClock, FaCalendarWeek, FaBuilding, FaUser, 
-  FaChartBar, FaChartPie, FaChartLine, FaTasks, FaExclamationTriangle 
+import {
+  FaFileAlt, FaClock, FaCalendarWeek, FaBuilding, FaUser,
+  FaChartBar, FaChartPie, FaChartLine, FaTasks, FaExclamationTriangle
 } from 'react-icons/fa';
 import api from '../services/api';
 import { authService } from '../services/authService';
@@ -16,38 +16,46 @@ const DashboardPage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
-  const role = user?.role; // 'admin', 'manager', 'cadre', 'technicien'
+  const role = user?.role;
 
   const isAdminOrManager = role === 'admin' || role === 'manager';
   const isCadre = role === 'cadre';
   const isTechnicien = role === 'technicien';
 
-  // Un technicien ou un cadre peut voir les données de son sous‑service
-  const canSeeTeamData = isCadre || isTechnicien || isAdminOrManager;
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    loadStats();
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.getDashboardStats();
-      setStats(data);
-      setError(null);
+      if (isMounted.current) {
+        setStats(data);
+        setError(null);
+      }
     } catch (err) {
-      console.error('Erreur chargement stats', err);
-      setError('Impossible de charger les statistiques');
+      if (isMounted.current) {
+        console.error('Erreur chargement stats', err);
+        setError('Impossible de charger les statistiques');
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
 
   if (loading) return <div className="loading">Chargement du tableau de bord...</div>;
   if (error) return <div className="error">{error}</div>;
   if (!stats) return null;
 
-  // Données pour le camembert (OT)
   const otData = [
     { name: 'Planifiés', value: stats.ot_counts?.planifie || 0 },
     { name: 'En cours', value: stats.ot_counts?.en_cours || 0 },
@@ -63,22 +71,15 @@ const DashboardPage = () => {
     if (path) navigate(path);
   };
 
-  // ===== DÉCISION D'AFFICHAGE DES SECTIONS =====
-  // Les techniciens ne voient pas les rapports hebdomadaires ni les clients
   const showHebdo = isAdminOrManager || isCadre;
   const showClients = isAdminOrManager || isCadre;
-  // Les graphiques "Heures par technicien" et "Répartition par sous-service" sont utiles pour les cadres et admins,
-  // mais aussi pour les techniciens s'ils veulent voir les stats de leur équipe.
-  // On les active pour tous les rôles non-techniciens, et on peut les activer pour les techniciens si souhaité.
-  // Ici, on les active pour tout le monde (car ils afficheront les données du sous‑service).
-  const showHeuresParTechnicien = true;  // ou isAdminOrManager || isCadre || isTechnicien
-  const showSousService = true;          // ou isAdminOrManager || isCadre || isTechnicien
+  const showHeuresParTechnicien = true;
+  const showSousService = true;
 
   return (
     <div className="dashboard-page">
       <h1 className="page-title">Tableau de bord</h1>
 
-      {/* ===== CARTES STATISTIQUES ===== */}
       <div className="stats-grid">
         <Card className="stat-card" onClick={() => handleCardClick('/ot-en-cours')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon"><FaClock /></div>
@@ -114,58 +115,29 @@ const DashboardPage = () => {
         )}
       </div>
 
-      {/* ===== KPI OT - CARTE AVEC COULEURS ===== */}
       <div className="stats-grid" style={{ marginBottom: '1.5rem' }}>
-        <Card 
-          className="stat-card" 
-          style={{ 
-            borderLeft: `4px solid ${
-              (stats.ot_kpi?.en_retard || 0) > 0 ? '#ef4444' : 
+        <Card
+          className="stat-card"
+          style={{
+            borderLeft: `4px solid ${(stats.ot_kpi?.en_retard || 0) > 0 ? '#ef4444' :
               (stats.ot_kpi?.en_cours || 0) > 0 ? '#f59e0b' : '#4caf50'
             }`,
             cursor: 'pointer',
             gridColumn: '1 / -1'
-          }} 
+          }}
           onClick={() => navigate('/ot-en-cours')}
         >
           <div className="stat-icon"><FaTasks /></div>
           <div className="stat-content">
             <h3>Ordres de travail</h3>
-            <div style={{ 
-              display: 'flex', 
-              gap: '1rem', 
-              marginTop: '0.25rem', 
-              flexWrap: 'wrap',
-              fontSize: '0.9rem'
-            }}>
-              <span style={{ 
-                background: '#e8f5e9', 
-                padding: '0.25rem 0.75rem', 
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem'
-              }}>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem', flexWrap: 'wrap', fontSize: '0.9rem' }}>
+              <span style={{ background: '#e8f5e9', padding: '0.25rem 0.75rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                 🟢 <strong>{stats.ot_kpi?.dans_les_temps || 0}</strong> Dans les Temps
               </span>
-              <span style={{ 
-                background: '#fff3e0', 
-                padding: '0.25rem 0.75rem', 
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem'
-              }}>
+              <span style={{ background: '#fff3e0', padding: '0.25rem 0.75rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                 🟠 <strong>{stats.ot_kpi?.en_cours || 0}</strong> En cours
               </span>
-              <span style={{ 
-                background: '#fee2e2', 
-                padding: '0.25rem 0.75rem', 
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem'
-              }}>
+              <span style={{ background: '#fee2e2', padding: '0.25rem 0.75rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                 🔴 <strong>{stats.ot_kpi?.en_retard || 0}</strong> En retard
               </span>
             </div>
@@ -176,14 +148,8 @@ const DashboardPage = () => {
         </Card>
       </div>
 
-      {/* ===== OT EN RETARD - ALERTE ===== */}
       {stats.ots_retard && stats.ots_retard.length > 0 && (
-        <Card className="stat-card" style={{ 
-          borderLeft: '4px solid #ef4444', 
-          marginBottom: '1.5rem',
-          backgroundColor: '#fef2f2',
-          gridColumn: '1 / -1'
-        }}>
+        <Card className="stat-card" style={{ borderLeft: '4px solid #ef4444', marginBottom: '1.5rem', backgroundColor: '#fef2f2', gridColumn: '1 / -1' }}>
           <h3 style={{ color: '#dc2626', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <FaExclamationTriangle /> OT en retard ({stats.ots_retard.length})
           </h3>
@@ -210,17 +176,9 @@ const DashboardPage = () => {
                     </td>
                     <td style={{ padding: '0.5rem' }}>{ot.techniciens?.join(', ') || '-'}</td>
                     <td style={{ padding: '0.5rem' }}>
-                      <button 
+                      <button
                         onClick={() => navigate(`/ordres-travail/${ot.id}`)}
-                        style={{ 
-                          padding: '0.25rem 0.75rem', 
-                          background: '#dc2626', 
-                          color: 'white', 
-                          border: 'none', 
-                          borderRadius: '4px', 
-                          cursor: 'pointer',
-                          fontSize: '0.8rem'
-                        }}
+                        style={{ padding: '0.25rem 0.75rem', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
                       >
                         Voir l'OT
                       </button>
@@ -233,13 +191,12 @@ const DashboardPage = () => {
         </Card>
       )}
 
-      {/* ===== GRAPHIQUES ===== */}
       <div className="charts-row">
         <Card className="chart-card">
           <h3><FaChartPie /> Répartition des ordres de travail</h3>
           {otData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
+              <PieChart isAnimationActive={false}>
                 <Pie
                   data={otData}
                   cx="50%"
@@ -272,7 +229,7 @@ const DashboardPage = () => {
           <h3><FaChartBar /> Heures travaillées (7 derniers jours)</h3>
           {stats.heures_par_jour && stats.heures_par_jour.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stats.heures_par_jour}>
+              <BarChart data={stats.heures_par_jour} isAnimationActive={false}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
@@ -303,7 +260,7 @@ const DashboardPage = () => {
             <h3><FaUser /> Heures par technicien</h3>
             {stats.heures_par_technicien && stats.heures_par_technicien.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={stats.heures_par_technicien} layout="vertical">
+                <BarChart data={stats.heures_par_technicien} layout="vertical" isAnimationActive={false}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
                   <YAxis type="category" dataKey="nom" width={80} />
@@ -323,7 +280,7 @@ const DashboardPage = () => {
             <h3><FaChartPie /> Répartition par sous-service</h3>
             {stats.repartition_sous_service && stats.repartition_sous_service.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
+                <PieChart isAnimationActive={false}>
                   <Pie
                     data={stats.repartition_sous_service}
                     cx="50%"
@@ -353,7 +310,7 @@ const DashboardPage = () => {
           <h3><FaChartLine /> Évolution mensuelle des heures</h3>
           {stats.evolution_mensuelle && stats.evolution_mensuelle.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={stats.evolution_mensuelle}>
+              <LineChart data={stats.evolution_mensuelle} isAnimationActive={false}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="mois" />
                 <YAxis />
