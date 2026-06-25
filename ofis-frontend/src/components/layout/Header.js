@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaSignOutAlt } from 'react-icons/fa';
 import NotificationBell from './NotificationBell';
 import './Layout.css';
-// ===== IMPORT DU LOGO =====
-import ofisLogo from '../../public/images/ofis-logo.png';
+import ofisLogo from '../../assets/images/ofis-logo.png';
 
 const Header = ({ user, onLogout }) => {
   const navigate = useNavigate();

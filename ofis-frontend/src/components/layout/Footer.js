@@ -1,7 +1,6 @@
 import React from 'react';
 import './Layout.css';
-// ===== IMPORT DU LOGO =====
-import ofisLogo from '../../public/images/ofis-logo.png';
+import ofisLogo from '../../assets/images/ofis-logo.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
