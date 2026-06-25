@@ -16,17 +16,68 @@ class SousService(models.Model):
 
 
 # ===== 2. PROFIL TECHNICIEN =====
+# ===== 2. PROFIL TECHNICIEN (MODIFIÉ) =====
 class Technician(models.Model):
+    # Champs existants
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='technician_profile')
     sous_services = models.ManyToManyField(SousService, blank=True, related_name='techniciens')
     phone = models.CharField(max_length=20, blank=True)
     hire_date = models.DateField(null=True, blank=True)
     taux_horaire = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True, help_text="Taux horaire en FCFA")
 
+    # ===== NOUVEAUX CHAMPS POUR LES DISPONIBILITÉS TEMPS RÉEL =====
+    STATUT_ACTUEL_CHOICES = [
+        ('disponible', '✅ Disponible'),
+        ('intervention', '🟠 En intervention'),
+        ('mission', '🟣 En mission'),
+        ('conges', '🔴 En congé'),
+    ]
+    statut_actuel = models.CharField(
+        max_length=20,
+        choices=STATUT_ACTUEL_CHOICES,
+        default='disponible',
+        help_text="Statut actuel du technicien (temps réel)"
+    )
+    commentaire = models.TextField(
+        blank=True,
+        help_text="Ex: Mission à Pointe-Noire du 22/06 au 12/07"
+    )
+    date_debut = models.DateField(null=True, blank=True, help_text="Début de la mission/congé")
+    date_fin = models.DateField(null=True, blank=True, help_text="Fin de la mission/congé")
+
     def __str__(self):
         services = ", ".join([str(ss) for ss in self.sous_services.all()])
         return f"{self.user.username} - {services}"
 
+
+# ===== 14. AGENDA TECHNICIEN (PLANIFICATION CALENDAIRE) =====
+class AgendaTechnicien(models.Model):
+    STATUT_CHOICES = [
+        ('disponible', 'Disponible'),
+        ('intervention', 'En intervention'),
+        ('indisponible', 'Indisponible'),
+        ('conges', 'Congés'),
+    ]
+    
+    technicien = models.ForeignKey(
+        Technician,
+        on_delete=models.CASCADE,
+        related_name='agenda'
+    )
+    date = models.DateField()
+    heure_debut = models.TimeField()
+    heure_fin = models.TimeField()
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='disponible')
+    commentaire = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['date', 'heure_debut']
+        unique_together = ['technicien', 'date', 'heure_debut']
+    
+    def __str__(self):
+        return f"{self.technicien.user.username} - {self.date} {self.heure_debut}-{self.heure_fin} ({self.statut})"
 
 # ===== 3. CLIENTS =====
 class Client(models.Model):
@@ -79,6 +130,7 @@ class OrdreTravail(models.Model):
     technicien = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='ordres_travail_anciens')
     parent_ot = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='sous_ots')
 
+    # ===== PROPRIÉTÉS EXISTANTES =====
     @property
     def heures_consommees(self):
         total = self.suivis.aggregate(total=models.Sum('heures'))['total'] or 0
@@ -89,6 +141,36 @@ class OrdreTravail(models.Model):
         if not self.estimation_heures or self.estimation_heures == 0:
             return 0
         return min(100, int((self.heures_consommees / float(self.estimation_heures)) * 100))
+
+    # ===== NOUVELLES PROPRIÉTÉS POUR LE SUIVI DES RETARDS =====
+    @property
+    def jours_retard(self):
+        """Nombre de jours de retard si date_fin est dépassée et OT non terminé"""
+        if not self.date_fin:
+            return 0
+        if self.statut == 'termine':
+            return 0
+        from django.utils import timezone
+        aujourdhui = timezone.now().date()
+        if aujourdhui > self.date_fin:
+            return (aujourdhui - self.date_fin).days
+        return 0
+    
+    @property
+    def est_en_retard(self):
+        """True si l'OT est en retard (date_fin dépassée et non terminé)"""
+        return self.jours_retard > 0
+
+    @property
+    def statut_couleur(self):
+        """Retourne la couleur associée au statut de l'OT"""
+        if self.statut == 'termine':
+            return 'vert'
+        if self.est_en_retard:
+            return 'rouge'
+        if self.statut == 'en_cours':
+            return 'orange'
+        return 'vert'
 
     def __str__(self):
         return f"{self.reference} - {self.objet}"
@@ -336,19 +418,44 @@ class Ticket(models.Model):
         ('critique', 'Critique'),
     ]
     
-    numero = models.IntegerField(unique=True, blank=True, null=True, editable=False, verbose_name="N° Ticket")
+    numero = models.IntegerField(
+        unique=True, 
+        blank=True, 
+        null=True, 
+        editable=False, 
+        verbose_name="N° Ticket"
+    )
     titre = models.CharField(max_length=255)
     description = models.TextField()
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='tickets')
-    technicien_assigne = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets_assigne')
-    cree_par = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='tickets_crees')
+    
+    # ===== TECHNICIEN ASSIGNÉ (OBLIGATOIRE) =====
+    technicien_assigne = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,  # ← PROTECT au lieu de SET_NULL
+        null=False,                # ← Ne peut pas être NULL
+        blank=False,               # ← Champ obligatoire
+        related_name='tickets_assigne'
+    )
+    
+    cree_par = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='tickets_crees'
+    )
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='nouveau')
     priorite = models.CharField(max_length=20, choices=PRIORITE_CHOICES, default='moyenne')
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)
     date_resolution = models.DateTimeField(null=True, blank=True)
     date_fermeture = models.DateTimeField(null=True, blank=True)
-    temps_passe = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="Temps passé en heures")
+    temps_passe = models.DecimalField(
+        max_digits=6, 
+        decimal_places=2, 
+        default=0, 
+        help_text="Temps passé en heures"
+    )
     solution = models.TextField(blank=True, help_text="Solution apportée")
     commentaires = models.TextField(blank=True, help_text="Commentaires internes")
     
@@ -361,7 +468,7 @@ class Ticket(models.Model):
             if dernier and dernier.numero:
                 self.numero = dernier.numero + 1
             else:
-                self.numero = 2321  # Démarre à 2321
+                self.numero = 2321
         super().save(*args, **kwargs)
     
     def __str__(self):
@@ -373,8 +480,7 @@ class Ticket(models.Model):
     
     @property
     def est_resolu(self):
-        return self.statut in ['resolu', 'ferme']
-
+        return self.statut in ['résolu', 'fermé']
 
 # ===== 13. HISTORIQUE DES TICKETS =====
 class TicketHistorique(models.Model):

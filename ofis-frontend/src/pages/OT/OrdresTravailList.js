@@ -84,6 +84,42 @@ const OrdresTravailList = () => {
     );
   };
 
+  // ===== COULEUR DE LA LIGNE (délai + heures) =====
+  const getLigneCouleur = (ot) => {
+    if (!ot) return '#ffffff';
+    if (ot.statut === 'termine') return '#e8f5e9';
+
+    const estEnRetardDelai = ot.est_en_retard || false;
+    const heuresConsommees = parseFloat(ot.heures_consommees) || 0;
+    const heuresEstimees = parseFloat(ot.estimation_heures) || 0;
+    const ecartHeures = heuresConsommees - heuresEstimees;
+    const seuilHeures = 1.0;
+    const estEnRetardHeures = ecartHeures > seuilHeures;
+
+    if (estEnRetardDelai || estEnRetardHeures) return '#fee2e2';
+    if (ot.statut === 'en_cours') return '#fff3e0';
+    return '#e8f5e9';
+  };
+
+  // ===== STATUT VISUEL =====
+  const getStatutVisuel = (ot) => {
+    if (!ot) return { label: '-', couleur: '#6b7280' };
+    if (ot.statut === 'termine') return { label: '✅ Terminé', couleur: '#4caf50' };
+
+    const estEnRetardDelai = ot.est_en_retard || false;
+    const heuresConsommees = parseFloat(ot.heures_consommees) || 0;
+    const heuresEstimees = parseFloat(ot.estimation_heures) || 0;
+    const ecartHeures = heuresConsommees - heuresEstimees;
+    const seuilHeures = 1.0;
+    const estEnRetardHeures = ecartHeures > seuilHeures;
+
+    if (estEnRetardDelai && estEnRetardHeures) return { label: '🔴 Retard (délai + heures)', couleur: '#ef4444' };
+    if (estEnRetardDelai) return { label: '🔴 Retard (délai)', couleur: '#ef4444' };
+    if (estEnRetardHeures) return { label: '🔴 Dépassement d\'heures', couleur: '#ef4444' };
+    if (ot.statut === 'en_cours') return { label: '🟠 En cours', couleur: '#f59e0b' };
+    return { label: '🟢 Dans les temps', couleur: '#4caf50' };
+  };
+
   if (loading) return <div className="loading">Chargement...</div>;
 
   return (
@@ -97,14 +133,13 @@ const OrdresTravailList = () => {
         )}
       </div>
 
-      {/* Barre de recherche et filtres */}
       <Card style={{ marginBottom: '1rem', padding: '1rem' }}>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ flex: 2, position: 'relative' }}>
             <FaSearch style={{ position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
             <input
               type="text"
-              placeholder="Rechercher par référence, objet, client..."
+              placeholder="Rechercher..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{ width: '100%', padding: '0.5rem 0.5rem 0.5rem 2rem', borderRadius: '4px', border: '1px solid #ccc' }}
@@ -138,7 +173,6 @@ const OrdresTravailList = () => {
         )}
       </Card>
 
-      {/* TABLEAU des OT */}
       {ots.length === 0 ? (
         <Card style={{ padding: '2rem', textAlign: 'center' }}>
           <p>Aucun ordre de travail trouvé.</p>
@@ -148,51 +182,80 @@ const OrdresTravailList = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
             <thead>
               <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #e0e0e0' }}>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Statut</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left' }}>Référence</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left' }}>Objet</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left' }}>Client</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left' }}>Techniciens</th>
-                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Heures</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>TPR (prévu)</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>TER (réel)</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Écart</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left' }}>Avancement</th>
-                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Statut</th>
                 <th style={{ padding: '0.75rem', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {ots.map(ot => (
-                <tr key={ot.id} style={{ borderBottom: '1px solid #e0e0e0' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'} onMouseLeave={(e) => e.currentTarget.style.background = 'white'}>
-                  <td style={{ padding: '0.75rem', fontWeight: 500 }}>{ot.reference} {getValidationBadge(ot.statut_validation)}</td>
-                  <td style={{ padding: '0.75rem' }}>{ot.objet?.substring(0, 40)}{ot.objet?.length > 40 ? '...' : ''}</td>
-                  <td style={{ padding: '0.75rem' }}>{ot.client_rapport_name || '-'}</td>
-                  <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{ot.techniciens_names?.join(', ') || '-'}</td>
-                  <td style={{ padding: '0.75rem' }}>{ot.heures_consommees?.toFixed(1)}/{ot.estimation_heures?.toFixed(0) || '-'}h</td>
-                  <td style={{ padding: '0.75rem', minWidth: '120px' }}>{getAvancementBar(ot.heures_consommees || 0, ot.estimation_heures)}</td>
-                  <td style={{ padding: '0.75rem' }}>{getStatutBadge(ot.statut)}</td>
-                  <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
-                      <Link to={`/ordres-travail/${ot.id}`}>
-                        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1976D2' }} title="Voir">
-                          <FaEye />
-                        </button>
-                      </Link>
-                      {ot.statut === 'planifie' && (
-                        <button onClick={() => handleDemarrer(ot.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#10b981' }} title="Démarrer">
-                          <FaPlay />
-                        </button>
-                      )}
-                    </div>
-                   </td>
-                 </tr>
-              ))}
+              {ots.map(ot => {
+                const bgColor = getLigneCouleur(ot);
+                const statutVisuel = getStatutVisuel(ot);
+                const heuresConsommees = parseFloat(ot.heures_consommees) || 0;
+                const estimationHeures = parseFloat(ot.estimation_heures) || 0;
+                const ecartHeures = heuresConsommees - estimationHeures;
+                const ecartColor = ecartHeures > 1 ? '#ef4444' : ecartHeures < -1 ? '#10b981' : '#f59e0b';
+                const ecartLabel = ecartHeures > 1 ? '+' : '';
+                
+                return (
+                  <tr key={ot.id} style={{ borderBottom: '1px solid #e0e0e0', backgroundColor: bgColor }} onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'} onMouseLeave={(e) => e.currentTarget.style.background = bgColor}>
+                    <td style={{ padding: '0.75rem' }}>
+                      <span style={{ color: statutVisuel.couleur, fontWeight: 'bold', fontSize: '0.85rem' }}>
+                        {statutVisuel.label}
+                      </span>
+                      {getValidationBadge(ot.statut_validation)}
+                    </td>
+                    <td style={{ padding: '0.75rem', fontWeight: 500 }}>{ot.reference}</td>
+                    <td style={{ padding: '0.75rem' }}>{ot.objet?.substring(0, 40)}{ot.objet?.length > 40 ? '...' : ''}</td>
+                    <td style={{ padding: '0.75rem' }}>{ot.client_rapport_name || '-'}</td>
+                    <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{ot.techniciens_names?.join(', ') || '-'}</td>
+                    <td style={{ padding: '0.75rem' }}>{estimationHeures.toFixed(0) || '-'}h</td>
+                    <td style={{ padding: '0.75rem' }}>{heuresConsommees.toFixed(1)}h</td>
+                    <td style={{ padding: '0.75rem', fontWeight: 'bold', color: ecartColor }}>
+                      {ecartLabel}{ecartHeures.toFixed(1)}h
+                      {ecartHeures > 1 && ' 🔴'}
+                      {ecartHeures < -1 && ' ✅'}
+                    </td>
+                    <td style={{ padding: '0.75rem', minWidth: '120px' }}>{getAvancementBar(heuresConsommees, estimationHeures)}</td>
+                    <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
+                        <Link to={`/ordres-travail/${ot.id}`}>
+                          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1976D2' }} title="Voir">
+                            <FaEye />
+                          </button>
+                        </Link>
+                        {ot.statut === 'planifie' && (
+                          <button onClick={() => handleDemarrer(ot.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#10b981' }} title="Démarrer">
+                            <FaPlay />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Légende */}
       <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', fontSize: '0.7rem', color: '#666' }}>
         <span>📋 Statuts: <span style={{ background: '#FEF3C7', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>Planifié</span> <span style={{ background: '#DBEAFE', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>En cours</span> <span style={{ background: '#D1FAE5', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>Terminé</span></span>
         <span>✅ Validation: <span style={{ background: '#FEF3C7', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>En attente</span> <span style={{ background: '#D1FAE5', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>Validé</span> <span style={{ background: '#FEE2E2', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>Rejeté</span></span>
+        <span>📊 <strong>Légende :</strong></span>
+        <span><span style={{ background: '#e8f5e9', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>🟢 Vert</span> = Dans les temps</span>
+        <span><span style={{ background: '#fff3e0', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>🟠 Orange</span> = En cours (OK)</span>
+        <span><span style={{ background: '#fee2e2', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>🔴 Rouge</span> = Retard</span>
+        <span>📈 <strong>TPR</strong> = Temps Prévisionnel de Réalisation</span>
+        <span>📈 <strong>TER</strong> = Temps Effectif de Réalisation</span>
+        <span>📈 <strong>Écart</strong> = TER - TPR</span>
       </div>
     </div>
   );

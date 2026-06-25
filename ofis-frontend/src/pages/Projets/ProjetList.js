@@ -58,6 +58,7 @@ const ProjetList = () => {
     }
   };
 
+  // ===== FONCTION MODIFIÉE =====
   const getStatutProjet = (projet) => {
     const heuresConsommees = parseFloat(projet.heures_consommees) || 0;
     const estimationHeures = parseFloat(projet.estimation_heures) || 0;
@@ -73,6 +74,7 @@ const ProjetList = () => {
     const estEnRetardDelai = dateFinPrevue && aujourdhui > dateFinPrevue;
     const estTermine = heuresConsommees >= estimationHeures;
     
+    // 1. PRIORITÉ AUX ALERTES (dépassement, retard)
     if (estEnDepassementHeures) {
       return { message: '🔴 Dépassement heures', couleur: '#ef4444', fond: '#fee2e2' };
     }
@@ -82,6 +84,13 @@ const ProjetList = () => {
     if (estTermine) {
       return { message: '✅ Terminé', couleur: '#4caf50', fond: '#e8f5e9' };
     }
+    
+    // 2. CAS SPÉCIFIQUE : projet "en cours" (sans alerte) => ORANGE
+    if (projet.statut === 'en_cours') {
+      return { message: '🟠 En cours', couleur: '#f59e0b', fond: '#fef3c7' };
+    }
+    
+    // 3. AUTRES STATUTS (suspendu, etc.) => vert "dans les temps"
     return { message: '🟢 Dans les temps', couleur: '#4caf50', fond: '#e8f5e9' };
   };
 

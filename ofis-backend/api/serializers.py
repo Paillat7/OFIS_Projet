@@ -5,7 +5,7 @@ from .models import (
     RapportJournalier, LigneRapportJournalier,
     RapportHebdoCadre,
     Projet, HeureProjet, SousService, Technician, Notification,
-     Ticket, TicketHistorique
+    Ticket, TicketHistorique, AgendaTechnicien
 )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -148,8 +148,8 @@ class RapportHebdoCadreSerializer(serializers.ModelSerializer):
     class Meta:
         model = RapportHebdoCadre
         fields = ['id', 'cadre', 'cadre_name', 'sous_service', 'sous_service_name', 'sous_service_parent',
-                  'date_debut', 'date_fin', 'type', 'type_display', 
-                  'resume', 'actions_notables', 'difficultes', 'perspectives', 
+                  'date_debut', 'date_fin', 'type', 'type_display',
+                  'resume', 'actions_notables', 'difficultes', 'perspectives',
                   'nb_interventions', 'heures_total', 'tickets',
                   'created_at', 'updated_at']
         read_only_fields = ('cadre', 'created_at', 'updated_at')
@@ -157,11 +157,11 @@ class RapportHebdoCadreSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active', 'is_superuser', 'role']
-    
+
     def get_role(self, obj):
         if obj.is_superuser:
             return 'admin'
@@ -205,17 +205,30 @@ class ProjetSerializer(serializers.ModelSerializer):
         return [u.username for u in obj.intervenants.all()]
 
 
+# ===== TECHNICIAN SERIALIZER (avec disponibilités) =====
 class TechnicianSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     user_id = serializers.IntegerField(source='user.id', read_only=True)
     first_name = serializers.CharField(source='user.first_name', read_only=True)
     last_name = serializers.CharField(source='user.last_name', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = Technician
-        fields = ['id', 'user_id', 'username', 'first_name', 'last_name', 'email', 
-                  'sous_services', 'phone', 'hire_date', 'taux_horaire']
+        fields = [
+            'id', 'user_id', 'username', 'first_name', 'last_name', 'email',
+            'sous_services', 'phone', 'hire_date', 'taux_horaire',
+            'statut_actuel', 'commentaire', 'date_debut', 'date_fin'
+        ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        if request and request.user:
+            # Cacher le taux horaire aux techniciens (sauf s'ils sont staff ou superuser)
+            if not (request.user.is_staff or request.user.is_superuser):
+                data.pop('taux_horaire', None)
+        return data
 
 
 class SousServiceSerializer(serializers.ModelSerializer):
@@ -226,7 +239,7 @@ class SousServiceSerializer(serializers.ModelSerializer):
 
 class NotificationSerializer(serializers.ModelSerializer):
     projet_name = serializers.CharField(source='projet.nom', read_only=True)
-    
+
     class Meta:
         model = Notification
         fields = '__all__'
@@ -236,7 +249,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 # ===== TICKETS SERIALIZERS =====
 class TicketHistoriqueSerializer(serializers.ModelSerializer):
     utilisateur_name = serializers.CharField(source='utilisateur.username', read_only=True)
-    
+
     class Meta:
         model = TicketHistorique
         fields = '__all__'
@@ -245,18 +258,29 @@ class TicketHistoriqueSerializer(serializers.ModelSerializer):
 
 class TicketSerializer(serializers.ModelSerializer):
     client_name = serializers.SerializerMethodField()
-    technicien_nom = serializers.CharField(source='technicien_assigne.username', read_only=True, allow_null=True)
+    technicien_nom = serializers.CharField(source='technicien_assigne.username', read_only=True)
     cree_par_nom = serializers.CharField(source='cree_par.username', read_only=True)
     statut_display = serializers.CharField(source='get_statut_display', read_only=True)
     priorite_display = serializers.CharField(source='get_priorite_display', read_only=True)
     historique = TicketHistoriqueSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = Ticket
         fields = '__all__'
         read_only_fields = ('date_creation', 'date_modification', 'cree_par', 'numero')
-    
+
     def get_client_name(self, obj):
         if obj.client:
             return obj.client.company or f"{obj.client.firstName} {obj.client.lastName}"
         return None
+
+
+# ===== AGENDA TECHNICIEN SERIALIZER =====
+class AgendaTechnicienSerializer(serializers.ModelSerializer):
+    technicien_nom = serializers.CharField(source='technicien.user.username', read_only=True)
+    technicien_id = serializers.IntegerField(source='technicien.id', read_only=True)
+
+    class Meta:
+        model = AgendaTechnicien
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')

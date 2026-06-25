@@ -65,26 +65,6 @@ const OTEnCours = () => {
     }
   };
 
-  const getStatutBadge = (statut) => {
-    const config = {
-      planifie: { label: 'Planifié', color: '#f59e0b', bg: '#FEF3C7' },
-      en_cours: { label: 'En cours', color: '#3b82f6', bg: '#DBEAFE' }
-    };
-    const c = config[statut] || { label: statut, color: '#666', bg: '#f0f0f0' };
-    return (
-      <span style={{ 
-        background: c.bg, 
-        color: c.color, 
-        padding: '0.25rem 0.75rem', 
-        borderRadius: '20px', 
-        fontSize: '0.75rem', 
-        fontWeight: 500 
-      }}>
-        {c.label}
-      </span>
-    );
-  };
-
   const getAvancementBar = (heuresConsommees, estimationHeures) => {
     const hConsommees = parseFloat(heuresConsommees) || 0;
     const hEstimation = parseFloat(estimationHeures) || 0;
@@ -103,10 +83,46 @@ const OTEnCours = () => {
           }} />
         </div>
         <span style={{ fontSize: '0.7rem' }}>
-          {Math.round(pourcentage)}% ({hConsommees}h/{hEstimation}h)
+          {Math.round(pourcentage)}% ({hConsommees.toFixed(1)}h/{hEstimation.toFixed(0)}h)
         </span>
       </div>
     );
+  };
+
+  // ===== COULEUR DE LA LIGNE (délai + heures) =====
+  const getLigneCouleur = (ot) => {
+    if (!ot) return '#ffffff';
+    if (ot.statut === 'termine') return '#e8f5e9';
+
+    const estEnRetardDelai = ot.est_en_retard || false;
+    const heuresConsommees = parseFloat(ot.heures_consommees) || 0;
+    const heuresEstimees = parseFloat(ot.estimation_heures) || 0;
+    const ecartHeures = heuresConsommees - heuresEstimees;
+    const seuilHeures = 1.0;
+    const estEnRetardHeures = ecartHeures > seuilHeures;
+
+    if (estEnRetardDelai || estEnRetardHeures) return '#fee2e2';
+    if (ot.statut === 'en_cours') return '#fff3e0';
+    return '#e8f5e9';
+  };
+
+  // ===== STATUT VISUEL =====
+  const getStatutVisuel = (ot) => {
+    if (!ot) return { label: '-', couleur: '#6b7280' };
+    if (ot.statut === 'termine') return { label: '✅ Terminé', couleur: '#4caf50' };
+
+    const estEnRetardDelai = ot.est_en_retard || false;
+    const heuresConsommees = parseFloat(ot.heures_consommees) || 0;
+    const heuresEstimees = parseFloat(ot.estimation_heures) || 0;
+    const ecartHeures = heuresConsommees - heuresEstimees;
+    const seuilHeures = 1.0;
+    const estEnRetardHeures = ecartHeures > seuilHeures;
+
+    if (estEnRetardDelai && estEnRetardHeures) return { label: '🔴 Retard (délai + heures)', couleur: '#ef4444' };
+    if (estEnRetardDelai) return { label: '🔴 Retard (délai)', couleur: '#ef4444' };
+    if (estEnRetardHeures) return { label: '🔴 Dépassement d\'heures', couleur: '#ef4444' };
+    if (ot.statut === 'en_cours') return { label: '🟠 En cours', couleur: '#f59e0b' };
+    return { label: '🟢 Dans les temps', couleur: '#4caf50' };
   };
 
   if (loading) return <div className="loading">Chargement...</div>;
@@ -120,7 +136,7 @@ const OTEnCours = () => {
             <FaSearch style={{ position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)', color: '#999' }} />
             <input
               type="text"
-              placeholder="Rechercher par référence, objet, client..."
+              placeholder="Rechercher..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{ padding: '0.5rem 0.5rem 0.5rem 2rem', width: '280px', borderRadius: '4px', border: '1px solid #ccc' }}
@@ -202,53 +218,70 @@ const OTEnCours = () => {
           }}>
             <thead>
               <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #e0e0e0' }}>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Statut</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left' }}>Référence</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left' }}>Objet</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left' }}>Client</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left' }}>Techniciens</th>
-                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Heures</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>TPR (prévu)</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>TER (réel)</th>
+                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Écart</th>
                 <th style={{ padding: '0.75rem', textAlign: 'left' }}>Avancement</th>
-                <th style={{ padding: '0.75rem', textAlign: 'left' }}>Statut</th>
                 <th style={{ padding: '0.75rem', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {ots.map(ot => {
+                const bgColor = getLigneCouleur(ot);
+                const statutVisuel = getStatutVisuel(ot);
                 const heuresConsommees = parseFloat(ot.heures_consommees) || 0;
                 const estimationHeures = parseFloat(ot.estimation_heures) || 0;
+                const ecartHeures = heuresConsommees - estimationHeures;
                 const isTechnicien = ot.techniciens_ids?.includes(user?.id);
                 const peutSupprimer = isManager;
                 
-                // Récupération du nom du client
                 const clientName = ot.client_rapport_name || 
                                   ot.client_rapport?.company || 
                                   (ot.client_rapport ? `${ot.client_rapport.firstName || ''} ${ot.client_rapport.lastName || ''}` : '-');
-                
-                // Récupération des noms des techniciens
                 const techniciensList = ot.techniciens_names?.join(', ') || 
                                        ot.techniciens?.map(t => t.username).join(', ') || 
                                        '-';
                 
+                const ecartColor = ecartHeures > 1 ? '#ef4444' : ecartHeures < -1 ? '#10b981' : '#f59e0b';
+                const ecartLabel = ecartHeures > 1 ? '+' : '';
+                
                 return (
                   <tr 
                     key={ot.id} 
-                    style={{ borderBottom: '1px solid #e0e0e0' }} 
+                    style={{ 
+                      borderBottom: '1px solid #e0e0e0',
+                      backgroundColor: bgColor,
+                      transition: 'background-color 0.2s'
+                    }}
                     onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'} 
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = bgColor}
                   >
+                    <td style={{ padding: '0.75rem' }}>
+                      <span style={{ color: statutVisuel.couleur, fontWeight: 'bold', fontSize: '0.85rem' }}>
+                        {statutVisuel.label}
+                      </span>
+                    </td>
                     <td style={{ padding: '0.75rem', fontWeight: 500 }}>{ot.reference}</td>
                     <td style={{ padding: '0.75rem' }}>
                       {ot.objet?.substring(0, 50)}{ot.objet?.length > 50 ? '...' : ''}
                     </td>
                     <td style={{ padding: '0.75rem' }}>{clientName}</td>
                     <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{techniciensList}</td>
-                    <td style={{ padding: '0.75rem' }}>
-                      {heuresConsommees.toFixed(1)}/{estimationHeures.toFixed(0) || '-'}h
+                    <td style={{ padding: '0.75rem' }}>{estimationHeures.toFixed(0) || '-'}h</td>
+                    <td style={{ padding: '0.75rem' }}>{heuresConsommees.toFixed(1)}h</td>
+                    <td style={{ padding: '0.75rem', fontWeight: 'bold', color: ecartColor }}>
+                      {ecartLabel}{ecartHeures.toFixed(1)}h
+                      {ecartHeures > 1 && ' 🔴'}
+                      {ecartHeures < -1 && ' ✅'}
                     </td>
                     <td style={{ padding: '0.75rem', minWidth: '130px' }}>
                       {getAvancementBar(heuresConsommees, estimationHeures)}
                     </td>
-                    <td style={{ padding: '0.75rem' }}>{getStatutBadge(ot.statut)}</td>
                     <td style={{ padding: '0.75rem', textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                         <Link to={`/ordres-travail/${ot.id}`}>
@@ -288,9 +321,12 @@ const OTEnCours = () => {
         borderRadius: '8px'
       }}>
         <span>📊 <strong>Légende :</strong></span>
-        <span><span style={{ background: '#FEF3C7', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>Planifié</span> = OT non démarré</span>
-        <span><span style={{ background: '#DBEAFE', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>En cours</span> = OT en progression</span>
-        <span>📈 <strong>Avancement :</strong> (heures consommées / estimation) en %</span>
+        <span><span style={{ background: '#e8f5e9', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>🟢 Vert</span> = Dans les temps</span>
+        <span><span style={{ background: '#fff3e0', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>🟠 Orange</span> = En cours (OK)</span>
+        <span><span style={{ background: '#fee2e2', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>🔴 Rouge</span> = Retard</span>
+        <span>📈 <strong>TPR</strong> = Temps Prévisionnel de Réalisation</span>
+        <span>📈 <strong>TER</strong> = Temps Effectif de Réalisation</span>
+        <span>📈 <strong>Écart</strong> = TER - TPR (positif = dépassement)</span>
       </div>
     </div>
   );
