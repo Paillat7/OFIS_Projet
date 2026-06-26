@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
@@ -16,25 +16,42 @@ const TicketList = () => {
   const isAssistant = user?.role === 'assistant';
   const canCreate = isAssistant || isManagerOrAdmin;
 
+  const isMounted = useRef(true);
+  const abortControllerRef = useRef(null);
+
   useEffect(() => {
-    chargerTickets();
-  }, [filtreStatut, filtrePriorite]);
+    return () => {
+      isMounted.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const chargerTickets = async () => {
     setLoading(true);
+    abortControllerRef.current = new AbortController();
     try {
       const params = {};
       if (filtreStatut) params.statut = filtreStatut;
       if (filtrePriorite) params.priorite = filtrePriorite;
-      const data = await ticketService.getAll(params);
-      setTickets(Array.isArray(data) ? data : []);
+      const data = await ticketService.getAll(params, { signal: abortControllerRef.current.signal });
+      if (isMounted.current) {
+        setTickets(Array.isArray(data) ? data : []);
+      }
     } catch (error) {
-      console.error('Erreur chargement tickets:', error);
-      setTickets([]);
+      if (isMounted.current && error.name !== 'AbortError') {
+        console.error('Erreur chargement tickets:', error);
+        setTickets([]);
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    chargerTickets();
+  }, [filtreStatut, filtrePriorite]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Supprimer ce ticket ?')) {
@@ -80,7 +97,6 @@ const TicketList = () => {
         )}
       </div>
 
-      {/* Filtres */}
       <Card style={{ marginBottom: '1rem' }}>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <select value={filtreStatut} onChange={(e) => setFiltreStatut(e.target.value)} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}>
@@ -101,7 +117,6 @@ const TicketList = () => {
         </div>
       </Card>
 
-      {/* Liste des tickets */}
       <div style={{ display: 'grid', gap: '1rem' }}>
         {tickets.length === 0 ? (
           <Card><p>Aucun ticket trouvé.</p></Card>

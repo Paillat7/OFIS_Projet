@@ -1,5 +1,6 @@
 import React from 'react';
 import './Layout.css';
+import ofisLogo from '../../assets/images/ofis-logo.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -8,17 +9,17 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-left">
-          <img 
-            src="/images/ofis-logo.png" 
-            alt="OFIS" 
-            style={{ height: '30px', marginRight: '10px' }} 
+          <img
+            src={ofisLogo}
+            alt="OFIS"
+            style={{ height: '30px', marginRight: '10px' }}
           />
           <span className="footer-tagline">IT. Services. People. You trust.</span>
         </div>
         <div className="footer-right">
-          <a 
-            href="http://www.ofis-technologies.com" 
-            target="_blank" 
+          <a
+            href="http://www.ofis-technologies.com"
+            target="_blank"
             rel="noopener noreferrer"
             className="footer-link"
           >

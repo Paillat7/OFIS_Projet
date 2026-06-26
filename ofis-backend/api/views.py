@@ -17,7 +17,8 @@ from .models import (
     RapportJournalier, LigneRapportJournalier,
     RapportHebdoCadre,
     Projet, HeureProjet, SousService, Technician, Notification,
-    Ticket, TicketHistorique
+    Ticket, TicketHistorique,
+    AgendaTechnicien  # ← AJOUTE ICI
 )
 from .serializers import (
     ClientSerializer, OrdreTravailSerializer, DocumentOTSerializer,
@@ -25,7 +26,8 @@ from .serializers import (
     RapportHebdoCadreSerializer,
     UserSerializer, CustomTokenObtainPairSerializer,
     ProjetSerializer, HeureProjetSerializer, TechnicianSerializer, NotificationSerializer,
-     TicketSerializer, TicketHistoriqueSerializer
+    TicketSerializer, TicketHistoriqueSerializer,
+    AgendaTechnicienSerializer  # ← AJOUTE ICI
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -367,20 +369,13 @@ class OrdreTravailViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = OrdreTravail.objects.all()
         
+        # ===== FILTRAGE POUR LES TECHNICIENS =====
+        # Si l'utilisateur n'est ni staff ni superuser, il ne voit que ses OT assignés
         if not (user.is_staff or user.is_superuser):
-            try:
-                technician = Technician.objects.get(user=user)
-                if technician.sous_services.exists():
-                    techniciens = Technician.objects.filter(
-                        sous_services__in=technician.sous_services.all()
-                    ).distinct()
-                    techniciens_ids = [t.user.id for t in techniciens]
-                    queryset = queryset.filter(techniciens__in=techniciens_ids).distinct()
-                else:
-                    queryset = queryset.filter(techniciens=user)
-            except Technician.DoesNotExist:
-                queryset = queryset.filter(techniciens=user)
+            # Filtrer par le champ ManyToMany 'techniciens' (OT assignés directement au technicien)
+            queryset = queryset.filter(techniciens=user).distinct()
         
+        # ===== FILTRES EXISTANTS =====
         statut = self.request.query_params.get('statut')
         if statut:
             queryset = queryset.filter(statut=statut)
@@ -591,6 +586,7 @@ class OrdreTravailViewSet(viewsets.ModelViewSet):
 
 
 # ===== RAPPORTS JOURNALIERS =====
+# ===== RAPPORTS JOURNALIERS =====
 class RapportJournalierViewSet(viewsets.ModelViewSet):
     queryset = RapportJournalier.objects.all()
     serializer_class = RapportJournalierSerializer
@@ -604,19 +600,35 @@ class RapportJournalierViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = RapportJournalier.objects.all()
         
-        if not (user.is_staff or user.is_superuser):
-            try:
-                technician = Technician.objects.get(user=user)
+        # Si l'utilisateur est staff ou superuser → voit tout
+        if user.is_staff or user.is_superuser:
+            return queryset
+        
+        # Vérifier si l'utilisateur est un cadre
+        is_cadre = user.groups.filter(name='cadre').exists()
+        
+        try:
+            technician = Technician.objects.get(user=user)
+            
+            if is_cadre:
+                # Un cadre voit les rapports des techniciens de son sous-service
                 if technician.sous_services.exists():
+                    # Récupérer tous les techniciens du même sous-service
                     techniciens = Technician.objects.filter(
                         sous_services__in=technician.sous_services.all()
                     ).distinct()
                     techniciens_ids = [t.user.id for t in techniciens]
                     queryset = queryset.filter(technicien__in=techniciens_ids)
                 else:
-                    queryset = queryset.filter(technicien=user)
-            except Technician.DoesNotExist:
+                    # Si le cadre n'a pas de sous-service, il ne voit rien
+                    queryset = queryset.none()
+            else:
+                # Un technicien ne voit que ses propres rapports
                 queryset = queryset.filter(technicien=user)
+                
+        except Technician.DoesNotExist:
+            # Si l'utilisateur n'a pas de profil Technician, il ne voit rien
+            queryset = queryset.none()
         
         return queryset.distinct()
 
@@ -624,7 +636,6 @@ class RapportJournalierViewSet(viewsets.ModelViewSet):
         if self.request.user.is_staff or self.request.user.is_superuser:
             raise PermissionDenied("Un administrateur ne peut pas créer de rapport journalier")
         serializer.save(technicien=self.request.user)
-
 
 # ===== RAPPORTS HEBDOMADAIRES CADRE =====
 class RapportHebdoCadreViewSet(viewsets.ModelViewSet):
@@ -752,6 +763,7 @@ class DocumentOTViewSet(viewsets.ModelViewSet):
 
 
 # ===== TECHNICIENS =====
+# ===== TECHNICIENS =====
 class TechnicianViewSet(viewsets.ModelViewSet):
     queryset = Technician.objects.all()
     serializer_class = TechnicianSerializer
@@ -760,6 +772,139 @@ class TechnicianViewSet(viewsets.ModelViewSet):
     search_fields = ['user__username', 'user__first_name', 'user__last_name', 'phone']
     ordering_fields = ['user__username', 'hire_date', 'taux_horaire']
     ordering = ['user__username']
+
+    # ===== DISPONIBILITÉ D'UN TECHNICIEN SPÉCIFIQUE =====
+    @action(detail=True, methods=['get', 'patch'])
+    def disponibilite(self, request, pk=None):
+        technician = self.get_object()
+        
+        if request.method == 'GET':
+            return Response({
+                'statut_actuel': technician.statut_actuel,
+                'commentaire': technician.commentaire,
+                'date_debut': technician.date_debut,
+                'date_fin': technician.date_fin,
+            })
+        
+        # PATCH - Mise à jour de la disponibilité
+        if not (request.user.is_staff or request.user == technician.user):
+            return Response({'error': 'Non autorisé'}, status=403)
+        
+        statut = request.data.get('statut')
+        if statut in ['disponible', 'intervention', 'mission', 'conges']:
+            technician.statut_actuel = statut
+        if 'commentaire' in request.data:
+            technician.commentaire = request.data['commentaire']
+        if 'date_debut' in request.data:
+            technician.date_debut = request.data['date_debut']
+        if 'date_fin' in request.data:
+            technician.date_fin = request.data['date_fin']
+        
+        technician.save()
+        return Response({'status': 'Disponibilité mise à jour'})
+
+    # ===== LISTE DES DISPONIBILITÉS DE TOUS LES TECHNICIENS =====
+    @action(detail=False, methods=['get'])
+    def disponibilites(self, request):
+        techniciens = Technician.objects.all()
+        data = []
+        for tech in techniciens:
+            data.append({
+                'id': tech.id,
+                'username': tech.user.username,
+                'first_name': tech.user.first_name,
+                'last_name': tech.user.last_name,
+                'taux_horaire': tech.taux_horaire,
+                'statut_actuel': tech.statut_actuel,
+                'commentaire': tech.commentaire,
+                'date_debut': tech.date_debut,
+                'date_fin': tech.date_fin,
+            })
+        return Response(data)
+
+
+# ===== AGENDA TECHNICIEN VIEWSET =====
+class AgendaTechnicienViewSet(viewsets.ModelViewSet):
+    queryset = AgendaTechnicien.objects.all()
+    serializer_class = AgendaTechnicienSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['technicien__user__username', 'commentaire']
+    ordering_fields = ['date', 'heure_debut']
+    ordering = ['date', 'heure_debut']
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = super().get_queryset()
+
+        # Si l'utilisateur n'est pas staff/superuser, il ne voit que son propre agenda
+        if not (user.is_staff or user.is_superuser):
+            try:
+                technician = Technician.objects.get(user=user)
+                queryset = queryset.filter(technicien=technician)
+            except Technician.DoesNotExist:
+                queryset = queryset.none()
+
+        date = self.request.query_params.get('date')
+        if date:
+            queryset = queryset.filter(date=date)
+        technicien_id = self.request.query_params.get('technicien')
+        if technicien_id:
+            queryset = queryset.filter(technicien_id=technicien_id)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        technicien = serializer.validated_data.get('technicien')
+        # Seul le technicien peut créer son propre agenda
+        if not (technicien.user == user):
+            raise PermissionDenied("Vous ne pouvez créer un agenda que pour vous-même.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        instance = self.get_object()
+        technicien = instance.technicien
+        # Seul le technicien peut modifier son propre agenda
+        if not (technicien.user == user):
+            raise PermissionDenied("Vous ne pouvez modifier que votre propre agenda.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        technicien = instance.technicien
+        # Seul le technicien peut supprimer son propre agenda
+        if not (technicien.user == user):
+            raise PermissionDenied("Vous ne pouvez supprimer que votre propre agenda.")
+        instance.delete()
+
+    @action(detail=False, methods=['get'])
+    def disponibilites_jour(self, request):
+        date = request.query_params.get('date')
+        if not date:
+            return Response({'error': 'Paramètre date requis'}, status=400)
+
+        techniciens = Technician.objects.all()
+        disponibles = []
+
+        for tech in techniciens:
+            occupe = AgendaTechnicien.objects.filter(
+                technicien=tech,
+                date=date,
+                statut__in=['intervention', 'indisponible', 'conges']
+            ).exists()
+
+            if not occupe and tech.statut_actuel != 'conges':
+                disponibles.append({
+                    'id': tech.id,
+                    'username': tech.user.username,
+                    'first_name': tech.user.first_name,
+                    'last_name': tech.user.last_name,
+                    'taux_horaire': tech.taux_horaire,
+                })
+
+        return Response(disponibles)
 
 
 # ===== NOTIFICATIONS =====
@@ -802,21 +947,43 @@ class DashboardStatsView(generics.GenericAPIView):
         user = request.user
         is_staff = user.is_staff or user.is_superuser
 
-        ots = OrdreTravail.objects.all()
+        # ===== RÉCUPÉRATION DES SOUS‑SERVICES DE L'UTILISATEUR (IDs) =====
+        sous_services_ids = []
         if not is_staff:
             try:
                 technician = Technician.objects.get(user=user)
-                if technician.sous_services.exists():
-                    techniciens = Technician.objects.filter(
-                        sous_services__in=technician.sous_services.all()
-                    ).distinct()
-                    techniciens_ids = [t.user.id for t in techniciens]
-                    ots = ots.filter(techniciens__in=techniciens_ids)
-                else:
-                    ots = ots.filter(techniciens=user)
+                sous_services_ids = list(technician.sous_services.values_list('id', flat=True))
             except Technician.DoesNotExist:
-                ots = ots.filter(techniciens=user)
+                pass
 
+        # ===== 1. FILTRAGE DES OT =====
+        ots = OrdreTravail.objects.all()
+        if not is_staff and sous_services_ids:
+            ots = ots.filter(
+                techniciens__technician_profile__sous_services__in=sous_services_ids
+            ).distinct()
+        elif not is_staff:
+            ots = ots.filter(techniciens=user)
+
+        # ===== 2. FILTRAGE DES RAPPORTS JOURNALIERS =====
+        rapports = RapportJournalier.objects.all()
+        if not is_staff and sous_services_ids:
+            rapports = rapports.filter(
+                technicien__technician_profile__sous_services__in=sous_services_ids
+            ).distinct()
+        elif not is_staff:
+            rapports = rapports.filter(technicien=user)
+
+        # ===== 3. FILTRAGE DES SUIVIS OT =====
+        suivis = SuiviOT.objects.all()
+        if not is_staff and sous_services_ids:
+            suivis = suivis.filter(
+                technicien__technician_profile__sous_services__in=sous_services_ids
+            ).distinct()
+        elif not is_staff:
+            suivis = suivis.filter(technicien=user)
+
+        # ===== 4. CALCULS STATISTIQUES =====
         ot_counts = {
             'planifie': ots.filter(statut='planifie').count(),
             'en_cours': ots.filter(statut='en_cours').count(),
@@ -825,39 +992,41 @@ class DashboardStatsView(generics.GenericAPIView):
             'rejete': ots.filter(statut_validation='rejete').count(),
         }
 
-        rapports = RapportJournalier.objects.all()
-        if not is_staff:
-            try:
-                technician = Technician.objects.get(user=user)
-                if technician.sous_services.exists():
-                    techniciens_ids = [t.user.id for t in Technician.objects.filter(
-                        sous_services__in=technician.sous_services.all()
-                    ).distinct()]
-                    rapports = rapports.filter(technicien__in=techniciens_ids)
+        from django.utils import timezone
+        ots_dans_les_temps = 0
+        ots_en_cours = 0
+        ots_en_retard = 0
+        for ot in ots:
+            if ot.statut == 'termine':
+                ots_dans_les_temps += 1
+            elif ot.statut == 'en_cours':
+                if ot.date_fin and timezone.now().date() > ot.date_fin:
+                    ots_en_retard += 1
                 else:
-                    rapports = rapports.filter(technicien=user)
-            except Technician.DoesNotExist:
-                rapports = rapports.filter(technicien=user)
-        
+                    ots_en_cours += 1
+            elif ot.statut == 'planifie':
+                if ot.date_fin and timezone.now().date() > ot.date_fin:
+                    ots_en_retard += 1
+                else:
+                    ots_dans_les_temps += 1
+
+        ots_retard_data = []
+        for ot in ots:
+            if ot.est_en_retard:
+                ots_retard_data.append({
+                    'id': ot.id,
+                    'reference': ot.reference,
+                    'objet': ot.objet or 'Sans objet',
+                    'client': ot.client_rapport.company or f"{ot.client_rapport.firstName} {ot.client_rapport.lastName}",
+                    'date_fin_prevue': ot.date_fin.isoformat() if ot.date_fin else None,
+                    'jours_retard': ot.jours_retard,
+                    'techniciens': [t.username for t in ot.techniciens.all()],
+                })
+
         total_heures = 0
         for rapport in rapports:
             for ligne in rapport.lignes.all():
                 total_heures += float(ligne.duree)
-
-        suivis = SuiviOT.objects.all()
-        if not is_staff:
-            try:
-                technician = Technician.objects.get(user=user)
-                if technician.sous_services.exists():
-                    techniciens_ids = [t.user.id for t in Technician.objects.filter(
-                        sous_services__in=technician.sous_services.all()
-                    ).distinct()]
-                    suivis = suivis.filter(technicien__in=techniciens_ids)
-                else:
-                    suivis = suivis.filter(technicien=user)
-            except Technician.DoesNotExist:
-                suivis = suivis.filter(technicien=user)
-
         for suivi in suivis:
             total_heures += float(suivi.heures)
 
@@ -865,11 +1034,11 @@ class DashboardStatsView(generics.GenericAPIView):
         total_rapports_hebdo = RapportHebdoCadre.objects.filter(cadre=user if not is_staff else models.Q()).count()
         total_clients = Client.objects.filter(is_active=True if not is_staff else models.Q()).count()
 
+        # Heures par jour
         heures_par_jour = []
         for i in range(6, -1, -1):
             date = datetime.now().date() - timedelta(days=i)
             date_str = date.strftime('%Y-%m-%d')
-            
             heures_jour = 0
             rapports_jour = rapports.filter(date=date_str)
             for rapport in rapports_jour:
@@ -878,89 +1047,70 @@ class DashboardStatsView(generics.GenericAPIView):
             suivis_jour = suivis.filter(date=date_str)
             for suivi in suivis_jour:
                 heures_jour += float(suivi.heures)
-            
             heures_par_jour.append({
                 'date': date.strftime('%d/%m'),
                 'heures': round(heures_jour, 1)
             })
 
+        # Heures par technicien (uniquement les techniciens du même sous‑service)
         heures_par_technicien = []
         techniciens = User.objects.filter(is_staff=False, is_superuser=False)
-        
-        if not is_staff:
-            try:
-                technician = Technician.objects.get(user=user)
-                if technician.sous_services.exists():
-                    techniciens_ids = [t.user.id for t in Technician.objects.filter(
-                        sous_services__in=technician.sous_services.all()
-                    ).distinct()]
-                    techniciens = techniciens.filter(id__in=techniciens_ids)
-            except Technician.DoesNotExist:
-                pass
-        
+        if not is_staff and sous_services_ids:
+            techniciens = techniciens.filter(
+                technician_profile__sous_services__in=sous_services_ids
+            ).distinct()
+        elif not is_staff:
+            techniciens = techniciens.filter(id=user.id)
+
         for technicien in techniciens:
             total_suivi = SuiviOT.objects.filter(technicien=technicien).aggregate(total=Sum('heures'))['total'] or 0
             total_rapport = 0
             for rapport in RapportJournalier.objects.filter(technicien=technicien):
                 for ligne in rapport.lignes.all():
                     total_rapport += float(ligne.duree)
-            
             total = float(total_suivi) + total_rapport
             if total > 0:
                 heures_par_technicien.append({
                     'nom': technicien.username,
                     'heures': round(total, 1)
                 })
-        
         heures_par_technicien.sort(key=lambda x: x['heures'], reverse=True)
 
+        # Répartition par sous‑service
         repartition_sous_service = []
-        for ss in SousService.objects.all():
-            total_heures_ss = 0
-            techniciens_ss = Technician.objects.filter(sous_services=ss)
-            for tech in techniciens_ss:
-                for rapport in RapportJournalier.objects.filter(technicien=tech.user):
-                    for ligne in rapport.lignes.all():
-                        total_heures_ss += float(ligne.duree)
-                for suivi in SuiviOT.objects.filter(technicien=tech.user):
-                    total_heures_ss += float(suivi.heures)
-            
-            if total_heures_ss > 0:
-                repartition_sous_service.append({
-                    'nom': f"{ss.service_parent} - {ss.nom}",
-                    'heures': round(total_heures_ss, 1)
-                })
+        if is_staff or sous_services_ids:
+            ss_queryset = SousService.objects.all()
+            if not is_staff:
+                ss_queryset = SousService.objects.filter(id__in=sous_services_ids)
+            for ss in ss_queryset:
+                total_heures_ss = 0
+                techniciens_ss = Technician.objects.filter(sous_services=ss)
+                for tech in techniciens_ss:
+                    for rapport in RapportJournalier.objects.filter(technicien=tech.user):
+                        for ligne in rapport.lignes.all():
+                            total_heures_ss += float(ligne.duree)
+                    for suivi in SuiviOT.objects.filter(technicien=tech.user):
+                        total_heures_ss += float(suivi.heures)
+                if total_heures_ss > 0:
+                    repartition_sous_service.append({
+                        'nom': f"{ss.service_parent} - {ss.nom}",
+                        'heures': round(total_heures_ss, 1)
+                    })
 
+        # Évolution mensuelle
         evolution_mensuelle = []
         aujourdhui = datetime.now().date()
-        
         for i in range(5, -1, -1):
             mois = aujourdhui.replace(day=1) - timedelta(days=30*i)
             mois_suivant = (mois.replace(day=28) + timedelta(days=4)).replace(day=1)
-            
             total_mois = 0
-            rapports_mois = RapportJournalier.objects.filter(date__gte=mois, date__lt=mois_suivant)
-            suivis_mois = SuiviOT.objects.filter(date__gte=mois, date__lt=mois_suivant)
-            
-            if not is_staff:
-                try:
-                    technician = Technician.objects.get(user=user)
-                    if technician.sous_services.exists():
-                        techniciens_ids = [t.user.id for t in Technician.objects.filter(
-                            sous_services__in=technician.sous_services.all()
-                        ).distinct()]
-                        rapports_mois = rapports_mois.filter(technicien__in=techniciens_ids)
-                        suivis_mois = suivis_mois.filter(technicien__in=techniciens_ids)
-                except Technician.DoesNotExist:
-                    pass
-            
+            rapports_mois = rapports.filter(date__gte=mois, date__lt=mois_suivant)
+            suivis_mois = suivis.filter(date__gte=mois, date__lt=mois_suivant)
             for rapport in rapports_mois:
                 for ligne in rapport.lignes.all():
                     total_mois += float(ligne.duree)
-            
             for suivi in suivis_mois:
                 total_mois += float(suivi.heures)
-            
             evolution_mensuelle.append({
                 'mois': mois.strftime('%b %Y'),
                 'heures': round(total_mois, 1)
@@ -968,6 +1118,13 @@ class DashboardStatsView(generics.GenericAPIView):
 
         return Response({
             'ot_counts': ot_counts,
+            'ot_kpi': {
+                'dans_les_temps': ots_dans_les_temps,
+                'en_cours': ots_en_cours,
+                'en_retard': ots_en_retard,
+                'total': ots.count(),
+            },
+            'ots_retard': ots_retard_data,
             'total_heures': round(total_heures, 1),
             'total_rapports_journaliers': total_rapports_journaliers,
             'total_rapports_hebdo': total_rapports_hebdo,
@@ -977,6 +1134,7 @@ class DashboardStatsView(generics.GenericAPIView):
             'repartition_sous_service': repartition_sous_service,
             'evolution_mensuelle': evolution_mensuelle,
         })
+
 
 
 # ===== FONCTIONS UTILITAIRES =====
@@ -1005,6 +1163,9 @@ def test_login(request):
     return Response({'error': 'Invalid credentials'}, status=400)
 
 # ===== TICKETS =====
+
+
+# ===== TICKETS =====
 # ===== TICKETS =====
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
@@ -1014,141 +1175,36 @@ class TicketViewSet(viewsets.ModelViewSet):
     search_fields = ['titre', 'description', 'client__company', 'numero']
     ordering_fields = ['date_creation', 'priorite', 'statut', 'numero']
     ordering = ['-date_creation']
-    
+
     def get_queryset(self):
         user = self.request.user
         queryset = Ticket.objects.all()
-        
-        # Vérifier les groupes
-        is_technicien = user.groups.filter(name='technicien').exists()
-        is_manager = user.is_staff or user.is_superuser
-        
-        # Technicien : ne voit que ses tickets assignés
-        if is_technicien and not is_manager:
-            queryset = queryset.filter(technicien_assigne=user)
-        
-        # Filtres
+
+        if not (user.is_staff or user.is_superuser):
+            try:
+                technician = Technician.objects.get(user=user)
+                sous_services_ids = list(technician.sous_services.values_list('id', flat=True))
+                if sous_services_ids:
+                    queryset = queryset.filter(
+                        technicien_assigne__technician_profile__sous_services__in=sous_services_ids
+                    ).distinct()
+                else:
+                    queryset = queryset.filter(technicien_assigne=user)
+            except Technician.DoesNotExist:
+                queryset = queryset.filter(technicien_assigne=user)
+
+        # Filtres additionnels
         statut = self.request.query_params.get('statut')
         if statut:
             queryset = queryset.filter(statut=statut)
-        
         priorite = self.request.query_params.get('priorite')
         if priorite:
             queryset = queryset.filter(priorite=priorite)
-        
         client_id = self.request.query_params.get('client')
         if client_id:
             queryset = queryset.filter(client_id=client_id)
-        
         technicien_id = self.request.query_params.get('technicien')
         if technicien_id:
             queryset = queryset.filter(technicien_assigne_id=technicien_id)
-        
+
         return queryset
-    
-    def perform_create(self, serializer):
-        serializer.save(cree_par=self.request.user)
-        TicketHistorique.objects.create(
-            ticket=serializer.instance,
-            utilisateur=self.request.user,
-            action='Création du ticket',
-            details=f"Ticket créé avec priorité {serializer.instance.get_priorite_display()}"
-        )
-    
-    @action(detail=True, methods=['post'])
-    def assigner(self, request, pk=None):
-        ticket = self.get_object()
-        technicien_id = request.data.get('technicien_id')
-        
-        if not technicien_id:
-            return Response({'error': 'technicien_id requis'}, status=400)
-        
-        try:
-            technicien = User.objects.get(id=technicien_id)
-        except User.DoesNotExist:
-            return Response({'error': 'Technicien non trouvé'}, status=404)
-        
-        ancien_technicien = ticket.technicien_assigne
-        ticket.technicien_assigne = technicien
-        ticket.save()
-        
-        TicketHistorique.objects.create(
-            ticket=ticket,
-            utilisateur=request.user,
-            action='Assignation',
-            details=f"Assigné à {technicien.username} (était {ancien_technicien.username if ancien_technicien else 'non assigné'})"
-        )
-        
-        return Response({'status': 'Technicien assigné'})
-    
-    @action(detail=True, methods=['post'])
-    def changer_statut(self, request, pk=None):
-        ticket = self.get_object()
-        nouveau_statut = request.data.get('statut')
-        
-        if nouveau_statut not in ['nouveau', 'en_cours', 'resolu', 'ferme']:
-            return Response({'error': 'Statut invalide'}, status=400)
-        
-        ancien_statut = ticket.statut
-        ticket.statut = nouveau_statut
-        
-        if nouveau_statut == 'resolu' and not ticket.date_resolution:
-            ticket.date_resolution = timezone.now()
-        elif nouveau_statut == 'ferme' and not ticket.date_fermeture:
-            ticket.date_fermeture = timezone.now()
-        
-        ticket.save()
-        
-        TicketHistorique.objects.create(
-            ticket=ticket,
-            utilisateur=request.user,
-            action='Changement de statut',
-            details=f"Statut changé de {ancien_statut} à {nouveau_statut}"
-        )
-        
-        return Response({'status': 'Statut mis à jour'})
-    
-    @action(detail=True, methods=['post'])
-    def ajouter_temps(self, request, pk=None):
-        ticket = self.get_object()
-        heures = request.data.get('heures')
-        
-        if not heures:
-            return Response({'error': 'heures requis'}, status=400)
-        
-        try:
-            heures = float(heures)
-        except ValueError:
-            return Response({'error': 'heures doit être un nombre'}, status=400)
-        
-        ticket.temps_passe = float(ticket.temps_passe) + heures
-        ticket.save()
-        
-        TicketHistorique.objects.create(
-            ticket=ticket,
-            utilisateur=request.user,
-            action='Ajout de temps',
-            details=f"{heures} heures ajoutées (total: {ticket.temps_passe}h)"
-        )
-        
-        return Response({'status': 'Temps ajouté', 'total': ticket.temps_passe})
-    
-    @action(detail=True, methods=['post'])
-    def ajouter_solution(self, request, pk=None):
-        ticket = self.get_object()
-        solution = request.data.get('solution')
-        
-        if not solution:
-            return Response({'error': 'solution requise'}, status=400)
-        
-        ticket.solution = solution
-        ticket.save()
-        
-        TicketHistorique.objects.create(
-            ticket=ticket,
-            utilisateur=request.user,
-            action='Solution ajoutée',
-            details=solution[:200]
-        )
-        
-        return Response({'status': 'Solution ajoutée'})

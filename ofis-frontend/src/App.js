@@ -77,6 +77,7 @@ import OTHistorique from './pages/OT/OTHistorique';
 
 // Techniciens
 import TechnicianList from './pages/Techniciens/TechnicianList';
+import Agenda from './pages/Techniciens/Agenda';
 
 // Notifications
 import NotificationList from './pages/Notifications/NotificationList';
@@ -234,7 +235,10 @@ function App() {
           <Route path="projets/:id" element={<RoleProtectedRoute allowedRoles={['cadre', 'manager', 'admin']}><ProjetDetail /></RoleProtectedRoute>} />
           <Route path="projets/:id/historique" element={<RoleProtectedRoute allowedRoles={['cadre', 'manager', 'admin']}><ProjetHistorique /></RoleProtectedRoute>} />
 
-          <Route path="techniciens" element={<RoleProtectedRoute allowedRoles={['manager','admin']}><TechnicianList /></RoleProtectedRoute>} />
+          {/* ===== TECHNICIENS - GESTION ===== */}
+          <Route path="techniciens/taux-horaires" element={<RoleProtectedRoute allowedRoles={['manager','admin']}><TechnicianList /></RoleProtectedRoute>} />
+          <Route path="techniciens/agenda" element={<RoleProtectedRoute allowedRoles={['manager','admin','technicien','cadre']}><Agenda /></RoleProtectedRoute>} />
+
           <Route path="notifications" element={<RoleProtectedRoute allowedRoles={['manager','admin','cadre']}><NotificationList /></RoleProtectedRoute>} />
 
           {/* Tickets */}

@@ -4,31 +4,29 @@ import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { ticketService } from '../../services/ticketService';
-import api from '../../services/api';
 import { authService } from '../../services/authService';
-import { FaArrowLeft, FaUserCheck, FaClock, FaCheckCircle } from 'react-icons/fa';
+import { FaArrowLeft, FaClock, FaCheckCircle } from 'react-icons/fa';
 
 const TicketDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [techniciens, setTechniciens] = useState([]);
   const [showTempsForm, setShowTempsForm] = useState(false);
   const [tempsValue, setTempsValue] = useState('');
   const [showSolutionForm, setShowSolutionForm] = useState(false);
   const [solutionValue, setSolutionValue] = useState('');
   const user = authService.getCurrentUser();
+
+  // Vérifier si l'utilisateur connecté est le technicien assigné au ticket
+  const isAssignedTechnicien = ticket?.technicien_assigne === user?.id;
   const isManagerOrAdmin = user?.role === 'manager' || user?.role === 'admin';
-  const isAssistant = user?.role === 'assistant';
-  const isTechnicien = user?.role === 'technicien';
-  const canAssign = isManagerOrAdmin;
-  const canAddTime = isTechnicien || isManagerOrAdmin;
-  const canAddSolution = isTechnicien || isManagerOrAdmin;
+
+  // Le technicien assigné OU le manager/admin peuvent agir
+  const canAct = isAssignedTechnicien || isManagerOrAdmin;
 
   useEffect(() => {
     chargerTicket();
-    chargerTechniciens();
   }, [id]);
 
   const chargerTicket = async () => {
@@ -40,27 +38,6 @@ const TicketDetail = () => {
       console.error('Erreur chargement ticket:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const chargerTechniciens = async () => {
-    try {
-      const users = await api.getUsers();
-      const techniciensData = users.filter(u => u.role === 'technicien');
-      setTechniciens(techniciensData);
-    } catch (error) {
-      console.error('Erreur chargement techniciens:', error);
-    }
-  };
-
-  const handleAssigner = async (technicienId) => {
-    if (!technicienId) return;
-    try {
-      await ticketService.assigner(id, technicienId);
-      chargerTicket();
-      alert('Technicien assigné');
-    } catch (error) {
-      alert('Erreur lors de l\'assignation');
     }
   };
 
@@ -160,34 +137,40 @@ const TicketDetail = () => {
         <p><strong>Temps passé:</strong> {ticket.temps_passe} heures</p>
         {ticket.solution && <p><strong>Solution:</strong> {ticket.solution}</p>}
 
-        {/* Actions */}
-        {!estFerme && (
+        {/* ===== ACTIONS ===== */}
+        {!estFerme && canAct && (
           <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #ddd' }}>
             <h3>Actions</h3>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-              {canAssign && ticket.statut === 'nouveau' && (
-                <select onChange={(e) => handleAssigner(e.target.value)} defaultValue="" style={{ padding: '0.5rem' }}>
-                  <option value="">Assigner un technicien</option>
-                  {techniciens.map(t => (
-                    <option key={t.id} value={t.id}>{t.username}</option>
-                  ))}
-                </select>
+              {/* Prendre en charge - uniquement pour le technicien assigné */}
+              {isAssignedTechnicien && ticket.statut === 'nouveau' && (
+                <Button size="small" variant="primary" onClick={() => handleChangerStatut('en_cours')}>
+                  Prendre en charge
+                </Button>
               )}
-              {ticket.statut === 'nouveau' && (
-                <Button size="small" variant="primary" onClick={() => handleChangerStatut('en_cours')}>Prendre en charge</Button>
+
+              {/* Marquer résolu - technicien assigné ou manager */}
+              {canAct && ticket.statut === 'en_cours' && (
+                <Button size="small" variant="success" onClick={() => handleChangerStatut('resolu')}>
+                  Marquer comme résolu
+                </Button>
               )}
-              {ticket.statut === 'en_cours' && (
-                <Button size="small" variant="success" onClick={() => handleChangerStatut('resolu')}>Marquer comme résolu</Button>
-              )}
-              {ticket.statut === 'resolu' && isManagerOrAdmin && (
-                <Button size="small" variant="secondary" onClick={() => handleChangerStatut('ferme')}>Fermer</Button>
+
+              {/* Fermer - uniquement manager */}
+              {isManagerOrAdmin && ticket.statut === 'resolu' && (
+                <Button size="small" variant="secondary" onClick={() => handleChangerStatut('ferme')}>
+                  Fermer
+                </Button>
               )}
             </div>
 
-            {canAddTime && ticket.statut !== 'ferme' && (
+            {/* Ajouter du temps - technicien assigné ou manager */}
+            {canAct && ticket.statut !== 'ferme' && (
               <div style={{ marginBottom: '1rem' }}>
                 {!showTempsForm ? (
-                  <Button size="small" variant="outline" onClick={() => setShowTempsForm(true)}><FaClock /> Ajouter du temps</Button>
+                  <Button size="small" variant="outline" onClick={() => setShowTempsForm(true)}>
+                    <FaClock /> Ajouter du temps
+                  </Button>
                 ) : (
                   <form onSubmit={handleAjouterTemps} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <Input type="number" step="0.5" value={tempsValue} onChange={(e) => setTempsValue(e.target.value)} placeholder="Heures" style={{ width: '100px' }} required />
@@ -198,10 +181,13 @@ const TicketDetail = () => {
               </div>
             )}
 
-            {canAddSolution && ticket.statut !== 'ferme' && !ticket.solution && (
+            {/* Ajouter une solution - technicien assigné ou manager */}
+            {canAct && ticket.statut !== 'ferme' && !ticket.solution && (
               <div>
                 {!showSolutionForm ? (
-                  <Button size="small" variant="outline" onClick={() => setShowSolutionForm(true)}><FaCheckCircle /> Ajouter une solution</Button>
+                  <Button size="small" variant="outline" onClick={() => setShowSolutionForm(true)}>
+                    <FaCheckCircle /> Ajouter une solution
+                  </Button>
                 ) : (
                   <form onSubmit={handleAjouterSolution}>
                     <Input textarea value={solutionValue} onChange={(e) => setSolutionValue(e.target.value)} placeholder="Décrivez la solution..." rows="3" required />

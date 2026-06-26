@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaSignOutAlt } from 'react-icons/fa';
 import NotificationBell from './NotificationBell';
 import './Layout.css';
+import ofisLogo from '../../assets/images/ofis-logo.png';
 
 const Header = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -16,10 +17,10 @@ const Header = ({ user, onLogout }) => {
     <header className="header">
       <div className="header-left">
         <Link to="/dashboard" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img 
-            src="/images/ofis-logo.png" 
-            alt="OFIS" 
-            style={{ height: '35px' }} 
+          <img
+            src={ofisLogo}
+            alt="OFIS"
+            style={{ height: '35px' }}
           />
           <div>
             <span className="logo-text">OFIS</span>

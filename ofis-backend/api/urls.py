@@ -13,6 +13,7 @@ router.register(r'documents-ot', views.DocumentOTViewSet, basename='documentot')
 router.register(r'technicians', views.TechnicianViewSet, basename='technician')
 router.register(r'notifications', views.NotificationViewSet, basename='notification')
 router.register(r'tickets', views.TicketViewSet, basename='ticket')
+router.register(r'agenda', views.AgendaTechnicienViewSet, basename='agenda')  # ← AJOUT
 
 urlpatterns = [
     path('', include(router.urls)),

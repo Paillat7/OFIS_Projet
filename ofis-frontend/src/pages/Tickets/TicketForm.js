@@ -19,6 +19,7 @@ const TicketForm = () => {
     client: '',
     priorite: 'moyenne',
     statut: 'nouveau',
+    technicien_assigne: '', // ← AJOUT : technicien assigné
   });
 
   useEffect(() => {
@@ -56,6 +57,7 @@ const TicketForm = () => {
         client: data.client || '',
         priorite: data.priorite || 'moyenne',
         statut: data.statut || 'nouveau',
+        technicien_assigne: data.technicien_assigne || '',
       });
     } catch (error) {
       console.error('Erreur chargement ticket:', error);
@@ -73,6 +75,13 @@ const TicketForm = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // Validation : technicien obligatoire
+      if (!form.technicien_assigne) {
+        alert('Veuillez assigner un technicien');
+        setLoading(false);
+        return;
+      }
+      
       if (id) {
         await ticketService.update(id, form);
       } else {
@@ -116,26 +125,65 @@ const TicketForm = () => {
           />
           <div className="form-group">
             <label>Client *</label>
-            <select name="client" value={form.client} onChange={handleChange} required style={{ width: '100%', padding: '0.5rem' }}>
+            <select
+              name="client"
+              value={form.client}
+              onChange={handleChange}
+              required
+              style={{ width: '100%', padding: '0.5rem' }}
+            >
               <option value="">Sélectionner un client</option>
               {clients.map(c => (
-                <option key={c.id} value={c.id}>{c.company || `${c.firstName} ${c.lastName}`}</option>
+                <option key={c.id} value={c.id}>
+                  {c.company || `${c.firstName} ${c.lastName}`}
+                </option>
               ))}
             </select>
           </div>
+
+          {/* ===== CHAMP TECHNICIEN ASSIGNÉ (OBLIGATOIRE) ===== */}
+          <div className="form-group">
+            <label>Technicien assigné *</label>
+            <select
+              name="technicien_assigne"
+              value={form.technicien_assigne}
+              onChange={handleChange}
+              required
+              style={{ width: '100%', padding: '0.5rem' }}
+            >
+              <option value="">Sélectionner un technicien</option>
+              {techniciens.map(t => (
+                <option key={t.id} value={t.id}>
+                  {t.username} ({t.first_name} {t.last_name})
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="form-group">
             <label>Priorité *</label>
-            <select name="priorite" value={form.priorite} onChange={handleChange} style={{ width: '100%', padding: '0.5rem' }}>
+            <select
+              name="priorite"
+              value={form.priorite}
+              onChange={handleChange}
+              style={{ width: '100%', padding: '0.5rem' }}
+            >
               <option value="basse">Basse</option>
               <option value="moyenne">Moyenne</option>
               <option value="haute">Haute</option>
               <option value="critique">Critique</option>
             </select>
           </div>
+
           {id && (
             <div className="form-group">
               <label>Statut</label>
-              <select name="statut" value={form.statut} onChange={handleChange} style={{ width: '100%', padding: '0.5rem' }}>
+              <select
+                name="statut"
+                value={form.statut}
+                onChange={handleChange}
+                style={{ width: '100%', padding: '0.5rem' }}
+              >
                 <option value="nouveau">Nouveau</option>
                 <option value="en_cours">En cours</option>
                 <option value="resolu">Résolu</option>
@@ -143,6 +191,7 @@ const TicketForm = () => {
               </select>
             </div>
           )}
+
           <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
             <Button type="submit" variant="primary" disabled={loading}>
               {loading ? 'Enregistrement...' : 'Enregistrer'}
