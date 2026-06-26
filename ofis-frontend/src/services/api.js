@@ -67,7 +67,8 @@ const api = {
   // ===== AUTHENTIFICATION =====
   async login(credentials) {
     try {
-      const response = await fetch(`${API_URL}/auth/login/`, {
+      // ✅ Correction : URL sans slash final pour éviter 405
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
