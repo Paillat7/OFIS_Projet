@@ -1,4 +1,4 @@
-const API_URL = 'https://ofis-backend.onrender.com/api';
+const API_URL = 'http://localhost:8000/api';
 
 // ===== HEADERS AVEC TOKEN =====
 const getHeaders = () => {
