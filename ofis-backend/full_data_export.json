@@ -1,0 +1,2469 @@
+[
+  {
+    "model": "api.sousservice",
+    "pk": 1,
+    "fields": {
+      "nom": "R├®seaux",
+      "service_parent": "OSN"
+    }
+  },
+  {
+    "model": "api.sousservice",
+    "pk": 2,
+    "fields": {
+      "nom": "Syst├¿mes informatiques",
+      "service_parent": "OSN"
+    }
+  },
+  {
+    "model": "api.sousservice",
+    "pk": 3,
+    "fields": {
+      "nom": "Radio",
+      "service_parent": "OBT"
+    }
+  },
+  {
+    "model": "api.sousservice",
+    "pk": 4,
+    "fields": {
+      "nom": "G├®o",
+      "service_parent": "OBT"
+    }
+  },
+  {
+    "model": "api.sousservice",
+    "pk": 5,
+    "fields": {
+      "nom": "Support technique",
+      "service_parent": "OSN"
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 2,
+    "fields": {
+      "user": [
+        "SVEN"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "6000",
+      "sous_services": [
+        1,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 3,
+    "fields": {
+      "user": [
+        "Arnaud"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "20000",
+      "sous_services": [
+        1,
+        2,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 4,
+    "fields": {
+      "user": [
+        "Dile"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "5500",
+      "sous_services": [
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 5,
+    "fields": {
+      "user": [
+        "Prince"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "5000",
+      "sous_services": [
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 6,
+    "fields": {
+      "user": [
+        "Patrick"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "20000",
+      "sous_services": [
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 7,
+    "fields": {
+      "user": [
+        "G├®deon"
+      ],
+      "phone": "gedeon@ofis.com",
+      "hire_date": null,
+      "taux_horaire": "18000",
+      "sous_services": [
+        3
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 8,
+    "fields": {
+      "user": [
+        "Sidney"
+      ],
+      "phone": "sidney@ofis.com",
+      "hire_date": null,
+      "taux_horaire": "18000",
+      "sous_services": [
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 9,
+    "fields": {
+      "user": [
+        "Zita"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": "6000",
+      "sous_services": [
+        5
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 10,
+    "fields": {
+      "user": [
+        "Yves"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": null,
+      "sous_services": [
+        2
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 11,
+    "fields": {
+      "user": [
+        "Brice"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": null,
+      "sous_services": [
+        2
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 12,
+    "fields": {
+      "user": [
+        "Thierry"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": null,
+      "sous_services": [
+        3
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 13,
+    "fields": {
+      "user": [
+        "Justi"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": null,
+      "sous_services": [
+        3
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 14,
+    "fields": {
+      "user": [
+        "Adam"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": null,
+      "sous_services": [
+        4
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 15,
+    "fields": {
+      "user": [
+        "Louz"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": null,
+      "sous_services": [
+        4
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 16,
+    "fields": {
+      "user": [
+        "Bruned"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": null,
+      "sous_services": [
+        4
+      ]
+    }
+  },
+  {
+    "model": "api.technician",
+    "pk": 17,
+    "fields": {
+      "user": [
+        "Chedid"
+      ],
+      "phone": "",
+      "hire_date": null,
+      "taux_horaire": null,
+      "sous_services": [
+        2
+      ]
+    }
+  },
+  {
+    "model": "api.client",
+    "pk": 1,
+    "fields": {
+      "firstName": "Bralico",
+      "lastName": "PNR",
+      "company": "Bralico",
+      "email": "bral.recrutement@castel-afrique.com",
+      "phone": "+242 05 395 0666",
+      "address": "POINTE-NOIRE Direction G├®n├®rale Situ├®e vers la foire de Songolo, derri├¿re la r├®sidence du Pr├®fet, BP 1201",
+      "createdAt": "2026-04-05T12:34:42.719Z",
+      "is_active": true
+    }
+  },
+  {
+    "model": "api.client",
+    "pk": 2,
+    "fields": {
+      "firstName": "Maintaining Energy",
+      "lastName": "Dietsmann",
+      "company": "Dietsmann",
+      "email": "info@dietsmann.com",
+      "phone": "+242 05 708 88 08",
+      "address": "Avenue de Loango, BP 1775, Pointe-Noire.",
+      "createdAt": "2026-04-05T13:58:19.182Z",
+      "is_active": true
+    }
+  },
+  {
+    "model": "api.ordretravail",
+    "pk": 1,
+    "fields": {
+      "reference": "OT-CC21-4047",
+      "reference_externe": "CDA-25-101502",
+      "objet": "REFONTE DES BAIES IT",
+      "lieu": "Usine Bralico",
+      "client_rapport": 1,
+      "estimation_heures": "20.00",
+      "date_creation": "2026-04-05T16:18:27.076Z",
+      "date_debut": "2026-04-05T16:21:36.363Z",
+      "date_fin": "2026-04-05T16:44:49.513Z",
+      "date_validation": "2026-04-05T16:53:32.915Z",
+      "date_archivage": "2026-04-05T16:53:32.915Z",
+      "statut": "termine",
+      "statut_validation": "valide",
+      "valide_par": [
+        "tresor"
+      ],
+      "technicien": null,
+      "parent_ot": null,
+      "techniciens": [
+        [
+          "SVEN"
+        ]
+      ]
+    }
+  },
+  {
+    "model": "api.ordretravail",
+    "pk": 2,
+    "fields": {
+      "reference": "OT-CC23-4048",
+      "reference_externe": "CDA-26-101504",
+      "objet": "Supervision Des Serveurs",
+      "lieu": "Dietsmann Direction",
+      "client_rapport": 2,
+      "estimation_heures": "10.00",
+      "date_creation": "2026-04-05T17:21:07.476Z",
+      "date_debut": "2026-04-05T17:28:31.964Z",
+      "date_fin": "2026-04-05T18:07:03.151Z",
+      "date_validation": "2026-04-05T18:09:36.307Z",
+      "date_archivage": "2026-04-05T18:09:36.307Z",
+      "statut": "termine",
+      "statut_validation": "valide",
+      "valide_par": [
+        "tresor"
+      ],
+      "technicien": null,
+      "parent_ot": null,
+      "techniciens": [
+        [
+          "SVEN"
+        ]
+      ]
+    }
+  },
+  {
+    "model": "api.ordretravail",
+    "pk": 9,
+    "fields": {
+      "reference": "OT-CC26-4240",
+      "reference_externe": "CDA-26-101708",
+      "objet": "DIAGNOSTIC DE SERVEURS salle 2",
+      "lieu": "Dietsmann Direction",
+      "client_rapport": 2,
+      "estimation_heures": "3.00",
+      "date_creation": "2026-04-08T09:42:31.132Z",
+      "date_debut": "2026-04-08T09:42:59.122Z",
+      "date_fin": null,
+      "date_validation": null,
+      "date_archivage": null,
+      "statut": "en_cours",
+      "statut_validation": "en_attente",
+      "valide_par": null,
+      "technicien": null,
+      "parent_ot": null,
+      "techniciens": [
+        [
+          "SVEN"
+        ]
+      ]
+    }
+  },
+  {
+    "model": "api.ordretravail",
+    "pk": 10,
+    "fields": {
+      "reference": "OT-CC26-4975",
+      "reference_externe": "CDA-26-101212",
+      "objet": "Diagnostic Des Serveurs",
+      "lieu": "Dietsmann Direction",
+      "client_rapport": 2,
+      "estimation_heures": "10.00",
+      "date_creation": "2026-04-17T07:38:25.816Z",
+      "date_debut": "2026-04-17T07:39:16.112Z",
+      "date_fin": null,
+      "date_validation": null,
+      "date_archivage": null,
+      "statut": "en_cours",
+      "statut_validation": "en_attente",
+      "valide_par": null,
+      "technicien": null,
+      "parent_ot": null,
+      "techniciens": [
+        [
+          "SVEN"
+        ]
+      ]
+    }
+  },
+  {
+    "model": "api.rapportjournalier",
+    "pk": 3,
+    "fields": {
+      "technicien": [
+        "SVEN"
+      ],
+      "date": "2026-04-07",
+      "sous_service": null,
+      "created_at": "2026-04-07T14:32:22.285Z",
+      "updated_at": "2026-04-07T14:32:22.285Z"
+    }
+  },
+  {
+    "model": "api.lignerapportjournalier",
+    "pk": 4,
+    "fields": {
+      "rapport": 3,
+      "client": 2,
+      "ot": null,
+      "nature_intervention": "Analyse des Serveurs",
+      "description": "J'ai fait un nettoyage au niveau du serveur et l├á il est en parfait ├®tat",
+      "avancement_resultat": "",
+      "date_debut": null,
+      "date_fin": null,
+      "duree": "2.00",
+      "numero_ticket": "",
+      "rit_signe": true,
+      "pv_signe": false,
+      "created_at": "2026-04-07T14:32:22.303Z",
+      "updated_at": "2026-04-07T14:32:22.303Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 2,
+    "fields": {
+      "ot": 1,
+      "technicien": [
+        "SVEN"
+      ],
+      "date": "2026-04-05",
+      "heures": "2.00",
+      "description": "Maintenance et refonte des baies",
+      "created_at": "2026-04-05T16:38:56.687Z",
+      "updated_at": "2026-04-05T16:38:56.687Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 4,
+    "fields": {
+      "ot": 2,
+      "technicien": [
+        "SVEN"
+      ],
+      "date": "2026-04-06",
+      "heures": "3.00",
+      "description": "Le ├®quipements ont ├®t├® install├®s st synchronis├®s",
+      "created_at": "2026-04-05T18:05:28.298Z",
+      "updated_at": "2026-04-05T18:05:28.298Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 8,
+    "fields": {
+      "ot": 9,
+      "technicien": [
+        "SVEN"
+      ],
+      "date": "2026-04-08",
+      "heures": "0.50",
+      "description": "Le ├®quipements ont ├®t├® install├®s st synchronis├®s",
+      "created_at": "2026-04-08T14:55:51.247Z",
+      "updated_at": "2026-04-08T14:55:51.247Z"
+    }
+  },
+  {
+    "model": "api.suiviot",
+    "pk": 10,
+    "fields": {
+      "ot": 10,
+      "technicien": [
+        "SVEN"
+      ],
+      "date": "2026-04-17",
+      "heures": "3.00",
+      "description": "Apr├¿s la partition que Angel a eu ├á faire il fallait s'assurer que la base de donn├®e n'a pas ├®t├® touch├® du coup ,le diagnostic rencontre des conflits d'acc├¿s o├╣ une transaction bloque d'autres utilisateurs, entra├«nant des lenteurs ou des deadlocks ,j'ai Optimis├® les transactions pour les rendre le plus court possible et utiliser des niveaux d'isolation appropri├®s",
+      "created_at": "2026-04-17T07:53:10.714Z",
+      "updated_at": "2026-04-17T07:53:10.714Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 1,
+    "fields": {
+      "ot": 2,
+      "type": "photo",
+      "fichier": "ot_documents/union.jpg",
+      "nom": "union.jpg",
+      "uploaded_at": "2026-04-05T17:42:41.719Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 2,
+    "fields": {
+      "ot": 2,
+      "type": "cr",
+      "fichier": "ot_documents/Together.jpg",
+      "nom": "Together.jpg",
+      "uploaded_at": "2026-04-05T17:59:18.865Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 3,
+    "fields": {
+      "ot": 2,
+      "type": "qualite",
+      "fichier": "ot_documents/Chapitre1_Entreprenariat_P0ryi2S.pdf",
+      "nom": "Chapitre1 Entreprenariat.pdf",
+      "uploaded_at": "2026-04-05T18:09:21.023Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 4,
+    "fields": {
+      "ot": 1,
+      "type": "photo",
+      "fichier": "ot_documents/OFIS_Software_Factory_LDeuL3S.pdf",
+      "nom": "OFIS Software Factory.pdf",
+      "uploaded_at": "2026-04-07T07:55:32.864Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 5,
+    "fields": {
+      "ot": 9,
+      "type": "screenshot",
+      "fichier": "ot_documents/annie-spratt-QckxruozjRg-unsplash.jpg",
+      "nom": "annie-spratt-QckxruozjRg-unsplash.jpg",
+      "uploaded_at": "2026-04-08T09:51:36.733Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 6,
+    "fields": {
+      "ot": 10,
+      "type": "photo",
+      "fichier": "ot_documents/Admin_2k8jtZA.jpg",
+      "nom": "Admin.jpg",
+      "uploaded_at": "2026-04-17T07:46:52.786Z"
+    }
+  },
+  {
+    "model": "api.documentot",
+    "pk": 7,
+    "fields": {
+      "ot": 10,
+      "type": "photo",
+      "fichier": "ot_documents/Sun.jpg",
+      "nom": "Sun.jpg",
+      "uploaded_at": "2026-04-17T07:53:49.254Z"
+    }
+  },
+  {
+    "model": "api.projet",
+    "pk": 9,
+    "fields": {
+      "nom": "Installation des balises TELTONIKA  v├®hicules  DIETSMANN",
+      "description": "Mise en place des installations",
+      "chef_projet": [
+        "Patrick"
+      ],
+      "estimation_heures": "6.00",
+      "date_debut": "2026-06-22",
+      "date_fin": "2026-06-24",
+      "statut": "en_cours",
+      "cout_projet": "6000000",
+      "devise_cout": "XAF",
+      "benefice_attendu": "1200000",
+      "devise_benefice": "XAF",
+      "created_at": "2026-06-22T17:25:13.613Z",
+      "updated_at": "2026-06-22T17:25:13.613Z",
+      "intervenants": []
+    }
+  },
+  {
+    "model": "api.projet",
+    "pk": 8,
+    "fields": {
+      "nom": "Projet Wifi Bralico Vindoulou",
+      "description": "Tra├ºage de v├®hicules",
+      "chef_projet": [
+        "Patrick"
+      ],
+      "estimation_heures": "8.00",
+      "date_debut": "2026-04-20",
+      "date_fin": "2026-04-22",
+      "statut": "en_cours",
+      "cout_projet": "800000",
+      "devise_cout": "XAF",
+      "benefice_attendu": "160000",
+      "devise_benefice": "XAF",
+      "created_at": "2026-04-22T14:50:24.757Z",
+      "updated_at": "2026-04-22T14:50:24.757Z",
+      "intervenants": [
+        [
+          "Dile"
+        ],
+        [
+          "Prince"
+        ]
+      ]
+    }
+  },
+  {
+    "model": "api.projet",
+    "pk": 6,
+    "fields": {
+      "nom": "Projet Wifi Bralico",
+      "description": "Installation et configuration du r├®seau wifi pour Bralico Congo",
+      "chef_projet": [
+        "Arnaud"
+      ],
+      "estimation_heures": "20.00",
+      "date_debut": "2026-04-06",
+      "date_fin": "2026-04-20",
+      "statut": "en_cours",
+      "cout_projet": "50000000",
+      "devise_cout": "XAF",
+      "benefice_attendu": "9999000",
+      "devise_benefice": "XAF",
+      "created_at": "2026-04-20T11:50:15.767Z",
+      "updated_at": "2026-04-20T11:50:15.767Z",
+      "intervenants": [
+        [
+          "SVEN"
+        ]
+      ]
+    }
+  },
+  {
+    "model": "api.projet",
+    "pk": 5,
+    "fields": {
+      "nom": "Installation des balises TELTONIKA  v├®hicules  DIETSMANN",
+      "description": "install├®  des balises teltonika pour diff├®rents v├®hicules DIETSMANN",
+      "chef_projet": [
+        "Patrick"
+      ],
+      "estimation_heures": "10.00",
+      "date_debut": "2026-04-18",
+      "date_fin": "2026-04-20",
+      "statut": "en_cours",
+      "cout_projet": "29999000",
+      "devise_cout": "XAF",
+      "benefice_attendu": "6000000",
+      "devise_benefice": "XAF",
+      "created_at": "2026-04-20T10:41:36.654Z",
+      "updated_at": "2026-04-20T10:41:36.654Z",
+      "intervenants": [
+        [
+          "Dile"
+        ],
+        [
+          "Prince"
+        ]
+      ]
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 27,
+    "fields": {
+      "projet": 8,
+      "intervenant": [
+        "Prince"
+      ],
+      "date": "2026-04-22",
+      "heure_debut": "06:00:00",
+      "heure_fin": "08:00:00",
+      "heures": "2.00",
+      "description": "Installation MIX sur le V├®hicule 970 AK 6",
+      "created_at": "2026-04-22T15:03:06.617Z",
+      "updated_at": "2026-04-22T15:03:06.617Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 28,
+    "fields": {
+      "projet": 8,
+      "intervenant": [
+        "Dile"
+      ],
+      "date": "2026-04-22",
+      "heure_debut": "15:00:00",
+      "heure_fin": "18:30:00",
+      "heures": "3.50",
+      "description": "Installation MIX sur le V├®hicule 366 MU 6",
+      "created_at": "2026-04-22T15:04:12.243Z",
+      "updated_at": "2026-04-22T15:04:12.243Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 26,
+    "fields": {
+      "projet": 8,
+      "intervenant": [
+        "Prince"
+      ],
+      "date": "2026-04-21",
+      "heure_debut": "12:00:00",
+      "heure_fin": "15:00:00",
+      "heures": "3.00",
+      "description": "Installation MIX sur le V├®hicule 449 LB 6",
+      "created_at": "2026-04-22T15:00:43.795Z",
+      "updated_at": "2026-04-22T15:00:43.795Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 15,
+    "fields": {
+      "projet": 5,
+      "intervenant": [
+        "Prince"
+      ],
+      "date": "2026-04-20",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.50",
+      "description": "Le 20 Prince a install├® la balise teltonika, V├®hicule DIETSMANN avec l'immatriculation 970 AK 6",
+      "created_at": "2026-04-20T10:51:52.025Z",
+      "updated_at": "2026-04-20T10:51:52.025Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 25,
+    "fields": {
+      "projet": 8,
+      "intervenant": [
+        "Dile"
+      ],
+      "date": "2026-04-20",
+      "heure_debut": "08:30:00",
+      "heure_fin": "11:00:00",
+      "heures": "2.50",
+      "description": "Installation des balises Gallooli",
+      "created_at": "2026-04-22T14:58:20.309Z",
+      "updated_at": "2026-04-22T14:58:20.309Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 13,
+    "fields": {
+      "projet": 5,
+      "intervenant": [
+        "Prince"
+      ],
+      "date": "2026-04-19",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "3.00",
+      "description": "Le 19 Prince a install├® la balise teltonika, V├®hicule DIETSMANN avec l'immatriculation 449 LB 6",
+      "created_at": "2026-04-20T10:48:21.482Z",
+      "updated_at": "2026-04-20T10:48:21.482Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 14,
+    "fields": {
+      "projet": 5,
+      "intervenant": [
+        "Dile"
+      ],
+      "date": "2026-04-19",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.50",
+      "description": "Le 19 Dile a install├® la balise teltonika, V├®hicule DiIETSMANN avec l'immatriculation 366 MU 6",
+      "created_at": "2026-04-20T10:50:03.062Z",
+      "updated_at": "2026-04-20T10:50:03.062Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 23,
+    "fields": {
+      "projet": 6,
+      "intervenant": [
+        "SVEN"
+      ],
+      "date": "2026-04-19",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "1.50",
+      "description": "Connectivit├® entre diff├®rents terminaux",
+      "created_at": "2026-04-20T12:16:59.385Z",
+      "updated_at": "2026-04-20T12:16:59.385Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 12,
+    "fields": {
+      "projet": 5,
+      "intervenant": [
+        "Dile"
+      ],
+      "date": "2026-04-18",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.00",
+      "description": "Le 18 Dile a install├® la balise teltonika, V├®hicule DiIETSMANN  avec l'immatriculation 204 MG 6 ",
+      "created_at": "2026-04-20T10:46:00.692Z",
+      "updated_at": "2026-04-20T10:46:00.692Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 22,
+    "fields": {
+      "projet": 6,
+      "intervenant": [
+        "SVEN"
+      ],
+      "date": "2026-04-18",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "3.00",
+      "description": "Affectation Adresse ip,pour les diff├®rents sous r├®seaux ",
+      "created_at": "2026-04-20T12:15:40.858Z",
+      "updated_at": "2026-04-20T12:15:40.858Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 19,
+    "fields": {
+      "projet": 6,
+      "intervenant": [
+        "SVEN"
+      ],
+      "date": "2026-04-10",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.00",
+      "description": "Mise en place SSH",
+      "created_at": "2026-04-20T12:11:56.595Z",
+      "updated_at": "2026-04-20T12:11:56.595Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 18,
+    "fields": {
+      "projet": 6,
+      "intervenant": [
+        "SVEN"
+      ],
+      "date": "2026-04-09",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "3.00",
+      "description": "Mise en place du protocle TCP/IP",
+      "created_at": "2026-04-20T12:10:44.825Z",
+      "updated_at": "2026-04-20T12:10:44.825Z"
+    }
+  },
+  {
+    "model": "api.heureprojet",
+    "pk": 16,
+    "fields": {
+      "projet": 6,
+      "intervenant": [
+        "SVEN"
+      ],
+      "date": "2026-04-06",
+      "heure_debut": null,
+      "heure_fin": null,
+      "heures": "2.00",
+      "description": "Configuration des Switches",
+      "created_at": "2026-04-20T12:07:24.548Z",
+      "updated_at": "2026-04-20T12:07:24.548Z"
+    }
+  },
+  {
+    "model": "api.notification",
+    "pk": 6,
+    "fields": {
+      "projet": 8,
+      "type": "depassement_heures",
+      "message": "ÔÜá´©Å D├®passement de 3.0 heures sur le projet Projet Wifi Bralico Vindoulou",
+      "est_lue": true,
+      "created_at": "2026-04-22T15:31:09.789Z"
+    }
+  },
+  {
+    "model": "api.ticket",
+    "pk": 4,
+    "fields": {
+      "numero": 2323,
+      "titre": "Panne r├®seau si├¿ge Bralico",
+      "description": "Maintenance et Depannage de serveurs",
+      "client": 1,
+      "technicien_assigne": [
+        "Prince"
+      ],
+      "cree_par": [
+        "tresor"
+      ],
+      "statut": "resolu",
+      "priorite": "haute",
+      "date_creation": "2026-06-22T10:44:59.208Z",
+      "date_modification": "2026-06-22T11:01:31.850Z",
+      "date_resolution": "2026-06-22T11:01:31.850Z",
+      "date_fermeture": null,
+      "temps_passe": "2.00",
+      "solution": "Le probl├¿me a ├®t├® r├®solu ",
+      "commentaires": ""
+    }
+  },
+  {
+    "model": "api.ticket",
+    "pk": 3,
+    "fields": {
+      "numero": 2322,
+      "titre": "Panne au niveau des Serveurs Bralico",
+      "description": "Besoin d'une maintenance au sein des salles serveurs, causant un disfonctionnement des activit├®s",
+      "client": 2,
+      "technicien_assigne": [
+        "SVEN"
+      ],
+      "cree_par": [
+        "tresor"
+      ],
+      "statut": "en_cours",
+      "priorite": "haute",
+      "date_creation": "2026-05-12T10:08:12.793Z",
+      "date_modification": "2026-05-12T10:09:36.472Z",
+      "date_resolution": null,
+      "date_fermeture": null,
+      "temps_passe": "0.00",
+      "solution": "",
+      "commentaires": ""
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 18,
+    "fields": {
+      "ticket": 4,
+      "utilisateur": [
+        "tresor"
+      ],
+      "action": "Changement de statut",
+      "details": "Statut chang├® de en_cours ├á resolu",
+      "date_action": "2026-06-22T11:01:31.854Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 17,
+    "fields": {
+      "ticket": 4,
+      "utilisateur": [
+        "Prince"
+      ],
+      "action": "Solution ajout├®e",
+      "details": "Le probl├¿me a ├®t├® r├®solu ",
+      "date_action": "2026-06-22T11:01:02.498Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 16,
+    "fields": {
+      "ticket": 4,
+      "utilisateur": [
+        "Prince"
+      ],
+      "action": "Changement de statut",
+      "details": "Statut chang├® de nouveau ├á en_cours",
+      "date_action": "2026-06-22T11:00:30.229Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 15,
+    "fields": {
+      "ticket": 4,
+      "utilisateur": [
+        "Prince"
+      ],
+      "action": "Ajout de temps",
+      "details": "2.0 heures ajout├®es (total: 2.0h)",
+      "date_action": "2026-06-22T11:00:18.577Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 14,
+    "fields": {
+      "ticket": 4,
+      "utilisateur": [
+        "tresor"
+      ],
+      "action": "Cr├®ation du ticket",
+      "details": "Ticket cr├®├® avec priorit├® Haute",
+      "date_action": "2026-06-22T10:44:59.212Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 13,
+    "fields": {
+      "ticket": 3,
+      "utilisateur": [
+        "SVEN"
+      ],
+      "action": "Changement de statut",
+      "details": "Statut chang├® de nouveau ├á en_cours",
+      "date_action": "2026-05-12T10:09:36.476Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 12,
+    "fields": {
+      "ticket": 3,
+      "utilisateur": [
+        "tresor"
+      ],
+      "action": "Assignation",
+      "details": "Assign├® ├á SVEN (├®tait non assign├®)",
+      "date_action": "2026-05-12T10:08:56.854Z"
+    }
+  },
+  {
+    "model": "api.tickethistorique",
+    "pk": 11,
+    "fields": {
+      "ticket": 3,
+      "utilisateur": [
+        "tresor"
+      ],
+      "action": "Cr├®ation du ticket",
+      "details": "Ticket cr├®├® avec priorit├® Haute",
+      "date_action": "2026-05-12T10:08:12.804Z"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$8frHykhYPN7n1dSAia0axL$rtEscSlhwLqeqvm5Yei6NscrDM/T/y8FzIEJw2InBFg=",
+      "last_login": "2026-06-19T07:05:18.528Z",
+      "is_superuser": true,
+      "username": "tresor",
+      "first_name": "",
+      "last_name": "",
+      "email": "tresor@ofis.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-04-04T15:10:43.575Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$awXPvEkDhT1LdEUm9nOQrG$WC8jeTJndccKMW9ZKw337sRzIuZM/JUzDVN/rpFuLDc=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "SVEN",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-05T15:30:51.881Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$D01c5VQTiafBxBA0Utz12m$/ocdIhoQ0oB+tY6XOsJ0g//U+pgqh5KNhbwZSBGIzOw=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Vianney",
+      "first_name": "",
+      "last_name": "",
+      "email": "vianney.missolo@ofis-technologies.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:47.941Z",
+      "groups": [
+        2
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 6,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$bSdZGYDWK9plZzxZkdrEDK$VW629fsB8+IQAc2eF8dXbftJ1uedtWfEvFIefqWCwd8=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Achille",
+      "first_name": "",
+      "last_name": "",
+      "email": "achille.donguia@ofis-technologies.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:48.892Z",
+      "groups": [
+        2
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 7,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$XrePz5JPTipIqjbQaYQJZJ$sK/L3DYzEM/gBLtPyVgzLbLU3Zo6LGkikkeEN8ROk9w=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Patrick",
+      "first_name": "",
+      "last_name": "",
+      "email": "patrick@ofis.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:49.986Z",
+      "groups": [
+        1
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 8,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$t0XUslw6kcKqg2JcziWxZL$aP42Yafp+NXDBEa1c6w8wuqNAIR7JENcbP6ZeBz47K4=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "G├®deon",
+      "first_name": "",
+      "last_name": "",
+      "email": "gedeon@ofis.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:51.030Z",
+      "groups": [
+        1
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 9,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$hTAUNo6dXFZFFfB69AYOQL$c4g+GxHpkXwUxBj3lmxaFxnDopnZ5nwovczMHpPNkJ4=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Sidney",
+      "first_name": "",
+      "last_name": "",
+      "email": "sidney@ofis.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:51.968Z",
+      "groups": [
+        1
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 10,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$UI66HxKIkl7sCYFqS1aDvR$U92L+/lqaETQDOZwg+B62dTeBDpYwAGyp/luAPfFvXY=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Zita",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:20:03.844Z",
+      "groups": [
+        3
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 11,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$dYPVZglgQJUhTzu25nUeeC$GdOXOKPB2BDRgGBN0wcanWvpCOvMBuhS24/EZ89KuW8=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Arnaud",
+      "first_name": "Arnaud",
+      "last_name": "GANONGO",
+      "email": "arnaud.ganongo@ofis-technologies.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-07T13:36:56.515Z",
+      "groups": [
+        1
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 12,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$3XzwYdu9MWVjeLQa2V602l$sacOy77qgdGUWUTlfb7VNlnhH2Hdz1X9hI3rEWvnb28=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Dile",
+      "first_name": "Dile",
+      "last_name": "SAMBA SAMBA",
+      "email": "dile@ofis-technologies.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-20T09:17:09.707Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 13,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$z0fzCQ9JRsFGhNbmRd3uTW$xhJPzaYAD4R1GB1+mKRKR418Ryqhupt6ROWcfH9OAgs=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Prince",
+      "first_name": "Prince",
+      "last_name": "MAZOUNGA",
+      "email": "prince@ofis-technologies.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-20T09:17:10.532Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 14,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$lEsXCbS7uHMcmNvy8G5X2K$BN5/qWjndcX+Aiq7qjGw2TbOZifcxokHBmlSzikokRA=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Yves",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T06:45:49.631Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 15,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$WpBDPn5JCva9ttgfoqfTso$ED9F1VVCR+n3i6oFiGz3RnRNgrQ3nbXe7jBfqrM3IU4=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Brice",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T06:48:10.074Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 16,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$F1kuuwAXRl7yAdIwS1AoSY$RPSmomNoCSiWNmI5oNIRFLJsoekN6scDiCE068VzX9U=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Thierry",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T06:51:09.761Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 17,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$we48fSAgzopR1mCDGIMPVR$bsQr0rff82hqbbf0AHNI7+94WgBqEFPGuwf8A8RwCds=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Justi",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T06:53:30.529Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 18,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$0bNbyBWtaAEmhwsJJameeG$i7ahQPW2lb5MRBe1f7Ir/m2ivJL6GVpjEGr+W+5L3B8=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Jaurdy",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T06:55:22.970Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 19,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$FXWVH5ceUCCliRw8mXagv6$TTkP/yRnctMqJG3xgi/YI2VuwEU0iFwyD62tiqYrDbQ=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Pierre",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-06-25T06:57:24Z",
+      "groups": [
+        2
+      ],
+      "user_permissions": [
+        1,
+        2,
+        3,
+        4,
+        89,
+        90,
+        91,
+        92,
+        25,
+        26,
+        27,
+        28,
+        37,
+        38,
+        39,
+        40,
+        73,
+        74,
+        75,
+        76,
+        45,
+        46,
+        47,
+        48,
+        53,
+        54,
+        55,
+        56,
+        77,
+        78,
+        79,
+        80,
+        33,
+        34,
+        35,
+        36,
+        69,
+        70,
+        71,
+        72,
+        41,
+        42,
+        43,
+        44,
+        49,
+        50,
+        51,
+        52,
+        29,
+        30,
+        31,
+        32,
+        61,
+        62,
+        63,
+        64,
+        57,
+        58,
+        59,
+        60,
+        85,
+        86,
+        87,
+        88,
+        81,
+        82,
+        83,
+        84,
+        9,
+        10,
+        11,
+        12,
+        5,
+        6,
+        7,
+        8,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        65,
+        66,
+        67,
+        68,
+        21,
+        22,
+        23,
+        24
+      ]
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 21,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$rD8IXJQWLVTvpUFWnJe3lc$yqX2F9MxKLIqgn89xRrEe0J27EEczxEhsYg2BkHgSfE=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Adam",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T07:02:45Z",
+      "groups": [
+        1
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 22,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$IHw73Bh1fGR8mHl9SB6Pln$THMvjDsQBBV8rNWqXc8UBOBZ4BzBhyc+8VDdWliz+M8=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Tingui",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T07:05:58.480Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 24,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$XHJh3eUQWRhSyqFjsWRNCu$2dN/SqUDfi7dkzACS0TlFma+zfKFwMn0SCXq4GyE85Y=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Galli",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T07:08:53.168Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 25,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$vtNlV4LyEjL33Sxsqr5F8a$c/OF1jn37PbYSYimZwIh5JODGz4yXLX+SkJ6iW+/gUw=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Louz",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T07:09:35.893Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 26,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$piTRgxonvOYTxuuK9mxcNp$IiGodF+KG/OUnjpqQG2RYsY9527X8HN5z0YGmVPpVCU=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Bruned",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T07:12:16.522Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 27,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$uT4w6JrasYFAKENzwQq4Of$LlyVU2a3gkTjAKvrt5Fsn/WwKrs+F6IDci9pfLtIwsM=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Chedid",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-06-25T07:47:14Z",
+      "groups": [
+        1
+      ],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+      "name": "cadre",
+      "permissions": []
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 2,
+    "fields": {
+      "name": "manager",
+      "permissions": []
+    }
+  },
+  {
+    "model": "auth.group",
+    "pk": 3,
+    "fields": {
+      "name": "assistant",
+      "permissions": []
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 1,
+    "fields": {
+      "name": "Can add log entry",
+      "content_type": 1,
+      "codename": "add_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 2,
+    "fields": {
+      "name": "Can change log entry",
+      "content_type": 1,
+      "codename": "change_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 3,
+    "fields": {
+      "name": "Can delete log entry",
+      "content_type": 1,
+      "codename": "delete_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 4,
+    "fields": {
+      "name": "Can view log entry",
+      "content_type": 1,
+      "codename": "view_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 89,
+    "fields": {
+      "name": "Can add agenda technicien",
+      "content_type": 23,
+      "codename": "add_agendatechnicien"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 90,
+    "fields": {
+      "name": "Can change agenda technicien",
+      "content_type": 23,
+      "codename": "change_agendatechnicien"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 91,
+    "fields": {
+      "name": "Can delete agenda technicien",
+      "content_type": 23,
+      "codename": "delete_agendatechnicien"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 92,
+    "fields": {
+      "name": "Can view agenda technicien",
+      "content_type": 23,
+      "codename": "view_agendatechnicien"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 25,
+    "fields": {
+      "name": "Can add client",
+      "content_type": 7,
+      "codename": "add_client"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 26,
+    "fields": {
+      "name": "Can change client",
+      "content_type": 7,
+      "codename": "change_client"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 27,
+    "fields": {
+      "name": "Can delete client",
+      "content_type": 7,
+      "codename": "delete_client"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 28,
+    "fields": {
+      "name": "Can view client",
+      "content_type": 7,
+      "codename": "view_client"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 37,
+    "fields": {
+      "name": "Can add document ot",
+      "content_type": 8,
+      "codename": "add_documentot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 38,
+    "fields": {
+      "name": "Can change document ot",
+      "content_type": 8,
+      "codename": "change_documentot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 39,
+    "fields": {
+      "name": "Can delete document ot",
+      "content_type": 8,
+      "codename": "delete_documentot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 40,
+    "fields": {
+      "name": "Can view document ot",
+      "content_type": 8,
+      "codename": "view_documentot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 73,
+    "fields": {
+      "name": "Can add heure projet",
+      "content_type": 18,
+      "codename": "add_heureprojet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 74,
+    "fields": {
+      "name": "Can change heure projet",
+      "content_type": 18,
+      "codename": "change_heureprojet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 75,
+    "fields": {
+      "name": "Can delete heure projet",
+      "content_type": 18,
+      "codename": "delete_heureprojet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 76,
+    "fields": {
+      "name": "Can view heure projet",
+      "content_type": 18,
+      "codename": "view_heureprojet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 45,
+    "fields": {
+      "name": "Can add ligne rapport hebdo cadre",
+      "content_type": 9,
+      "codename": "add_lignerapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 46,
+    "fields": {
+      "name": "Can change ligne rapport hebdo cadre",
+      "content_type": 9,
+      "codename": "change_lignerapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 47,
+    "fields": {
+      "name": "Can delete ligne rapport hebdo cadre",
+      "content_type": 9,
+      "codename": "delete_lignerapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 48,
+    "fields": {
+      "name": "Can view ligne rapport hebdo cadre",
+      "content_type": 9,
+      "codename": "view_lignerapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 53,
+    "fields": {
+      "name": "Can add Ligne de rapport journalier",
+      "content_type": 10,
+      "codename": "add_lignerapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 54,
+    "fields": {
+      "name": "Can change Ligne de rapport journalier",
+      "content_type": 10,
+      "codename": "change_lignerapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 55,
+    "fields": {
+      "name": "Can delete Ligne de rapport journalier",
+      "content_type": 10,
+      "codename": "delete_lignerapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 56,
+    "fields": {
+      "name": "Can view Ligne de rapport journalier",
+      "content_type": 10,
+      "codename": "view_lignerapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 77,
+    "fields": {
+      "name": "Can add notification",
+      "content_type": 20,
+      "codename": "add_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 78,
+    "fields": {
+      "name": "Can change notification",
+      "content_type": 20,
+      "codename": "change_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 79,
+    "fields": {
+      "name": "Can delete notification",
+      "content_type": 20,
+      "codename": "delete_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 80,
+    "fields": {
+      "name": "Can view notification",
+      "content_type": 20,
+      "codename": "view_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 33,
+    "fields": {
+      "name": "Can add ordre travail",
+      "content_type": 11,
+      "codename": "add_ordretravail"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 34,
+    "fields": {
+      "name": "Can change ordre travail",
+      "content_type": 11,
+      "codename": "change_ordretravail"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 35,
+    "fields": {
+      "name": "Can delete ordre travail",
+      "content_type": 11,
+      "codename": "delete_ordretravail"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 36,
+    "fields": {
+      "name": "Can view ordre travail",
+      "content_type": 11,
+      "codename": "view_ordretravail"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 69,
+    "fields": {
+      "name": "Can add projet",
+      "content_type": 19,
+      "codename": "add_projet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 70,
+    "fields": {
+      "name": "Can change projet",
+      "content_type": 19,
+      "codename": "change_projet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 71,
+    "fields": {
+      "name": "Can delete projet",
+      "content_type": 19,
+      "codename": "delete_projet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 72,
+    "fields": {
+      "name": "Can view projet",
+      "content_type": 19,
+      "codename": "view_projet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 41,
+    "fields": {
+      "name": "Can add rapport hebdo cadre",
+      "content_type": 12,
+      "codename": "add_rapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 42,
+    "fields": {
+      "name": "Can change rapport hebdo cadre",
+      "content_type": 12,
+      "codename": "change_rapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 43,
+    "fields": {
+      "name": "Can delete rapport hebdo cadre",
+      "content_type": 12,
+      "codename": "delete_rapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 44,
+    "fields": {
+      "name": "Can view rapport hebdo cadre",
+      "content_type": 12,
+      "codename": "view_rapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 49,
+    "fields": {
+      "name": "Can add rapport journalier",
+      "content_type": 13,
+      "codename": "add_rapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 50,
+    "fields": {
+      "name": "Can change rapport journalier",
+      "content_type": 13,
+      "codename": "change_rapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 51,
+    "fields": {
+      "name": "Can delete rapport journalier",
+      "content_type": 13,
+      "codename": "delete_rapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 52,
+    "fields": {
+      "name": "Can view rapport journalier",
+      "content_type": 13,
+      "codename": "view_rapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 29,
+    "fields": {
+      "name": "Can add sous service",
+      "content_type": 14,
+      "codename": "add_sousservice"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 30,
+    "fields": {
+      "name": "Can change sous service",
+      "content_type": 14,
+      "codename": "change_sousservice"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 31,
+    "fields": {
+      "name": "Can delete sous service",
+      "content_type": 14,
+      "codename": "delete_sousservice"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 32,
+    "fields": {
+      "name": "Can view sous service",
+      "content_type": 14,
+      "codename": "view_sousservice"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 61,
+    "fields": {
+      "name": "Can add suivi ot",
+      "content_type": 15,
+      "codename": "add_suiviot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 62,
+    "fields": {
+      "name": "Can change suivi ot",
+      "content_type": 15,
+      "codename": "change_suiviot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 63,
+    "fields": {
+      "name": "Can delete suivi ot",
+      "content_type": 15,
+      "codename": "delete_suiviot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 64,
+    "fields": {
+      "name": "Can view suivi ot",
+      "content_type": 15,
+      "codename": "view_suiviot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 57,
+    "fields": {
+      "name": "Can add technician",
+      "content_type": 16,
+      "codename": "add_technician"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 58,
+    "fields": {
+      "name": "Can change technician",
+      "content_type": 16,
+      "codename": "change_technician"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 59,
+    "fields": {
+      "name": "Can delete technician",
+      "content_type": 16,
+      "codename": "delete_technician"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 60,
+    "fields": {
+      "name": "Can view technician",
+      "content_type": 16,
+      "codename": "view_technician"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 85,
+    "fields": {
+      "name": "Can add ticket",
+      "content_type": 21,
+      "codename": "add_ticket"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 86,
+    "fields": {
+      "name": "Can change ticket",
+      "content_type": 21,
+      "codename": "change_ticket"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 87,
+    "fields": {
+      "name": "Can delete ticket",
+      "content_type": 21,
+      "codename": "delete_ticket"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 88,
+    "fields": {
+      "name": "Can view ticket",
+      "content_type": 21,
+      "codename": "view_ticket"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 81,
+    "fields": {
+      "name": "Can add ticket historique",
+      "content_type": 22,
+      "codename": "add_tickethistorique"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 82,
+    "fields": {
+      "name": "Can change ticket historique",
+      "content_type": 22,
+      "codename": "change_tickethistorique"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 83,
+    "fields": {
+      "name": "Can delete ticket historique",
+      "content_type": 22,
+      "codename": "delete_tickethistorique"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 84,
+    "fields": {
+      "name": "Can view ticket historique",
+      "content_type": 22,
+      "codename": "view_tickethistorique"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 9,
+    "fields": {
+      "name": "Can add group",
+      "content_type": 2,
+      "codename": "add_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 10,
+    "fields": {
+      "name": "Can change group",
+      "content_type": 2,
+      "codename": "change_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 11,
+    "fields": {
+      "name": "Can delete group",
+      "content_type": 2,
+      "codename": "delete_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 12,
+    "fields": {
+      "name": "Can view group",
+      "content_type": 2,
+      "codename": "view_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 5,
+    "fields": {
+      "name": "Can add permission",
+      "content_type": 3,
+      "codename": "add_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 6,
+    "fields": {
+      "name": "Can change permission",
+      "content_type": 3,
+      "codename": "change_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 7,
+    "fields": {
+      "name": "Can delete permission",
+      "content_type": 3,
+      "codename": "delete_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 8,
+    "fields": {
+      "name": "Can view permission",
+      "content_type": 3,
+      "codename": "view_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 13,
+    "fields": {
+      "name": "Can add user",
+      "content_type": 4,
+      "codename": "add_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 14,
+    "fields": {
+      "name": "Can change user",
+      "content_type": 4,
+      "codename": "change_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 15,
+    "fields": {
+      "name": "Can delete user",
+      "content_type": 4,
+      "codename": "delete_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 16,
+    "fields": {
+      "name": "Can view user",
+      "content_type": 4,
+      "codename": "view_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 17,
+    "fields": {
+      "name": "Can add content type",
+      "content_type": 5,
+      "codename": "add_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 18,
+    "fields": {
+      "name": "Can change content type",
+      "content_type": 5,
+      "codename": "change_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 19,
+    "fields": {
+      "name": "Can delete content type",
+      "content_type": 5,
+      "codename": "delete_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 20,
+    "fields": {
+      "name": "Can view content type",
+      "content_type": 5,
+      "codename": "view_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 65,
+    "fields": {
+      "name": "Can add notification",
+      "content_type": 17,
+      "codename": "add_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 66,
+    "fields": {
+      "name": "Can change notification",
+      "content_type": 17,
+      "codename": "change_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 67,
+    "fields": {
+      "name": "Can delete notification",
+      "content_type": 17,
+      "codename": "delete_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 68,
+    "fields": {
+      "name": "Can view notification",
+      "content_type": 17,
+      "codename": "view_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 21,
+    "fields": {
+      "name": "Can add session",
+      "content_type": 6,
+      "codename": "add_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 22,
+    "fields": {
+      "name": "Can change session",
+      "content_type": 6,
+      "codename": "change_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 23,
+    "fields": {
+      "name": "Can delete session",
+      "content_type": 6,
+      "codename": "delete_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "pk": 24,
+    "fields": {
+      "name": "Can view session",
+      "content_type": 6,
+      "codename": "view_session"
+    }
+  }
+]

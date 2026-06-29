@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/common/Card';
 import {
@@ -22,45 +22,43 @@ const DashboardPage = () => {
   const isCadre = role === 'cadre';
   const isTechnicien = role === 'technicien';
 
-  const isMounted = useRef(true);
   const abortControllerRef = useRef(null);
 
   useEffect(() => {
-    return () => {
-      isMounted.current = false;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const loadStats = async () => {
+      setLoading(true);
+      try {
+        console.log('🔄 Appel API...');
+        const data = await api.getDashboardStats({ signal: controller.signal });
+        console.log('📊 Données reçues :', data);
+        setStats(data);
+        setError(null);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('❌ Erreur :', err);
+          setError('Impossible de charger les statistiques');
+        }
+      } finally {
+        setLoading(false);
+        console.log('🔄 Fin chargement');
       }
+    };
+
+    loadStats();
+
+    return () => {
+      controller.abort();
     };
   }, []);
 
-  const loadStats = useCallback(async () => {
-    setLoading(true);
-    abortControllerRef.current = new AbortController();
-    try {
-      const data = await api.getDashboardStats({ signal: abortControllerRef.current.signal });
-      if (isMounted.current) {
-        setStats(data);
-        setError(null);
-      }
-    } catch (err) {
-      if (isMounted.current && err.name !== 'AbortError') {
-        console.error('Erreur chargement stats', err);
-        setError('Impossible de charger les statistiques');
-      }
-    } finally {
-      if (isMounted.current) setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadStats();
-  }, [loadStats]);
-
   if (loading) return <div className="loading">Chargement du tableau de bord...</div>;
   if (error) return <div className="error">{error}</div>;
-  if (!stats) return null;
+  if (!stats) return <div>Aucune donnée reçue.</div>;
 
+  // ===== AFFICHAGE DU DASHBOARD =====
   const otData = [
     { name: 'Planifiés', value: stats.ot_counts?.planifie || 0 },
     { name: 'En cours', value: stats.ot_counts?.en_cours || 0 },

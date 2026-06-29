@@ -16,48 +16,48 @@ const TicketList = () => {
   const isAssistant = user?.role === 'assistant';
   const canCreate = isAssistant || isManagerOrAdmin;
 
-  const isMounted = useRef(true);
   const abortControllerRef = useRef(null);
 
   useEffect(() => {
-    return () => {
-      isMounted.current = false;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const chargerTickets = async () => {
+      setLoading(true);
+      try {
+        const params = {};
+        if (filtreStatut) params.statut = filtreStatut;
+        if (filtrePriorite) params.priorite = filtrePriorite;
+        const data = await ticketService.getAll(params, { signal: controller.signal });
+        setTickets(Array.isArray(data) ? data : []);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Erreur chargement tickets:', error);
+          setTickets([]);
+        }
+      } finally {
+        setLoading(false);
       }
     };
-  }, []);
 
-  const chargerTickets = async () => {
-    setLoading(true);
-    abortControllerRef.current = new AbortController();
-    try {
-      const params = {};
-      if (filtreStatut) params.statut = filtreStatut;
-      if (filtrePriorite) params.priorite = filtrePriorite;
-      const data = await ticketService.getAll(params, { signal: abortControllerRef.current.signal });
-      if (isMounted.current) {
-        setTickets(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      if (isMounted.current && error.name !== 'AbortError') {
-        console.error('Erreur chargement tickets:', error);
-        setTickets([]);
-      }
-    } finally {
-      if (isMounted.current) setLoading(false);
-    }
-  };
-
-  useEffect(() => {
     chargerTickets();
+
+    return () => {
+      controller.abort();
+    };
   }, [filtreStatut, filtrePriorite]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Supprimer ce ticket ?')) {
       try {
         await ticketService.delete(id);
-        chargerTickets();
+        // Recharger après suppression
+        const controller = new AbortController();
+        const params = {};
+        if (filtreStatut) params.statut = filtreStatut;
+        if (filtrePriorite) params.priorite = filtrePriorite;
+        const data = await ticketService.getAll(params, { signal: controller.signal });
+        setTickets(Array.isArray(data) ? data : []);
       } catch (error) {
         alert('Erreur lors de la suppression');
       }

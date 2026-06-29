@@ -21,9 +21,14 @@ const handleResponse = async (response) => {
 const api = {
   // ===== MÉTHODES GÉNÉRIQUES =====
   async get(url, params = {}) {
-    const queryString = new URLSearchParams(params).toString();
+    // Extraire le signal, car il ne doit pas être ajouté à l'URL
+    const { signal, ...queryParams } = params;
+    const queryString = new URLSearchParams(queryParams).toString();
     const fullUrl = queryString ? `${API_URL}${url}?${queryString}` : `${API_URL}${url}`;
-    const response = await fetch(fullUrl, { headers: getHeaders() });
+    const response = await fetch(fullUrl, {
+      headers: getHeaders(),
+      signal: signal, // ✅ passer le signal à fetch
+    });
     return handleResponse(response);
   },
 
@@ -67,7 +72,6 @@ const api = {
   // ===== AUTHENTIFICATION =====
   async login(credentials) {
     try {
-      // ✅ Correction : URL sans slash final pour éviter 405
       const response = await fetch(`${API_URL}/auth/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

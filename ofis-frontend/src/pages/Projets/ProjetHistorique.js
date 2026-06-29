@@ -77,7 +77,6 @@ const ProjetHistorique = () => {
     return true;
   });
 
-  // Grouper par date
   const groupedByDate = filteredHistorique.reduce((acc, item) => {
     const date = new Date(item.date).toLocaleDateString();
     if (!acc[date]) acc[date] = [];
@@ -98,7 +97,6 @@ const ProjetHistorique = () => {
       </div>
 
       <Card>
-        {/* Filtres et recherche */}
         <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ flex: 1 }}>
             <input
@@ -123,7 +121,6 @@ const ProjetHistorique = () => {
           </select>
         </div>
 
-        {/* Chronologie */}
         {Object.keys(groupedByDate).length === 0 ? (
           <p style={{ textAlign: 'center', padding: '2rem' }}>Aucun événement dans l'historique.</p>
         ) : (
@@ -198,5 +195,3 @@ const ProjetHistorique = () => {
 };
 
 export default ProjetHistorique;
-
-

@@ -1,27 +1,47 @@
 import React from 'react';
-import '../common/Common.css';
 
 const Input = ({
   label,
+  name,
   type = 'text',
-  error,
-  helperText,
+  value,
+  onChange,
+  placeholder,
   icon,
+  rightIcon,
+  required = false,
+  textarea = false,
+  rows = 3,
   ...props
 }) => {
+  // On sépare les props DOM des props personnalisées
+  const domProps = { ...props };
+  // On retire rightIcon car ce n'est pas une prop DOM valide
+  delete domProps.rightIcon;
+
+  const inputProps = {
+    id: name,
+    name,
+    type,
+    value,
+    onChange,
+    placeholder,
+    required,
+    ...domProps
+  };
+
   return (
     <div className="input-group">
-      {label && <label className="input-label">{label}</label>}
+      {label && <label htmlFor={name}>{label}</label>}
       <div className="input-wrapper">
         {icon && <span className="input-icon">{icon}</span>}
-        <input
-          type={type}
-          className={`input-field ${error ? 'error' : ''} ${icon ? 'with-icon' : ''}`}
-          {...props}
-        />
+        {textarea ? (
+          <textarea {...inputProps} rows={rows} className="input-field" />
+        ) : (
+          <input {...inputProps} className="input-field" />
+        )}
+        {rightIcon && <span className="input-right-icon">{rightIcon}</span>}
       </div>
-      {error && <span className="input-error">{error}</span>}
-      {helperText && !error && <span className="input-helper">{helperText}</span>}
     </div>
   );
 };

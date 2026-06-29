@@ -1,0 +1,1073 @@
+[
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add log entry",
+      "content_type": [
+        "admin",
+        "logentry"
+      ],
+      "codename": "add_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change log entry",
+      "content_type": [
+        "admin",
+        "logentry"
+      ],
+      "codename": "change_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete log entry",
+      "content_type": [
+        "admin",
+        "logentry"
+      ],
+      "codename": "delete_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view log entry",
+      "content_type": [
+        "admin",
+        "logentry"
+      ],
+      "codename": "view_logentry"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add client",
+      "content_type": [
+        "api",
+        "client"
+      ],
+      "codename": "add_client"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change client",
+      "content_type": [
+        "api",
+        "client"
+      ],
+      "codename": "change_client"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete client",
+      "content_type": [
+        "api",
+        "client"
+      ],
+      "codename": "delete_client"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view client",
+      "content_type": [
+        "api",
+        "client"
+      ],
+      "codename": "view_client"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add document ot",
+      "content_type": [
+        "api",
+        "documentot"
+      ],
+      "codename": "add_documentot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change document ot",
+      "content_type": [
+        "api",
+        "documentot"
+      ],
+      "codename": "change_documentot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete document ot",
+      "content_type": [
+        "api",
+        "documentot"
+      ],
+      "codename": "delete_documentot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view document ot",
+      "content_type": [
+        "api",
+        "documentot"
+      ],
+      "codename": "view_documentot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add heure projet",
+      "content_type": [
+        "api",
+        "heureprojet"
+      ],
+      "codename": "add_heureprojet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change heure projet",
+      "content_type": [
+        "api",
+        "heureprojet"
+      ],
+      "codename": "change_heureprojet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete heure projet",
+      "content_type": [
+        "api",
+        "heureprojet"
+      ],
+      "codename": "delete_heureprojet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view heure projet",
+      "content_type": [
+        "api",
+        "heureprojet"
+      ],
+      "codename": "view_heureprojet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add ligne rapport journalier",
+      "content_type": [
+        "api",
+        "lignerapportjournalier"
+      ],
+      "codename": "add_lignerapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change ligne rapport journalier",
+      "content_type": [
+        "api",
+        "lignerapportjournalier"
+      ],
+      "codename": "change_lignerapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete ligne rapport journalier",
+      "content_type": [
+        "api",
+        "lignerapportjournalier"
+      ],
+      "codename": "delete_lignerapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view ligne rapport journalier",
+      "content_type": [
+        "api",
+        "lignerapportjournalier"
+      ],
+      "codename": "view_lignerapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add notification",
+      "content_type": [
+        "api",
+        "notification"
+      ],
+      "codename": "add_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change notification",
+      "content_type": [
+        "api",
+        "notification"
+      ],
+      "codename": "change_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete notification",
+      "content_type": [
+        "api",
+        "notification"
+      ],
+      "codename": "delete_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view notification",
+      "content_type": [
+        "api",
+        "notification"
+      ],
+      "codename": "view_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add ordre travail",
+      "content_type": [
+        "api",
+        "ordretravail"
+      ],
+      "codename": "add_ordretravail"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change ordre travail",
+      "content_type": [
+        "api",
+        "ordretravail"
+      ],
+      "codename": "change_ordretravail"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete ordre travail",
+      "content_type": [
+        "api",
+        "ordretravail"
+      ],
+      "codename": "delete_ordretravail"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view ordre travail",
+      "content_type": [
+        "api",
+        "ordretravail"
+      ],
+      "codename": "view_ordretravail"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add projet",
+      "content_type": [
+        "api",
+        "projet"
+      ],
+      "codename": "add_projet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change projet",
+      "content_type": [
+        "api",
+        "projet"
+      ],
+      "codename": "change_projet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete projet",
+      "content_type": [
+        "api",
+        "projet"
+      ],
+      "codename": "delete_projet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view projet",
+      "content_type": [
+        "api",
+        "projet"
+      ],
+      "codename": "view_projet"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add rapport hebdo cadre",
+      "content_type": [
+        "api",
+        "rapporthebdocadre"
+      ],
+      "codename": "add_rapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change rapport hebdo cadre",
+      "content_type": [
+        "api",
+        "rapporthebdocadre"
+      ],
+      "codename": "change_rapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete rapport hebdo cadre",
+      "content_type": [
+        "api",
+        "rapporthebdocadre"
+      ],
+      "codename": "delete_rapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view rapport hebdo cadre",
+      "content_type": [
+        "api",
+        "rapporthebdocadre"
+      ],
+      "codename": "view_rapporthebdocadre"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add rapport journalier",
+      "content_type": [
+        "api",
+        "rapportjournalier"
+      ],
+      "codename": "add_rapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change rapport journalier",
+      "content_type": [
+        "api",
+        "rapportjournalier"
+      ],
+      "codename": "change_rapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete rapport journalier",
+      "content_type": [
+        "api",
+        "rapportjournalier"
+      ],
+      "codename": "delete_rapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view rapport journalier",
+      "content_type": [
+        "api",
+        "rapportjournalier"
+      ],
+      "codename": "view_rapportjournalier"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add sous service",
+      "content_type": [
+        "api",
+        "sousservice"
+      ],
+      "codename": "add_sousservice"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change sous service",
+      "content_type": [
+        "api",
+        "sousservice"
+      ],
+      "codename": "change_sousservice"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete sous service",
+      "content_type": [
+        "api",
+        "sousservice"
+      ],
+      "codename": "delete_sousservice"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view sous service",
+      "content_type": [
+        "api",
+        "sousservice"
+      ],
+      "codename": "view_sousservice"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add suivi ot",
+      "content_type": [
+        "api",
+        "suiviot"
+      ],
+      "codename": "add_suiviot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change suivi ot",
+      "content_type": [
+        "api",
+        "suiviot"
+      ],
+      "codename": "change_suiviot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete suivi ot",
+      "content_type": [
+        "api",
+        "suiviot"
+      ],
+      "codename": "delete_suiviot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view suivi ot",
+      "content_type": [
+        "api",
+        "suiviot"
+      ],
+      "codename": "view_suiviot"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add technician",
+      "content_type": [
+        "api",
+        "technician"
+      ],
+      "codename": "add_technician"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change technician",
+      "content_type": [
+        "api",
+        "technician"
+      ],
+      "codename": "change_technician"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete technician",
+      "content_type": [
+        "api",
+        "technician"
+      ],
+      "codename": "delete_technician"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view technician",
+      "content_type": [
+        "api",
+        "technician"
+      ],
+      "codename": "view_technician"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add ticket",
+      "content_type": [
+        "api",
+        "ticket"
+      ],
+      "codename": "add_ticket"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change ticket",
+      "content_type": [
+        "api",
+        "ticket"
+      ],
+      "codename": "change_ticket"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete ticket",
+      "content_type": [
+        "api",
+        "ticket"
+      ],
+      "codename": "delete_ticket"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view ticket",
+      "content_type": [
+        "api",
+        "ticket"
+      ],
+      "codename": "view_ticket"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add ticket historique",
+      "content_type": [
+        "api",
+        "tickethistorique"
+      ],
+      "codename": "add_tickethistorique"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change ticket historique",
+      "content_type": [
+        "api",
+        "tickethistorique"
+      ],
+      "codename": "change_tickethistorique"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete ticket historique",
+      "content_type": [
+        "api",
+        "tickethistorique"
+      ],
+      "codename": "delete_tickethistorique"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view ticket historique",
+      "content_type": [
+        "api",
+        "tickethistorique"
+      ],
+      "codename": "view_tickethistorique"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add group",
+      "content_type": [
+        "auth",
+        "group"
+      ],
+      "codename": "add_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change group",
+      "content_type": [
+        "auth",
+        "group"
+      ],
+      "codename": "change_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete group",
+      "content_type": [
+        "auth",
+        "group"
+      ],
+      "codename": "delete_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view group",
+      "content_type": [
+        "auth",
+        "group"
+      ],
+      "codename": "view_group"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add permission",
+      "content_type": [
+        "auth",
+        "permission"
+      ],
+      "codename": "add_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change permission",
+      "content_type": [
+        "auth",
+        "permission"
+      ],
+      "codename": "change_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete permission",
+      "content_type": [
+        "auth",
+        "permission"
+      ],
+      "codename": "delete_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view permission",
+      "content_type": [
+        "auth",
+        "permission"
+      ],
+      "codename": "view_permission"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add user",
+      "content_type": [
+        "auth",
+        "user"
+      ],
+      "codename": "add_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change user",
+      "content_type": [
+        "auth",
+        "user"
+      ],
+      "codename": "change_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete user",
+      "content_type": [
+        "auth",
+        "user"
+      ],
+      "codename": "delete_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view user",
+      "content_type": [
+        "auth",
+        "user"
+      ],
+      "codename": "view_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add content type",
+      "content_type": [
+        "contenttypes",
+        "contenttype"
+      ],
+      "codename": "add_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change content type",
+      "content_type": [
+        "contenttypes",
+        "contenttype"
+      ],
+      "codename": "change_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete content type",
+      "content_type": [
+        "contenttypes",
+        "contenttype"
+      ],
+      "codename": "delete_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view content type",
+      "content_type": [
+        "contenttypes",
+        "contenttype"
+      ],
+      "codename": "view_contenttype"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add notification",
+      "content_type": [
+        "notifications",
+        "notification"
+      ],
+      "codename": "add_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change notification",
+      "content_type": [
+        "notifications",
+        "notification"
+      ],
+      "codename": "change_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete notification",
+      "content_type": [
+        "notifications",
+        "notification"
+      ],
+      "codename": "delete_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view notification",
+      "content_type": [
+        "notifications",
+        "notification"
+      ],
+      "codename": "view_notification"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add session",
+      "content_type": [
+        "sessions",
+        "session"
+      ],
+      "codename": "add_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change session",
+      "content_type": [
+        "sessions",
+        "session"
+      ],
+      "codename": "change_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete session",
+      "content_type": [
+        "sessions",
+        "session"
+      ],
+      "codename": "delete_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view session",
+      "content_type": [
+        "sessions",
+        "session"
+      ],
+      "codename": "view_session"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "admin",
+      "model": "logentry"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "auth",
+      "model": "group"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "auth",
+      "model": "permission"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "auth",
+      "model": "user"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "contenttypes",
+      "model": "contenttype"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "sessions",
+      "model": "session"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "client"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "documentot"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "heureprojet"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "lignerapportjournalier"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "notification"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "ordretravail"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "projet"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "rapporthebdocadre"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "rapportjournalier"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "sousservice"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "suiviot"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "technician"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "ticket"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "api",
+      "model": "tickethistorique"
+    }
+  },
+  {
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "app_label": "notifications",
+      "model": "notification"
+    }
+  }
+]

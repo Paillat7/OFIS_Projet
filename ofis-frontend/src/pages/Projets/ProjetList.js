@@ -16,64 +16,66 @@ const ProjetList = () => {
   const isCadre = user?.role === 'cadre';
   const canCreate = isAdminOrManager || isCadre;
 
-  const isMounted = useRef(true);
   const abortControllerRef = useRef(null);
 
   useEffect(() => {
-    return () => {
-      isMounted.current = false;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    let isMounted = true;
+    let tasksCompleted = 0;
+
+    const chargerProjets = async () => {
+      try {
+        const data = await projetService.getAll({ signal: controller.signal });
+        if (isMounted) setProjets(Array.isArray(data) ? data : []);
+      } catch (error) {
+        if (error.name !== 'AbortError' && isMounted) {
+          console.error('Erreur chargement projets', error);
+          setProjets([]);
+        }
+      } finally {
+        tasksCompleted++;
+        if (isMounted && tasksCompleted === 2) setLoading(false);
       }
     };
-  }, []);
 
-  const chargerProjets = async () => {
-    setLoading(true);
-    abortControllerRef.current = new AbortController();
-    try {
-      const data = await projetService.getAll({ signal: abortControllerRef.current.signal });
-      if (isMounted.current) {
-        setProjets(Array.isArray(data) ? data : []);
+    const chargerTauxHoraires = async () => {
+      try {
+        const data = await api.get('/technicians/', { signal: controller.signal });
+        const tauxMap = {};
+        data.forEach(tech => {
+          tauxMap[tech.user_id] = tech.taux_horaire || 0;
+        });
+        if (isMounted) setTauxHoraires(tauxMap);
+      } catch (error) {
+        if (error.name !== 'AbortError' && isMounted) {
+          console.error('Erreur chargement taux horaires:', error);
+        }
+      } finally {
+        tasksCompleted++;
+        if (isMounted && tasksCompleted === 2) setLoading(false);
       }
-    } catch (error) {
-      if (isMounted.current && error.name !== 'AbortError') {
-        console.error('Erreur chargement projets', error);
-        setProjets([]);
-      }
-    } finally {
-      if (isMounted.current) setLoading(false);
-    }
-  };
+    };
 
-  const chargerTauxHoraires = async () => {
-    abortControllerRef.current = new AbortController();
-    try {
-      const data = await api.get('/technicians/', { signal: abortControllerRef.current.signal });
-      const tauxMap = {};
-      data.forEach(tech => {
-        tauxMap[tech.user_id] = tech.taux_horaire || 0;
-      });
-      if (isMounted.current) {
-        setTauxHoraires(tauxMap);
-      }
-    } catch (error) {
-      if (isMounted.current && error.name !== 'AbortError') {
-        console.error('Erreur chargement taux horaires:', error);
-      }
-    }
-  };
-
-  useEffect(() => {
     chargerProjets();
     chargerTauxHoraires();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, []);
 
   const handleDelete = async (id) => {
     if (window.confirm('Supprimer ce projet ?')) {
       try {
         await projetService.delete(id);
-        chargerProjets();
+        // Recharger après suppression
+        const controller = new AbortController();
+        const data = await projetService.getAll({ signal: controller.signal });
+        setProjets(Array.isArray(data) ? data : []);
+        alert('Projet supprimé avec succès');
       } catch (error) {
         alert('Erreur suppression');
       }
@@ -105,7 +107,25 @@ const ProjetList = () => {
     return { message: '🟢 Dans les temps', couleur: '#4caf50', fond: '#e8f5e9' };
   };
 
-  if (loading) return <div className="loading">Chargement...</div>;
+  // ===== SKELETON DE CHARGEMENT =====
+  if (loading) {
+    return (
+      <div className="dashboard-page">
+        <div className="page-header">
+          <h1>Projets</h1>
+          <Button variant="primary" disabled><FaPlus /> Nouveau projet</Button>
+        </div>
+        <div style={{ display: 'grid', gap: '1rem' }}>
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} style={{ padding: '1rem', background: '#f9fafb', borderLeft: '4px solid #e5e7eb' }}>
+              <div style={{ height: '1.5rem', background: '#e5e7eb', borderRadius: '4px', width: '60%', marginBottom: '0.5rem' }}></div>
+              <div style={{ height: '1rem', background: '#e5e7eb', borderRadius: '4px', width: '40%' }}></div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-page">
@@ -120,7 +140,7 @@ const ProjetList = () => {
 
       <div style={{ display: 'grid', gap: '1rem' }}>
         {projets.length === 0 ? (
-          <Card><p>Aucun projet.</p></Card>
+          <Card><p>Aucun projet trouvé.</p></Card>
         ) : (
           projets.map(projet => {
             const statut = getStatutProjet(projet);

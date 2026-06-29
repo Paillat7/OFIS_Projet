@@ -1,5 +1,4 @@
 import React from 'react';
-import '../common/Common.css';
 
 const Button = ({
   children,
@@ -7,37 +6,23 @@ const Button = ({
   size = 'medium',
   isLoading = false,
   disabled = false,
-  className = '',
+  type = 'button',
+  onClick,
   ...props
 }) => {
-  const variantClass = {
-    primary: 'btn-primary',
-    secondary: 'btn-secondary',
-    danger: 'btn-danger',
-    success: 'btn-success',
-    outline: 'btn-outline',
-  }[variant];
-
-  const sizeClass = {
-    small: 'btn-small',
-    medium: 'btn-medium',
-    large: 'btn-large',
-  }[size];
+  const domProps = { ...props };
+  // Retirer isLoading et autres props non DOM
+  delete domProps.isLoading;
 
   return (
     <button
-      className={`btn ${variantClass} ${sizeClass} ${className} ${isLoading ? 'loading' : ''}`}
+      type={type}
+      onClick={onClick}
       disabled={disabled || isLoading}
-      {...props}
+      className={`btn btn-${variant} btn-${size} ${isLoading ? 'btn-loading' : ''}`}
+      {...domProps}
     >
-      {isLoading ? (
-        <>
-          <span className="spinner"></span>
-          Chargement...
-        </>
-      ) : (
-        children
-      )}
+      {isLoading ? 'Chargement...' : children}
     </button>
   );
 };

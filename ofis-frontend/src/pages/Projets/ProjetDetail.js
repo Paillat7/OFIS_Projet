@@ -258,7 +258,7 @@ const ProjetDetail = () => {
   return (
     <div className="dashboard-page">
       <div className="page-header">
-        <Button variant="outline" onClick={() => navigate(-1)}>
+        <Button variant="outline" onClick={() => navigate('/projets')}>
           <FaArrowLeft /> Retour
         </Button>
         <h1>{projet.nom}</h1>

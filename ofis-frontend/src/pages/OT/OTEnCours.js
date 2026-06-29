@@ -16,51 +16,54 @@ const OTEnCours = () => {
   const user = authService.getCurrentUser();
   const isManager = user?.role === 'manager' || user?.role === 'admin';
 
-  const isMounted = useRef(true);
   const abortControllerRef = useRef(null);
 
   useEffect(() => {
-    return () => {
-      isMounted.current = false;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
-  const chargerOT = async () => {
-    setLoading(true);
-    abortControllerRef.current = new AbortController();
-    try {
-      const params = {};
-      if (search) params.search = search;
-      if (filters.statut) params.statut = filters.statut;
-      const data = await otService.getAll(params, { signal: abortControllerRef.current.signal });
-      if (isMounted.current) {
+    const chargerOT = async () => {
+      setLoading(true);
+      try {
+        const params = {};
+        if (search) params.search = search;
+        if (filters.statut) params.statut = filters.statut;
+        const data = await otService.getAll(params, { signal: controller.signal });
         const enCours = Array.isArray(data)
           ? data.filter(ot => ot.statut === 'planifie' || ot.statut === 'en_cours')
           : [];
         setOts(enCours);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Erreur chargement OT', error);
+          setOts([]);
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      if (isMounted.current && error.name !== 'AbortError') {
-        console.error('Erreur chargement OT', error);
-        setOts([]);
-      }
-    } finally {
-      if (isMounted.current) setLoading(false);
-    }
-  };
+    };
 
-  useEffect(() => {
     chargerOT();
-  }, [filters, search]);
+
+    return () => {
+      controller.abort();
+    };
+  }, [search, filters]);
 
   const handleDemarrer = async (id) => {
     if (window.confirm('Démarrer cet OT ?')) {
       try {
         await otService.demarrer(id);
-        chargerOT();
+        // Recharger la liste après démarrage
+        const controller = new AbortController();
+        const params = {};
+        if (search) params.search = search;
+        if (filters.statut) params.statut = filters.statut;
+        const data = await otService.getAll(params, { signal: controller.signal });
+        const enCours = Array.isArray(data)
+          ? data.filter(ot => ot.statut === 'planifie' || ot.statut === 'en_cours')
+          : [];
+        setOts(enCours);
         alert('OT démarré avec succès');
       } catch (error) {
         alert('Erreur au démarrage');
@@ -72,7 +75,16 @@ const OTEnCours = () => {
     if (window.confirm(`Supprimer définitivement l'OT ${reference} ?`)) {
       try {
         await otService.delete(id);
-        chargerOT();
+        // Recharger la liste après suppression
+        const controller = new AbortController();
+        const params = {};
+        if (search) params.search = search;
+        if (filters.statut) params.statut = filters.statut;
+        const data = await otService.getAll(params, { signal: controller.signal });
+        const enCours = Array.isArray(data)
+          ? data.filter(ot => ot.statut === 'planifie' || ot.statut === 'en_cours')
+          : [];
+        setOts(enCours);
         alert(`OT ${reference} supprimé avec succès`);
       } catch (error) {
         console.error('Erreur suppression:', error);
@@ -81,6 +93,7 @@ const OTEnCours = () => {
     }
   };
 
+  // ===== Fonctions de rendu (inchangées) =====
   const getAvancementBar = (heuresConsommees, estimationHeures) => {
     const hConsommees = parseFloat(heuresConsommees) || 0;
     const hEstimation = parseFloat(estimationHeures) || 0;

@@ -1,0 +1,53 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$8frHykhYPN7n1dSAia0axL$rtEscSlhwLqeqvm5Yei6NscrDM/T/y8FzIEJw2InBFg=",
+      "last_login": "2026-06-19T07:05:18.528575+00:00",
+      "is_superuser": true,
+      "username": "tresor",
+      "first_name": "",
+      "last_name": "",
+      "email": "tresor@ofis.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-04-04T15:10:43.575644+00:00",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$awXPvEkDhT1LdEUm9nOQrG$WC8jeTJndccKMW9ZKw337sRzIuZM/JUzDVN/rpFuLDc=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "SVEN",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-04-05T15:30:51.881721+00:00",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$D01c5VQTiafBxBA0Utz12m$/ocdIhoQ0oB+tY6XOsJ0g//U+pgqh5KNhbwZSBGIzOw=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "Vianney",
+      "first_name": "",
+      "last_name": "",
+      "email": "vianney.missolo@ofis-technologies.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-04-07T09:10:47.941413+00:00",
+      "groups": [
+        
